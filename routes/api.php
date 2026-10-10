@@ -3,6 +3,7 @@
 use App\Domains\Akademik\Http\Controllers\AkademikController;
 use App\Domains\Akademik\Http\Controllers\GradeController;
 use App\Domains\Akademik\Http\Controllers\RombelController;
+use App\Domains\Alumni\Http\Controllers\AlumniController;
 use App\Domains\Bk\Http\Controllers\BkController;
 use App\Domains\Broadcast\Http\Controllers\BroadcastController;
 use App\Domains\Ekskul\Http\Controllers\EkskulController;
@@ -15,6 +16,7 @@ use App\Domains\Kesiswaan\Http\Controllers\StudentController;
 use App\Domains\Keuangan\Http\Controllers\KeuanganController;
 use App\Domains\Laporan\Http\Controllers\ReportController;
 use App\Domains\Lms\Http\Controllers\LmsController;
+use App\Domains\Organisasi\Http\Controllers\OrganisasiController;
 use App\Domains\Pengaturan\Http\Controllers\SettingController;
 use App\Domains\Pengumuman\Http\Controllers\AnnouncementController;
 use App\Domains\Perpus\Http\Controllers\PerpusController;
@@ -227,6 +229,22 @@ Route::prefix('v1')->group(function (): void {
             Route::get('/{survey}', [SurveiController::class, 'show'])->middleware('permission:survei.view');
             Route::post('/{survey}/isi', [SurveiController::class, 'submit'])->middleware('permission:survei.isi');
             Route::get('/{survey}/hasil', [SurveiController::class, 'result'])->middleware('permission:survei.hasil');
+        });
+
+        Route::prefix('alumni')->middleware('module:alumni')->group(function (): void {
+            Route::get('/', [AlumniController::class, 'index'])->middleware('permission:alumni.view');
+            Route::post('/', [AlumniController::class, 'store'])->middleware('permission:alumni.create');
+            Route::get('statistik', [AlumniController::class, 'statistik'])->middleware('permission:alumni.view');
+            Route::get('/{alumni}', [AlumniController::class, 'show'])->middleware('permission:alumni.view');
+            Route::post('/{alumni}/karier', [AlumniController::class, 'addCareer'])->middleware('permission:alumni.update');
+        });
+
+        Route::prefix('organisasi')->middleware('module:organisasi')->group(function (): void {
+            Route::get('/', [OrganisasiController::class, 'index'])->middleware('permission:organisasi.view');
+            Route::post('/', [OrganisasiController::class, 'store'])->middleware('permission:organisasi.create');
+            Route::get('/{organization}', [OrganisasiController::class, 'show'])->middleware('permission:organisasi.view');
+            Route::post('/{organization}/pengurus', [OrganisasiController::class, 'addMember'])->middleware('permission:organisasi.update');
+            Route::post('/{organization}/kegiatan', [OrganisasiController::class, 'addActivity'])->middleware('permission:organisasi.update');
         });
     });
 });

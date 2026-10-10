@@ -10,6 +10,9 @@ use App\Livewire\Akademik\RombelShow;
 use App\Livewire\Akademik\ScheduleForm;
 use App\Livewire\Akademik\ScheduleIndex;
 use App\Livewire\Akademik\SubjectIndex;
+use App\Livewire\Alumni\AlumniForm;
+use App\Livewire\Alumni\AlumniIndex;
+use App\Livewire\Alumni\AlumniShow;
 use App\Livewire\Aset\AssetForm;
 use App\Livewire\Aset\AssetIndex;
 use App\Livewire\Aset\AssetShow;
@@ -42,6 +45,9 @@ use App\Livewire\Laporan\ReportIndex;
 use App\Livewire\Lms\AssignmentForm;
 use App\Livewire\Lms\AssignmentIndex;
 use App\Livewire\Lms\AssignmentShow;
+use App\Livewire\Organisasi\OrganizationForm;
+use App\Livewire\Organisasi\OrganizationIndex;
+use App\Livewire\Organisasi\OrganizationShow;
 use App\Livewire\Pengaturan\AcademicYearIndex;
 use App\Livewire\Pengaturan\ModuleIndex;
 use App\Livewire\Pengaturan\SchoolProfile;
@@ -251,5 +257,21 @@ Route::middleware('auth')->group(function (): void {
         Route::get('/{survey}/isi', SurveyFill::class)->name('isi')->middleware('permission:survei.isi');
         Route::get('/{survey}/hasil', SurveyResult::class)->name('hasil')->middleware('permission:survei.hasil');
         Route::get('/{survey}/ubah', SurveyForm::class)->name('edit')->middleware('permission:survei.update');
+    });
+
+    // Alumni & Karier — modul add-on (feature flag)
+    Route::prefix('alumni')->name('alumni.')->middleware('module:alumni')->group(function (): void {
+        Route::get('/', AlumniIndex::class)->name('index')->middleware('permission:alumni.view');
+        Route::get('/tambah', AlumniForm::class)->name('create')->middleware('permission:alumni.create');
+        Route::get('/{alumni}/ubah', AlumniForm::class)->name('edit')->middleware('permission:alumni.update');
+        Route::get('/{alumni}', AlumniShow::class)->name('show')->middleware('permission:alumni.view');
+    });
+
+    // Organisasi — modul add-on (feature flag)
+    Route::prefix('organisasi')->name('organisasi.')->middleware('module:organisasi')->group(function (): void {
+        Route::get('/', OrganizationIndex::class)->name('index')->middleware('permission:organisasi.view');
+        Route::get('/tambah', OrganizationForm::class)->name('create')->middleware('permission:organisasi.create');
+        Route::get('/{organization}/ubah', OrganizationForm::class)->name('edit')->middleware('permission:organisasi.update');
+        Route::get('/{organization}', OrganizationShow::class)->name('show')->middleware('permission:organisasi.view');
     });
 });
