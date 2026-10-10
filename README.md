@@ -49,5 +49,10 @@ Setiap push/PR menjalankan: Pint (`--test`), Larastan level 6, Pest, `composer a
 
 ## Dokumentasi & prototipe
 
+- `PANDUAN-PENGGUNA.md` — panduan lengkap berbahasa Indonesia untuk pengguna akhir
+  (admin, guru, staf sekolah). Di dalam aplikasi tersedia sebagai **Pusat Bantuan**
+  (`/bantuan`): markdown di `docs/bantuan/*.md` di-render menjadi HTML oleh
+  `App\Http\Controllers\HelpController` — tanpa toolchain tambahan.
+- `CHANGELOG.md` — catatan perubahan (Keep a Changelog, Bahasa Indonesia).
 - `design/` — prototipe HTML design system v2 (referensi visual, Tailwind CDN).
 - Dokumentasi PRD lengkap: `~/workspace/your_files/PRD-SIMS-*.md`.

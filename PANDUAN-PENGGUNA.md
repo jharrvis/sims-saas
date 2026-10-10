@@ -214,7 +214,34 @@ Jika ada menu yang tidak muncul, berarti peran Anda tidak memiliki hak untuk itu
 
 ---
 
-## 14. Pertanyaan Umum
+## 14. Pengumuman
+
+1. Buka menu **Pengumuman** → klik **Buat Pengumuman**.
+2. Isi judul dan isi, pilih target: **Semua**, **Peran** (mis. guru/siswa), atau **Kelas** tertentu.
+3. Tentukan periode tayang dan centang **Penting** bila mendesak.
+4. Klik **Simpan Draf**, lalu **Tayangkan** agar muncul di dashboard pengguna.
+
+Pengumuman draf hanya terlihat oleh pembuatnya. Untuk menarik kembali, klik **Tarik ke Draf**.
+
+## 15. Laporan
+
+1. Buka menu **Laporan**, pilih jenis: Data Siswa, Data Guru & Pegawai, Data Kelas, Mutasi Siswa, Rekap Absensi, atau Rekap Nilai.
+2. Atur filter (status, tanggal, semester) lalu klik **Tampilkan**.
+3. Klik **Ekspor CSV** untuk mengunduh (dapat dibuka di Excel/WPS).
+
+## 16. Pengaturan
+
+Menu **Pengaturan** memiliki tiga tab:
+
+- **Profil Sekolah**: nama, NPSN, jenjang, alamat, telepon, email.
+- **Tahun Ajaran**: tambah tahun ajaran baru dan klik **Aktifkan** untuk menjadikannya periode berjalan.
+- **Modul Add-on**: aktif/nonaktifkan modul (PPDB, Keuangan, Pengumuman) sesuai paket langganan. Modul nonaktif menampilkan 403 `MODULE_DISABLED`.
+
+## 17. Pusat Bantuan
+
+Klik menu **Pusat Bantuan** di sidebar untuk membuka panduan ini dalam format web yang mudah dibaca — lengkap dengan navigasi per topik. Setiap halaman modul juga memiliki tautan **Bantuan** yang langsung membuka topik yang relevan.
+
+## 18. Pertanyaan Umum
 
 **Saya lupa tidak menerima kode WhatsApp.**
 Tunggu 60 detik lalu klik kirim ulang. Maksimal 3 kali per 15 menit. Pastikan nomor terdaftar & WhatsApp aktif.

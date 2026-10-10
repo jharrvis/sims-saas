@@ -47,9 +47,16 @@
             @can('keuangan.tagihan.view')
                 <x-nav-link href="{{ route('keuangan.index') }}" icon="wallet" label="Keuangan SPP" :active="request()->routeIs('keuangan.*')" />
             @endcan
-            <x-nav-link href="#" icon="megaphone" label="Pengumuman" />
-            <x-nav-link href="#" icon="bar-chart-3" label="Laporan" />
-            <x-nav-link href="#" icon="settings" label="Pengaturan" />
+            @can('pengumuman.view')
+                <x-nav-link href="{{ route('pengumuman.index') }}" icon="megaphone" label="Pengumuman" :active="request()->routeIs('pengumuman.*')" />
+            @endcan
+            @can('laporan.view')
+                <x-nav-link href="{{ route('laporan.index') }}" icon="bar-chart-3" label="Laporan" :active="request()->routeIs('laporan.*')" />
+            @endcan
+            @can('sekolah.view')
+                <x-nav-link href="{{ route('pengaturan.profil') }}" icon="settings" label="Pengaturan" :active="request()->routeIs('pengaturan.*')" />
+            @endcan
+            <x-nav-link href="{{ route('bantuan.index') }}" icon="circle-help" label="Pusat Bantuan" :active="request()->routeIs('bantuan.*')" />
         </nav>
         <div class="px-5 py-4 text-xs text-slate-500 border-t border-slate-700/50">
             SIMS v1.0

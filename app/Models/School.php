@@ -14,6 +14,10 @@ class School extends Model
         'slug',
         'npsn',
         'jenjang',
+        'alamat',
+        'telepon',
+        'email',
+        'logo_path',
         'status',
         'status_langganan',
     ];

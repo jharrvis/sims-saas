@@ -16,6 +16,10 @@ Format mengikuti [Keep a Changelog](https://keepachangelog.com/id/1.1.0/).
 - PPDB Online (add-on): periode, formulir pendaftar, verifikasi berkas, seleksi (tes + wawancara), pengumuman kelulusan, daftar ulang → otomatis menjadi data siswa; di belakang feature flag `module:ppdb` → 403 `MODULE_DISABLED`
 - Keuangan SPP (add-on): jenis tagihan, generate tagihan massal per periode, pembayaran bertahap + kuitansi otomatis, status lunas/sebagian/jatuh tempo, ringkasan arus kas & tunggakan; di belakang feature flag `module:keuangan`
 - `PANDUAN-PENGGUNA.md`: panduan lengkap berbahasa Indonesia untuk pengguna akhir (login WA OTP → semua modul)
+- Pusat Bantuan in-app (`/bantuan`): panduan end-user di-render dari `docs/bantuan/*.md` menjadi HTML dengan layout aplikasi (tanpa toolchain Node/Docusaurus); tombol "?" kontekstual di halaman modul
+- Pengumuman (add-on): pengumuman tersegmentasi (semua/peran/kelas), draf → tayang, tanda penting, periode tayang; di belakang feature flag `module:pengumuman`; API v1 untuk PWA
+- Laporan: 6 laporan bawaan (siswa, guru, kelas, mutasi, absensi, nilai) + filter + ekspor CSV berkode UTF-8 (FR-1001/1002); UI Livewire + API v1
+- Pengaturan: profil sekolah (nama, NPSN, alamat, kontak), tahun ajaran (tambah + aktifkan), toggle modul add-on per sekolah; UI tab + API v1
 
 ### Keamanan
 - Isolasi tenant fail-closed: query model tenant tanpa konteks melempar exception (diuji)
