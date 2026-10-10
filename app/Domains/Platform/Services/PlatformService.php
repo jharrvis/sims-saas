@@ -91,7 +91,7 @@ class PlatformService
     /**
      * Suspend tenant: kunci tulis (402 di ResolveTenant) + catat audit.
      */
-    public function suspend(School $school, User $by, string $alasan = ''): void
+    public function suspend(School $school, ?User $by, string $alasan = ''): void
     {
         $school->update(['status_langganan' => 'suspended']);
         $this->syncSubscription($school, 'suspended');
@@ -138,7 +138,7 @@ class PlatformService
     /**
      * Terbitkan tagihan langganan (Midtrans menyusul di langkah onboarding).
      */
-    public function issueInvoice(Subscription $sub, User $by, int $diskon = 0): BillingInvoice
+    public function issueInvoice(Subscription $sub, ?User $by = null, int $diskon = 0): BillingInvoice
     {
         $school = $this->findTenant($sub->school_id);
         $plan = $sub->plan;
@@ -216,11 +216,11 @@ class PlatformService
     /**
      * @param  array<string, mixed>  $after
      */
-    private function audit(User $by, string $aksi, School $school, array $after): void
+    private function audit(?User $by, string $aksi, School $school, array $after): void
     {
         AuditLog::create([
             'school_id' => $school->id,
-            'user_id' => $by->id,
+            'user_id' => $by?->id,
             'aksi' => $aksi,
             'model_type' => School::class,
             'model_id' => (string) $school->id,

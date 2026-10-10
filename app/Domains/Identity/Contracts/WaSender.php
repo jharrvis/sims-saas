@@ -19,4 +19,11 @@ interface WaSender
      * @param  string  $schoolName  Nama sekolah untuk template
      */
     public function sendOtp(string $phone, string $code, string $schoolName): bool;
+
+    /**
+     * Kirim pesan teks bebas (notifikasi sistem, pengingat tagihan).
+     *
+     * @param  string  $phone  Nomor tujuan format internasional (628xx)
+     */
+    public function sendText(string $phone, string $message): bool;
 }

@@ -24,4 +24,14 @@ final class LogWaSender implements WaSender
 
         return true;
     }
+
+    public function sendText(string $phone, string $message): bool
+    {
+        Log::info('[WA-TEXT] ke {phone}: {message}', [
+            'phone' => $phone,
+            'message' => $message,
+        ]);
+
+        return true;
+    }
 }
