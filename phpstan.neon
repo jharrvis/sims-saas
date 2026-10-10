@@ -14,5 +14,5 @@ parameters:
     # dapat menyimpulkan $this di dalam closure it()/test().
     ignoreErrors:
         - '#Call to an undefined method Pest\\PendingCalls\\TestCall::(actingAs|postJson|getJson|deleteJson|seed|withoutVite)\(\)#'
-        - '#Access to an undefined property Pest\\PendingCalls\\TestCall::\$(app|school|user|keuangan|kesiswaan|ta|admin|rombel|guru|mapel|semester|komponen|siswa|period|feeType)#'
+        - '#Access to an undefined property Pest\\PendingCalls\\TestCall::\$(app|school|user|keuangan|kesiswaan|ta|admin|rombel|guru|mapel|semester|komponen|siswa|period|feeType|jenis)#'
         - '#Unable to resolve the template type T(Key|Value) in call to function collect#'

@@ -56,6 +56,8 @@ class RoleSeeder extends Seeder
                 'pengumuman.view', 'pengumuman.create', 'pengumuman.update',
                 'pengumuman.delete', 'pengumuman.publish',
                 'laporan.view', 'laporan.export',
+                'erapor.view', 'erapor.cetak', 'erapor.catatan',
+                'tatib.view', 'tatib.create', 'tatib.update', 'tatib.delete',
                 'pengguna.view', 'pengguna.create', 'pengguna.update',
                 'pengguna.delete', 'pengguna.reset-password',
                 'peran.view', 'peran.create', 'peran.update', 'peran.delete',
@@ -77,6 +79,7 @@ class RoleSeeder extends Seeder
                 'keuangan.tagihan.view', 'keuangan.laporan.view',
                 'pengumuman.view', 'pengumuman.publish',
                 'laporan.view', 'laporan.export',
+                'erapor.view', 'erapor.cetak',
                 'dashboard.view',
                 'audit-log.view',
             ],
@@ -96,6 +99,7 @@ class RoleSeeder extends Seeder
                 'keuangan.bayar.create', 'keuangan.laporan.view',
                 'pengumuman.view', 'pengumuman.create', 'pengumuman.update', 'pengumuman.publish',
                 'laporan.view',
+                'tatib.view', 'tatib.create', 'tatib.update',
                 'dashboard.view',
             ],
             'wali-kelas' => [
@@ -105,6 +109,8 @@ class RoleSeeder extends Seeder
                 'jadwal.view',
                 'absensi.view', 'absensi.create', 'absensi.update', 'absensi.kunci',
                 'nilai.view', 'nilai.release', 'nilai.rekap', // ◐ rombel binaannya
+                'erapor.view', 'erapor.cetak', 'erapor.catatan',
+                'tatib.view', 'tatib.create', 'tatib.update', 'tatib.delete', // ◐ rombel binaannya
                 'dashboard.view',
             ],
             'guru-mapel' => [

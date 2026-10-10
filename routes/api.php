@@ -3,6 +3,7 @@
 use App\Domains\Akademik\Http\Controllers\AkademikController;
 use App\Domains\Akademik\Http\Controllers\GradeController;
 use App\Domains\Akademik\Http\Controllers\RombelController;
+use App\Domains\ERapor\Http\Controllers\ERaporController;
 use App\Domains\Identity\Http\Controllers\AuthController;
 use App\Domains\Kepegawaian\Http\Controllers\EmployeeController;
 use App\Domains\Kesiswaan\Http\Controllers\StudentController;
@@ -11,6 +12,7 @@ use App\Domains\Laporan\Http\Controllers\ReportController;
 use App\Domains\Pengaturan\Http\Controllers\SettingController;
 use App\Domains\Pengumuman\Http\Controllers\AnnouncementController;
 use App\Domains\Ppdb\Http\Controllers\PpdbController;
+use App\Domains\Tatib\Http\Controllers\TatibController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function (): void {
@@ -119,6 +121,20 @@ Route::prefix('v1')->group(function (): void {
             Route::put('profil', [SettingController::class, 'updateProfile'])->middleware('permission:sekolah.update');
             Route::get('tahun-ajaran', [SettingController::class, 'academicYears'])->middleware('permission:tahun-ajaran.view');
             Route::post('tahun-ajaran/{tahun}/aktifkan', [SettingController::class, 'activateYear'])->middleware('permission:tahun-ajaran.activate');
+        });
+
+        Route::prefix('erapor')->middleware('module:e_rapor')->group(function (): void {
+            Route::get('siswa/{student}/semester/{semester}', [ERaporController::class, 'show'])->middleware('permission:erapor.view');
+            Route::post('siswa/{student}/semester/{semester}/catatan', [ERaporController::class, 'simpanCatatan'])->middleware('permission:erapor.catatan');
+        });
+
+        Route::prefix('tatib')->middleware('module:tata_tertib')->group(function (): void {
+            Route::get('jenis', [TatibController::class, 'typeIndex'])->middleware('permission:tatib.view');
+            Route::post('jenis', [TatibController::class, 'typeStore'])->middleware('permission:tatib.create');
+            Route::get('/', [TatibController::class, 'index'])->middleware('permission:tatib.view');
+            Route::post('/', [TatibController::class, 'store'])->middleware('permission:tatib.create');
+            Route::get('rekap', [TatibController::class, 'rekap'])->middleware('permission:tatib.view');
+            Route::delete('/{violation}', [TatibController::class, 'destroy'])->middleware('permission:tatib.delete');
         });
     });
 });

@@ -43,6 +43,8 @@ class HelpController extends Controller
             'keuangan' => ['Keuangan SPP', 'Tagihan dan pembayaran', 'wallet'],
             'pengumuman' => ['Pengumuman', 'Buat dan tayangkan pengumuman', 'megaphone'],
             'laporan' => ['Laporan', 'Laporan bawaan dan ekspor', 'bar-chart-3'],
+            'erapor' => ['E-Rapor', 'Pratinjau dan cetak rapor', 'file-text'],
+            'tatib' => ['Tata Tertib', 'Pelanggaran dan poin', 'shield-alert'],
             'pengaturan' => ['Pengaturan', 'Profil sekolah, tahun ajaran, modul', 'settings'],
             'peran' => ['Peran & Hak Akses', 'Daftar peran pengguna', 'key-round'],
             'faq' => ['Pertanyaan Umum', 'Jawaban pertanyaan umum', 'circle-help'],

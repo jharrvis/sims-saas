@@ -241,7 +241,24 @@ Menu **Pengaturan** memiliki tiga tab:
 
 Klik menu **Pusat Bantuan** di sidebar untuk membuka panduan ini dalam format web yang mudah dibaca — lengkap dengan navigasi per topik. Setiap halaman modul juga memiliki tautan **Bantuan** yang langsung membuka topik yang relevan.
 
-## 18. Pertanyaan Umum
+## 18. E-Rapor
+
+1. Buka menu **E-Rapor**, pilih **rombel** dan **semester**.
+2. Klik **Lihat Rapor** pada siswa untuk pratinjau rapor: nilai per mapel + predikat, rata-rata, rekap ketidakhadiran, dan catatan wali kelas.
+3. Untuk mengisi/mengubah catatan wali, tulis pada kolom **Catatan Wali Kelas** lalu klik **Simpan Catatan**.
+4. Klik **Cetak Rapor** untuk mencetak dengan kop sekolah.
+
+## 19. Tata Tertib
+
+**Kelola jenis pelanggaran** (menu Tata Tertib → Kelola Jenis): tambah nama pelanggaran, kategori (Ringan/Sedang/Berat), dan bobot poin.
+
+**Mencatat pelanggaran:**
+1. Klik **Catat Pelanggaran**, ketik nama siswa, pilih jenis pelanggaran dan tanggal.
+2. Isi keterangan dan tindak lanjut bila perlu, lalu simpan.
+
+Halaman utama menampilkan **rekap poin tertinggi** serta riwayat pelanggaran yang dapat disaring per kategori.
+
+## 20. Pertanyaan Umum
 
 **Saya lupa tidak menerima kode WhatsApp.**
 Tunggu 60 detik lalu klik kirim ulang. Maksimal 3 kali per 15 menit. Pastikan nomor terdaftar & WhatsApp aktif.

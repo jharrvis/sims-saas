@@ -27,6 +27,7 @@ class ModuleSeeder extends Seeder
             ['kode' => 'keuangan', 'nama' => 'Keuangan & SPP', 'kategori' => 'addon'],
             ['kode' => 'e_rapor', 'nama' => 'E-Rapor', 'kategori' => 'addon'],
             ['kode' => 'pengumuman', 'nama' => 'Pengumuman', 'kategori' => 'addon'],
+            ['kode' => 'tata_tertib', 'nama' => 'Tata Tertib & Poin', 'kategori' => 'addon'],
         ];
     }
 

@@ -20,6 +20,8 @@ Format mengikuti [Keep a Changelog](https://keepachangelog.com/id/1.1.0/).
 - Pengumuman (add-on): pengumuman tersegmentasi (semua/peran/kelas), draf → tayang, tanda penting, periode tayang; di belakang feature flag `module:pengumuman`; API v1 untuk PWA
 - Laporan: 6 laporan bawaan (siswa, guru, kelas, mutasi, absensi, nilai) + filter + ekspor CSV berkode UTF-8 (FR-1001/1002); UI Livewire + API v1
 - Pengaturan: profil sekolah (nama, NPSN, alamat, kontak), tahun ajaran (tambah + aktifkan), toggle modul add-on per sekolah; UI tab + API v1
+- E-Rapor (add-on): rapor cetak berkop sekolah (nilai + predikat + rata-rata + rekap absensi + catatan wali kelas + tanda tangan), catatan wali per siswa/semester; di belakang feature flag `module:e_rapor`
+- Tata Tertib (add-on): master jenis pelanggaran (ringan/sedang/berat + bobot poin), pencatatan pelanggaran per siswa, rekap poin tertinggi; di belakang feature flag `module:tata_tertib`
 
 ### Keamanan
 - Isolasi tenant fail-closed: query model tenant tanpa konteks melempar exception (diuji)

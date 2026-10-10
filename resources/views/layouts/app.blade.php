@@ -53,6 +53,12 @@
             @can('laporan.view')
                 <x-nav-link href="{{ route('laporan.index') }}" icon="bar-chart-3" label="Laporan" :active="request()->routeIs('laporan.*')" />
             @endcan
+            @can('tatib.view')
+                <x-nav-link href="{{ route('tatib.index') }}" icon="shield-alert" label="Tata Tertib" :active="request()->routeIs('tatib.*')" />
+            @endcan
+            @can('erapor.view')
+                <x-nav-link href="{{ route('erapor.index') }}" icon="file-text" label="E-Rapor" :active="request()->routeIs('erapor.*')" />
+            @endcan
             @can('sekolah.view')
                 <x-nav-link href="{{ route('pengaturan.profil') }}" icon="settings" label="Pengaturan" :active="request()->routeIs('pengaturan.*')" />
             @endcan
