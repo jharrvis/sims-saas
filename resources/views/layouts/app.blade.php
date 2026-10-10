@@ -26,7 +26,12 @@
             @can('siswa.view')
                 <x-nav-link href="{{ route('siswa.index') }}" icon="users" label="Data Siswa" :active="request()->routeIs('siswa.*')" />
             @endcan
-            <x-nav-link href="#" icon="graduation-cap" label="Data Guru" />
+            @can('guru.view')
+                <x-nav-link href="{{ route('guru.index') }}" icon="graduation-cap" label="Data Guru" :active="request()->routeIs('guru.*')" />
+            @endcan
+            @can('kelas.view')
+                <x-nav-link href="{{ route('kelas.index') }}" icon="school" label="Data Kelas" :active="request()->routeIs('kelas.*')" />
+            @endcan
             <x-nav-link href="#" icon="calendar-days" label="Jadwal Pelajaran" />
             <x-nav-link href="#" icon="clipboard-check" label="Absensi Siswa" />
             <x-nav-link href="#" icon="award" label="Data Nilai" />

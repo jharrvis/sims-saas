@@ -49,4 +49,14 @@ class Student extends Model
             ->withPivot('hubungan')
             ->withTimestamps();
     }
+
+    /**
+     * @return BelongsToMany<Rombel, $this>
+     */
+    public function rombels(): BelongsToMany
+    {
+        return $this->belongsToMany(Rombel::class, 'class_student')
+            ->withPivot(['academic_year_id', 'status'])
+            ->withTimestamps();
+    }
 }
