@@ -74,6 +74,12 @@
             @can('transportasi.view')
                 <x-nav-link href="{{ route('transportasi.index') }}" icon="bus" label="Antar-Jemput" :active="request()->routeIs('transportasi.*')" />
             @endcan
+            @can('kantin.view')
+                <x-nav-link href="{{ route('kantin.index') }}" icon="store" label="Kantin" :active="request()->routeIs('kantin.*')" />
+            @endcan
+            @can('survei.view')
+                <x-nav-link href="{{ route('survei.index') }}" icon="clipboard-list" label="Survei" :active="request()->routeIs('survei.*')" />
+            @endcan
             @can('bk.view')
                 <x-nav-link href="{{ route('bk.index') }}" icon="heart-handshake" label="BK & Konseling" :active="request()->routeIs('bk.*')" />
             @endcan

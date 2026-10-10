@@ -30,6 +30,8 @@ Format mengikuti [Keep a Changelog](https://keepachangelog.com/id/1.1.0/).
 - Inventaris & Aset (add-on): kategori, master aset (kode unik/tenant, kondisi, lokasi), riwayat mutasi (masuk/pindah/kondisi/keluar) yang otomatis memperbarui lokasi & kondisi; di belakang feature flag `module:inventaris`
 - UKS & Kesehatan (add-on): kunjungan UKS (keluhan, diagnosa, tindakan, suhu, rujukan), stok & pemakaian obat otomatis mengurangi stok; di belakang feature flag `module:uks`
 - Antar-Jemput / Transportasi (add-on): rute + sopir/kendaraan/kapasitas, titik penjemputan terurut, penumpang dengan batas kapasitas; di belakang feature flag `module:transportasi`
+- Kantin / Koperasi Digital (add-on): produk + stok, kasir POS (keranjang, bayar, kembalian), checkout transaksional anti-oversell, riwayat + omzet harian; di belakang feature flag `module:kantin`
+- Survei & Evaluasi (add-on): survei dengan pertanyaan pilihan ganda/skala/teks, periode buka-tutup, pengisian responden, agregat hasil (distribusi & rata-rata); di belakang feature flag `module:survei`
 
 ### Keamanan
 - Isolasi tenant fail-closed: query model tenant tanpa konteks melempar exception (diuji)

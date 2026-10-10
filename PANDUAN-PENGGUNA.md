@@ -308,7 +308,19 @@ Halaman utama menampilkan **rekap poin tertinggi** serta riwayat pelanggaran yan
 1. Menu **Antar-Jemput** → **Tambah Rute**: nama rute, sopir, nomor kendaraan, kapasitas.
 2. Buka **Kelola Rute**: tambah titik penjemputan (nama + jam berangkat) secara berurutan, lalu tambah penumpang per siswa (bisa dikaitkan ke titik tertentu). Kapasitas penuh otomatis menolak penumpang baru.
 
-## 31. Pertanyaan Umum
+## 32. Kantin Digital
+
+1. **Produk:** menu **Kantin** → **Tambah Produk** (nama, kategori, harga, stok).
+2. **Kasir:** klik **Kasir**, ketuk produk untuk masuk keranjang, pilih siswa bila perlu, isi jumlah bayar → **Bayar**. Stok berkurang otomatis; bayar kurang ditolak.
+3. **Riwayat:** klik **Riwayat** untuk melihat transaksi harian dan omzet.
+
+## 33. Survei & Evaluasi
+
+1. **Buat survei:** menu **Survei** → **Buat Survei**, isi judul, periode buka-tutup, target, lalu tambah pertanyaan (pilihan ganda / skala 1–5 / isian teks).
+2. **Isi survei:** buka survei berstatus Aktif → **Isi** → jawab → **Kirim Jawaban**.
+3. **Lihat hasil:** klik **Hasil** untuk agregat: distribusi jawaban pilihan ganda dan rata-rata skala.
+
+## 34. Pertanyaan Umum
 
 **Saya lupa tidak menerima kode WhatsApp.**
 Tunggu 60 detik lalu klik kirim ulang. Maksimal 3 kali per 15 menit. Pastikan nomor terdaftar & WhatsApp aktif.

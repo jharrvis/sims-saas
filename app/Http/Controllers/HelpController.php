@@ -53,6 +53,8 @@ class HelpController extends Controller
             'aset' => ['Inventaris & Aset', 'Kelola aset dan mutasi', 'package'],
             'uks' => ['UKS & Kesehatan', 'Kunjungan UKS dan obat', 'heart-pulse'],
             'transportasi' => ['Antar-Jemput', 'Rute dan penumpang', 'bus'],
+            'kantin' => ['Kantin Digital', 'Produk, kasir, dan transaksi', 'store'],
+            'survei' => ['Survei & Evaluasi', 'Survei dan hasil agregat', 'clipboard-list'],
             'pengaturan' => ['Pengaturan', 'Profil sekolah, tahun ajaran, modul', 'settings'],
             'peran' => ['Peran & Hak Akses', 'Daftar peran pengguna', 'key-round'],
             'faq' => ['Pertanyaan Umum', 'Jawaban pertanyaan umum', 'circle-help'],

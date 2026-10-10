@@ -36,6 +36,8 @@ class ModuleSeeder extends Seeder
             ['kode' => 'inventaris', 'nama' => 'Inventaris & Aset', 'kategori' => 'addon'],
             ['kode' => 'uks', 'nama' => 'UKS & Kesehatan', 'kategori' => 'addon'],
             ['kode' => 'transportasi', 'nama' => 'Antar-Jemput / Transportasi', 'kategori' => 'addon'],
+            ['kode' => 'kantin', 'nama' => 'Kantin / Koperasi Digital', 'kategori' => 'addon'],
+            ['kode' => 'survei', 'nama' => 'Survei & Evaluasi', 'kategori' => 'addon'],
         ];
     }
 
