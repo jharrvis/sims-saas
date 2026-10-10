@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\HelpController;
 use App\Livewire\Akademik\AttendanceIndex;
 use App\Livewire\Akademik\GradeInput;
 use App\Livewire\Akademik\GradeLeger;
@@ -20,6 +21,12 @@ use App\Livewire\Kesiswaan\StudentIndex;
 use App\Livewire\Kesiswaan\StudentShow;
 use App\Livewire\Keuangan\InvoiceIndex;
 use App\Livewire\Keuangan\InvoiceShow;
+use App\Livewire\Laporan\ReportIndex;
+use App\Livewire\Pengaturan\AcademicYearIndex;
+use App\Livewire\Pengaturan\ModuleIndex;
+use App\Livewire\Pengaturan\SchoolProfile;
+use App\Livewire\Pengumuman\AnnouncementForm;
+use App\Livewire\Pengumuman\AnnouncementIndex;
 use App\Livewire\Ppdb\PpdbApplicantForm;
 use App\Livewire\Ppdb\PpdbApplicantIndex;
 use App\Livewire\Ppdb\PpdbApplicantShow;
@@ -89,5 +96,30 @@ Route::middleware('auth')->group(function (): void {
     Route::prefix('keuangan')->name('keuangan.')->middleware('module:keuangan')->group(function (): void {
         Route::get('/', InvoiceIndex::class)->name('index')->middleware('permission:keuangan.tagihan.view');
         Route::get('/{invoice}', InvoiceShow::class)->name('show')->middleware('permission:keuangan.tagihan.view');
+    });
+
+    // Pusat Bantuan — dokumentasi end-user (selalu tersedia)
+    Route::prefix('bantuan')->name('bantuan.')->group(function (): void {
+        Route::get('/', [HelpController::class, 'index'])->name('index');
+        Route::get('/{topik}', [HelpController::class, 'show'])->name('show');
+    });
+
+    // Pengumuman — modul add-on (feature flag)
+    Route::prefix('pengumuman')->name('pengumuman.')->middleware('module:pengumuman')->group(function (): void {
+        Route::get('/', AnnouncementIndex::class)->name('index')->middleware('permission:pengumuman.view');
+        Route::get('/buat', AnnouncementForm::class)->name('create')->middleware('permission:pengumuman.create');
+        Route::get('/{announcement}/ubah', AnnouncementForm::class)->name('edit')->middleware('permission:pengumuman.update');
+    });
+
+    // Laporan — modul inti
+    Route::prefix('laporan')->name('laporan.')->group(function (): void {
+        Route::get('/', ReportIndex::class)->name('index')->middleware('permission:laporan.view');
+    });
+
+    // Pengaturan
+    Route::prefix('pengaturan')->name('pengaturan.')->group(function (): void {
+        Route::get('/', SchoolProfile::class)->name('profil')->middleware('permission:sekolah.view');
+        Route::get('/tahun-ajaran', AcademicYearIndex::class)->name('tahun-ajaran')->middleware('permission:tahun-ajaran.view');
+        Route::get('/modul', ModuleIndex::class)->name('modul')->middleware('permission:sekolah.view');
     });
 });

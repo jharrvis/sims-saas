@@ -7,6 +7,9 @@ use App\Domains\Identity\Http\Controllers\AuthController;
 use App\Domains\Kepegawaian\Http\Controllers\EmployeeController;
 use App\Domains\Kesiswaan\Http\Controllers\StudentController;
 use App\Domains\Keuangan\Http\Controllers\KeuanganController;
+use App\Domains\Laporan\Http\Controllers\ReportController;
+use App\Domains\Pengaturan\Http\Controllers\SettingController;
+use App\Domains\Pengumuman\Http\Controllers\AnnouncementController;
 use App\Domains\Ppdb\Http\Controllers\PpdbController;
 use Illuminate\Support\Facades\Route;
 
@@ -95,6 +98,27 @@ Route::prefix('v1')->group(function (): void {
             Route::post('tagihan/{invoice}/bayar', [KeuanganController::class, 'paymentStore'])->middleware('permission:keuangan.bayar.create');
             Route::get('laporan/ringkasan', [KeuanganController::class, 'summary'])->middleware('permission:keuangan.laporan.view');
             Route::get('laporan/tunggakan', [KeuanganController::class, 'arrears'])->middleware('permission:keuangan.laporan.view');
+        });
+
+        Route::prefix('pengumuman')->middleware('module:pengumuman')->group(function (): void {
+            Route::get('/', [AnnouncementController::class, 'index'])->middleware('permission:pengumuman.view');
+            Route::post('/', [AnnouncementController::class, 'store'])->middleware('permission:pengumuman.create');
+            Route::get('/{announcement}', [AnnouncementController::class, 'show'])->middleware('permission:pengumuman.view');
+            Route::put('/{announcement}', [AnnouncementController::class, 'update'])->middleware('permission:pengumuman.update');
+            Route::post('/{announcement}/publish', [AnnouncementController::class, 'publish'])->middleware('permission:pengumuman.publish');
+            Route::delete('/{announcement}', [AnnouncementController::class, 'destroy'])->middleware('permission:pengumuman.delete');
+        });
+
+        Route::prefix('laporan')->group(function (): void {
+            Route::get('/', [ReportController::class, 'index'])->middleware('permission:laporan.view');
+            Route::get('/ekspor', [ReportController::class, 'export'])->middleware('permission:laporan.export');
+        });
+
+        Route::prefix('pengaturan')->group(function (): void {
+            Route::get('profil', [SettingController::class, 'profile'])->middleware('permission:sekolah.view');
+            Route::put('profil', [SettingController::class, 'updateProfile'])->middleware('permission:sekolah.update');
+            Route::get('tahun-ajaran', [SettingController::class, 'academicYears'])->middleware('permission:tahun-ajaran.view');
+            Route::post('tahun-ajaran/{tahun}/aktifkan', [SettingController::class, 'activateYear'])->middleware('permission:tahun-ajaran.activate');
         });
     });
 });
