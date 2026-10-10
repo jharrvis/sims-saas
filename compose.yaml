@@ -1,0 +1,50 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    container_name: sims-app
+    working_dir: /var/www/html
+    volumes:
+      - ./:/var/www/html
+    ports:
+      - "8000:8000"
+    depends_on:
+      - pgsql
+      - redis
+    environment:
+      DB_CONNECTION: pgsql
+      DB_HOST: pgsql
+      DB_PORT: 5432
+      DB_DATABASE: ${DB_DATABASE:-sims}
+      DB_USERNAME: ${DB_USERNAME:-sims}
+      DB_PASSWORD: ${DB_PASSWORD:-secret}
+      REDIS_HOST: redis
+      CACHE_STORE: redis
+      QUEUE_CONNECTION: redis
+      SESSION_DRIVER: redis
+    command: php artisan serve --host=0.0.0.0 --port=8000
+
+  pgsql:
+    image: postgres:16-alpine
+    container_name: sims-pgsql
+    environment:
+      POSTGRES_DB: ${DB_DATABASE:-sims}
+      POSTGRES_USER: ${DB_USERNAME:-sims}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-secret}
+    volumes:
+      - pgsql-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7-alpine
+    container_name: sims-redis
+    volumes:
+      - redis-data:/data
+    ports:
+      - "6379:6379"
+
+volumes:
+  pgsql-data:
+  redis-data:
