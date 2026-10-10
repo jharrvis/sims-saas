@@ -13,5 +13,5 @@ parameters:
     # Pest mengikat closure test ke TestCase saat runtime; Larastan tidak
     # dapat menyimpulkan $this di dalam closure it()/test().
     ignoreErrors:
-        - '#Call to an undefined method Pest\\PendingCalls\\TestCall::(actingAs|postJson|getJson)\(\)#'
-        - '#Access to an undefined property Pest\\PendingCalls\\TestCall::\$app#'
+        - '#Call to an undefined method Pest\\PendingCalls\\TestCall::(actingAs|postJson|getJson|deleteJson|seed)\(\)#'
+        - '#Access to an undefined property Pest\\PendingCalls\\TestCall::\$(app|school|user|keuangan|kesiswaan)#'

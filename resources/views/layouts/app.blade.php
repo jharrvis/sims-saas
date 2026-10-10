@@ -23,7 +23,9 @@
         </a>
         <nav class="flex-1 overflow-y-auto px-3 py-4 space-y-1 text-sm">
             <x-nav-link href="{{ route('dashboard') }}" icon="layout-dashboard" label="Dashboard" :active="request()->routeIs('dashboard')" />
-            <x-nav-link href="#" icon="users" label="Data Siswa" />
+            @can('siswa.view')
+                <x-nav-link href="{{ route('siswa.index') }}" icon="users" label="Data Siswa" :active="request()->routeIs('siswa.*')" />
+            @endcan
             <x-nav-link href="#" icon="graduation-cap" label="Data Guru" />
             <x-nav-link href="#" icon="calendar-days" label="Jadwal Pelajaran" />
             <x-nav-link href="#" icon="clipboard-check" label="Absensi Siswa" />
