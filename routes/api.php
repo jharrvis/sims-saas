@@ -3,6 +3,7 @@
 use App\Domains\Akademik\Http\Controllers\AkademikController;
 use App\Domains\Akademik\Http\Controllers\GradeController;
 use App\Domains\Akademik\Http\Controllers\RombelController;
+use App\Domains\Bk\Http\Controllers\BkController;
 use App\Domains\ERapor\Http\Controllers\ERaporController;
 use App\Domains\Identity\Http\Controllers\AuthController;
 use App\Domains\Kepegawaian\Http\Controllers\EmployeeController;
@@ -11,6 +12,7 @@ use App\Domains\Keuangan\Http\Controllers\KeuanganController;
 use App\Domains\Laporan\Http\Controllers\ReportController;
 use App\Domains\Pengaturan\Http\Controllers\SettingController;
 use App\Domains\Pengumuman\Http\Controllers\AnnouncementController;
+use App\Domains\Perpus\Http\Controllers\PerpusController;
 use App\Domains\Ppdb\Http\Controllers\PpdbController;
 use App\Domains\Tatib\Http\Controllers\TatibController;
 use Illuminate\Support\Facades\Route;
@@ -135,6 +137,22 @@ Route::prefix('v1')->group(function (): void {
             Route::post('/', [TatibController::class, 'store'])->middleware('permission:tatib.create');
             Route::get('rekap', [TatibController::class, 'rekap'])->middleware('permission:tatib.view');
             Route::delete('/{violation}', [TatibController::class, 'destroy'])->middleware('permission:tatib.delete');
+        });
+
+        Route::prefix('bk')->middleware('module:bk_konseling')->group(function (): void {
+            Route::get('/', [BkController::class, 'index'])->middleware('permission:bk.view');
+            Route::post('/', [BkController::class, 'store'])->middleware('permission:bk.create');
+            Route::get('/{session}', [BkController::class, 'show'])->middleware('permission:bk.view');
+            Route::put('/{session}', [BkController::class, 'update'])->middleware('permission:bk.update');
+            Route::delete('/{session}', [BkController::class, 'destroy'])->middleware('permission:bk.delete');
+        });
+
+        Route::prefix('perpus')->middleware('module:perpustakaan')->group(function (): void {
+            Route::get('buku', [PerpusController::class, 'bookIndex'])->middleware('permission:perpus.view');
+            Route::post('buku', [PerpusController::class, 'bookStore'])->middleware('permission:perpus.buku');
+            Route::get('pinjam', [PerpusController::class, 'loanIndex'])->middleware('permission:perpus.view');
+            Route::post('pinjam', [PerpusController::class, 'loanStore'])->middleware('permission:perpus.pinjam');
+            Route::post('pinjam/{loan}/kembali', [PerpusController::class, 'loanReturn'])->middleware('permission:perpus.kembali');
         });
     });
 });

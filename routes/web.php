@@ -14,6 +14,8 @@ use App\Livewire\Auth\Login;
 use App\Livewire\Auth\SetupTwoFactor;
 use App\Livewire\Auth\TenantSwitcher;
 use App\Livewire\Auth\VerifyMfa;
+use App\Livewire\Bk\CounselingForm;
+use App\Livewire\Bk\CounselingIndex;
 use App\Livewire\ERapor\RaporIndex;
 use App\Livewire\ERapor\RaporShow;
 use App\Livewire\Kepegawaian\EmployeeForm;
@@ -29,6 +31,9 @@ use App\Livewire\Pengaturan\ModuleIndex;
 use App\Livewire\Pengaturan\SchoolProfile;
 use App\Livewire\Pengumuman\AnnouncementForm;
 use App\Livewire\Pengumuman\AnnouncementIndex;
+use App\Livewire\Perpus\BookForm;
+use App\Livewire\Perpus\BookIndex;
+use App\Livewire\Perpus\LoanIndex;
 use App\Livewire\Ppdb\PpdbApplicantForm;
 use App\Livewire\Ppdb\PpdbApplicantIndex;
 use App\Livewire\Ppdb\PpdbApplicantShow;
@@ -140,5 +145,20 @@ Route::middleware('auth')->group(function (): void {
         Route::get('/catat', ViolationForm::class)->name('create')->middleware('permission:tatib.create');
         Route::get('/jenis', ViolationTypeIndex::class)->name('jenis')->middleware('permission:tatib.view');
         Route::get('/{violation}/ubah', ViolationForm::class)->name('edit')->middleware('permission:tatib.update');
+    });
+
+    // BK & Konseling — modul add-on (feature flag)
+    Route::prefix('bk')->name('bk.')->middleware('module:bk_konseling')->group(function (): void {
+        Route::get('/', CounselingIndex::class)->name('index')->middleware('permission:bk.view');
+        Route::get('/jadwalkan', CounselingForm::class)->name('create')->middleware('permission:bk.create');
+        Route::get('/{session}/ubah', CounselingForm::class)->name('edit')->middleware('permission:bk.update');
+    });
+
+    // Perpustakaan — modul add-on (feature flag)
+    Route::prefix('perpus')->name('perpus.')->middleware('module:perpustakaan')->group(function (): void {
+        Route::get('/', BookIndex::class)->name('index')->middleware('permission:perpus.view');
+        Route::get('/tambah', BookForm::class)->name('create')->middleware('permission:perpus.buku');
+        Route::get('/pinjam', LoanIndex::class)->name('pinjam')->middleware('permission:perpus.pinjam');
+        Route::get('/{book}/ubah', BookForm::class)->name('edit')->middleware('permission:perpus.buku');
     });
 });
