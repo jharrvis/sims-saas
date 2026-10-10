@@ -46,6 +46,7 @@ class PermissionSeeder extends Seeder
                 'ppdb.seleksi.input', 'ppdb.pengumuman.create',
                 'keuangan.tagihan.view', 'keuangan.tagihan.create', 'keuangan.tagihan.generate',
                 'keuangan.bayar.create', 'keuangan.laporan.view',
+                'langganan.view', 'langganan.bayar',
                 'pengumuman.view', 'pengumuman.create', 'pengumuman.update',
                 'pengumuman.delete', 'pengumuman.publish',
                 'laporan.view', 'laporan.export',

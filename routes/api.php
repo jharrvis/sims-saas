@@ -27,6 +27,7 @@ use App\Domains\Survei\Http\Controllers\SurveiController;
 use App\Domains\Tatib\Http\Controllers\TatibController;
 use App\Domains\Transportasi\Http\Controllers\TransportasiController;
 use App\Domains\Uks\Http\Controllers\UksController;
+use App\Http\Controllers\MidtransWebhookController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function (): void {
@@ -39,6 +40,10 @@ Route::prefix('v1')->group(function (): void {
         ->middleware('throttle:10,1');
     Route::post('auth/qr/redeem', [QrApiController::class, 'redeem'])
         ->middleware('throttle:20,1');
+
+    // Webhook Midtrans — tanpa auth, diamankan via signature_key.
+    Route::post('webhooks/midtrans', MidtransWebhookController::class)
+        ->middleware('throttle:60,1');
 
     // Terotentikasi (tenant dilengkapi setelah auth:sanctum untuk Bearer token)
     Route::middleware(['auth:sanctum', 'tenant.resolved'])->group(function (): void {

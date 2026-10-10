@@ -43,10 +43,12 @@ use App\Livewire\Kesiswaan\StudentIndex;
 use App\Livewire\Kesiswaan\StudentShow;
 use App\Livewire\Keuangan\InvoiceIndex;
 use App\Livewire\Keuangan\InvoiceShow;
+use App\Livewire\Langganan\Index as LanggananIndex;
 use App\Livewire\Laporan\ReportIndex;
 use App\Livewire\Lms\AssignmentForm;
 use App\Livewire\Lms\AssignmentIndex;
 use App\Livewire\Lms\AssignmentShow;
+use App\Livewire\Onboarding\DaftarSekolah;
 use App\Livewire\Organisasi\OrganizationForm;
 use App\Livewire\Organisasi\OrganizationIndex;
 use App\Livewire\Organisasi\OrganizationShow;
@@ -103,6 +105,7 @@ Route::get('/', function () {
 
 Route::middleware('guest')->group(function (): void {
     Route::get('/login', Login::class)->name('login');
+    Route::get('/daftar', DaftarSekolah::class)->name('daftar');
 });
 
 // Verifikasi MFA — dapat diakses pra-login (sesi mfa_pending_user_id)
@@ -113,6 +116,9 @@ Route::get('/mfa/verify', VerifyMfa::class)->name('mfa.verify');
 Route::middleware(['auth', 'mfa'])->group(function (): void {
     Route::get('/2fa/setup', SetupTwoFactor::class)->name('2fa.setup');
     Route::get('/pilih-sekolah', TenantSwitcher::class)->name('tenant.switch');
+
+    // Langganan sekolah — paket & tagihan milik tenant sendiri
+    Route::get('/langganan', LanggananIndex::class)->name('langganan')->middleware('permission:langganan.view');
 
     // Kesiswaan — modul inti (selalu aktif)
     Route::prefix('siswa')->name('siswa.')->group(function (): void {

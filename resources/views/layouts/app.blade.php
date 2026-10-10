@@ -104,6 +104,9 @@
             @can('sekolah.view')
                 <x-nav-link href="{{ route('pengaturan.profil') }}" icon="settings" label="Pengaturan" :active="request()->routeIs('pengaturan.*')" />
             @endcan
+            @can('langganan.view')
+                <x-nav-link href="{{ route('langganan') }}" icon="credit-card" label="Langganan" :active="request()->routeIs('langganan')" />
+            @endcan
             <x-nav-link href="{{ route('bantuan.index') }}" icon="circle-help" label="Pusat Bantuan" :active="request()->routeIs('bantuan.*')" />
         </nav>
         <div class="px-5 py-4 text-xs text-slate-500 border-t border-slate-700/50">
