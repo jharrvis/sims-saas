@@ -9,6 +9,7 @@ use App\Domains\Ekskul\Http\Controllers\EkskulController;
 use App\Domains\ERapor\Http\Controllers\ERaporController;
 use App\Domains\Identity\Http\Controllers\AuthController;
 use App\Domains\Inventaris\Http\Controllers\InventarisController;
+use App\Domains\Kantin\Http\Controllers\KantinController;
 use App\Domains\Kepegawaian\Http\Controllers\EmployeeController;
 use App\Domains\Kesiswaan\Http\Controllers\StudentController;
 use App\Domains\Keuangan\Http\Controllers\KeuanganController;
@@ -18,6 +19,7 @@ use App\Domains\Pengaturan\Http\Controllers\SettingController;
 use App\Domains\Pengumuman\Http\Controllers\AnnouncementController;
 use App\Domains\Perpus\Http\Controllers\PerpusController;
 use App\Domains\Ppdb\Http\Controllers\PpdbController;
+use App\Domains\Survei\Http\Controllers\SurveiController;
 use App\Domains\Tatib\Http\Controllers\TatibController;
 use App\Domains\Transportasi\Http\Controllers\TransportasiController;
 use App\Domains\Uks\Http\Controllers\UksController;
@@ -210,6 +212,21 @@ Route::prefix('v1')->group(function (): void {
             Route::post('/{route}/titik', [TransportasiController::class, 'addStop'])->middleware('permission:transportasi.update');
             Route::post('/{route}/penumpang', [TransportasiController::class, 'addMember'])->middleware('permission:transportasi.update');
             Route::delete('/{route}/penumpang/{studentId}', [TransportasiController::class, 'removeMember'])->middleware('permission:transportasi.update');
+        });
+
+        Route::prefix('kantin')->middleware('module:kantin')->group(function (): void {
+            Route::get('produk', [KantinController::class, 'productIndex'])->middleware('permission:kantin.view');
+            Route::post('produk', [KantinController::class, 'productStore'])->middleware('permission:kantin.produk');
+            Route::post('checkout', [KantinController::class, 'checkout'])->middleware('permission:kantin.kasir');
+            Route::get('transaksi', [KantinController::class, 'transactionIndex'])->middleware('permission:kantin.view');
+        });
+
+        Route::prefix('survei')->middleware('module:survei')->group(function (): void {
+            Route::get('/', [SurveiController::class, 'index'])->middleware('permission:survei.view');
+            Route::post('/', [SurveiController::class, 'store'])->middleware('permission:survei.create');
+            Route::get('/{survey}', [SurveiController::class, 'show'])->middleware('permission:survei.view');
+            Route::post('/{survey}/isi', [SurveiController::class, 'submit'])->middleware('permission:survei.isi');
+            Route::get('/{survey}/hasil', [SurveiController::class, 'result'])->middleware('permission:survei.hasil');
         });
     });
 });

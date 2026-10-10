@@ -28,6 +28,9 @@ use App\Livewire\Ekskul\EkskulIndex;
 use App\Livewire\Ekskul\EkskulShow;
 use App\Livewire\ERapor\RaporIndex;
 use App\Livewire\ERapor\RaporShow;
+use App\Livewire\Kantin\Kasir;
+use App\Livewire\Kantin\ProductIndex;
+use App\Livewire\Kantin\TransactionIndex;
 use App\Livewire\Kepegawaian\EmployeeForm;
 use App\Livewire\Kepegawaian\EmployeeIndex;
 use App\Livewire\Kesiswaan\StudentForm;
@@ -51,6 +54,10 @@ use App\Livewire\Ppdb\PpdbApplicantForm;
 use App\Livewire\Ppdb\PpdbApplicantIndex;
 use App\Livewire\Ppdb\PpdbApplicantShow;
 use App\Livewire\Ppdb\PpdbPeriodIndex;
+use App\Livewire\Survei\SurveyFill;
+use App\Livewire\Survei\SurveyForm;
+use App\Livewire\Survei\SurveyIndex;
+use App\Livewire\Survei\SurveyResult;
 use App\Livewire\Tatib\ViolationForm;
 use App\Livewire\Tatib\ViolationIndex;
 use App\Livewire\Tatib\ViolationTypeIndex;
@@ -228,5 +235,21 @@ Route::middleware('auth')->group(function (): void {
         Route::get('/tambah', RouteForm::class)->name('create')->middleware('permission:transportasi.create');
         Route::get('/{route}/ubah', RouteForm::class)->name('edit')->middleware('permission:transportasi.update');
         Route::get('/{route}', RouteShow::class)->name('show')->middleware('permission:transportasi.view');
+    });
+
+    // Kantin Digital — modul add-on (feature flag)
+    Route::prefix('kantin')->name('kantin.')->middleware('module:kantin')->group(function (): void {
+        Route::get('/', ProductIndex::class)->name('index')->middleware('permission:kantin.view');
+        Route::get('/kasir', Kasir::class)->name('kasir')->middleware('permission:kantin.kasir');
+        Route::get('/transaksi', TransactionIndex::class)->name('transaksi')->middleware('permission:kantin.view');
+    });
+
+    // Survei & Evaluasi — modul add-on (feature flag)
+    Route::prefix('survei')->name('survei.')->middleware('module:survei')->group(function (): void {
+        Route::get('/', SurveyIndex::class)->name('index')->middleware('permission:survei.view');
+        Route::get('/buat', SurveyForm::class)->name('create')->middleware('permission:survei.create');
+        Route::get('/{survey}/isi', SurveyFill::class)->name('isi')->middleware('permission:survei.isi');
+        Route::get('/{survey}/hasil', SurveyResult::class)->name('hasil')->middleware('permission:survei.hasil');
+        Route::get('/{survey}/ubah', SurveyForm::class)->name('edit')->middleware('permission:survei.update');
     });
 });
