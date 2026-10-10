@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\RequireMfa;
 use App\Http\Middleware\RequireModule;
 use App\Http\Middleware\ResolveTenant;
 use App\Http\Middleware\SetSpatieTeam;
@@ -22,6 +23,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->append(ResolveTenant::class);
         $middleware->append(SetSpatieTeam::class);
         $middleware->alias([
+            'mfa' => RequireMfa::class,
             'module' => RequireModule::class,
             'role' => RoleMiddleware::class,
             'permission' => PermissionMiddleware::class,

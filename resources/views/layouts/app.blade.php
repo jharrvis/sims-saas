@@ -23,6 +23,9 @@
         </a>
         <nav class="flex-1 overflow-y-auto px-3 py-4 space-y-1 text-sm">
             <x-nav-link href="{{ route('dashboard') }}" icon="layout-dashboard" label="Dashboard" :active="request()->routeIs('dashboard')" />
+            @if (auth()->user()?->activeMemberships()->count() > 1)
+                <x-nav-link href="{{ route('tenant.switch') }}" icon="repeat" label="Ganti Sekolah" :active="request()->routeIs('tenant.switch')" />
+            @endif
             @can('siswa.view')
                 <x-nav-link href="{{ route('siswa.index') }}" icon="users" label="Data Siswa" :active="request()->routeIs('siswa.*')" />
             @endcan

@@ -54,6 +54,6 @@ class TenantSwitcher extends Component
             ->map(fn ($m) => $m->school);
 
         return view('livewire.auth.tenant-switcher', ['schools' => $schools])
-            ->layout('layouts.guest', ['title' => 'Pilih Sekolah']);
+            ->layout('layouts.app', ['title' => 'Pilih Sekolah']);
     }
 }

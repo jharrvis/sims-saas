@@ -77,16 +77,20 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('dashboard');
-})->name('dashboard');
+})->name('dashboard')->middleware(['auth', 'mfa']);
 
 Route::middleware('guest')->group(function (): void {
     Route::get('/login', Login::class)->name('login');
-    Route::get('/mfa/verify', VerifyMfa::class)->name('mfa.verify');
-    Route::get('/pilih-sekolah', TenantSwitcher::class)->name('tenant.switch');
 });
 
-Route::middleware('auth')->group(function (): void {
+// Verifikasi MFA — dapat diakses pra-login (sesi mfa_pending_user_id)
+// maupun oleh user terautentikasi yang sesinya belum terverifikasi
+// (mis. login ulang via cookie remember-me). Otorisasi ditangani komponen.
+Route::get('/mfa/verify', VerifyMfa::class)->name('mfa.verify');
+
+Route::middleware(['auth', 'mfa'])->group(function (): void {
     Route::get('/2fa/setup', SetupTwoFactor::class)->name('2fa.setup');
+    Route::get('/pilih-sekolah', TenantSwitcher::class)->name('tenant.switch');
 
     // Kesiswaan — modul inti (selalu aktif)
     Route::prefix('siswa')->name('siswa.')->group(function (): void {

@@ -34,6 +34,7 @@ Format mengikuti [Keep a Changelog](https://keepachangelog.com/id/1.1.0/).
 - Survei & Evaluasi (add-on): survei dengan pertanyaan pilihan ganda/skala/teks, periode buka-tutup, pengisian responden, agregat hasil (distribusi & rata-rata); di belakang feature flag `module:survei`
 - Alumni & Karier (add-on): data alumni (taut opsional ke siswa), riwayat karier tracer study (kuliah/kerja/wirausaha), statistik distribusi status; di belakang feature flag `module:alumni`
 - Organisasi (add-on): organisasi (OSIS/MPK/Pramuka/…), pengurus siswa dengan jabatan anti-duplikat, kegiatan dengan status; di belakang feature flag `module:organisasi`
+- Keamanan (audit): `/pilih-sekolah` dipindah ke middleware `auth` (sebelumnya di `guest` sehingga tidak terjangkau user login); dashboard `/` kini wajib `auth`; middleware baru `mfa` menegakkan FR-904 — akun platform tanpa MFA terkonfirmasi dipaksa ke `2fa/setup`, dan sesi tanpa verifikasi MFA (mis. via remember-me) dipaksa ke `mfa.verify`; tambah tautan "Ganti Sekolah" di navigasi untuk akun multi-sekolah
 
 ### Keamanan
 - Isolasi tenant fail-closed: query model tenant tanpa konteks melempar exception (diuji)

@@ -19,15 +19,49 @@ class VerifyMfa extends Component
 
     public ?string $error = null;
 
+    public function mount(): void
+    {
+        $user = $this->resolveUser();
+
+        // Tidak ada sesi verifikasi → kembali ke login.
+        if (! $user) {
+            $this->redirect(route('login'), navigate: true);
+
+            return;
+        }
+
+        // Tidak butuh verifikasi MFA → ke dashboard.
+        if (! $user->is_platform || ! $user->mfaSecret?->isConfirmed()) {
+            $this->redirect(route('dashboard'), navigate: true);
+        }
+    }
+
+    /**
+     * User yang sedang diverifikasi: dari sesi pra-login, atau user
+     * terautentikasi yang sesinya belum terverifikasi (remember-me).
+     */
+    private function resolveUser(): ?User
+    {
+        $pendingId = session('mfa_pending_user_id');
+
+        if ($pendingId) {
+            return User::find($pendingId);
+        }
+
+        /** @var User|null $authed */
+        $authed = auth()->user();
+
+        return $authed;
+    }
+
     public function verify(TotpService $totp): void
     {
         $this->validate(['code' => ['required', 'string']]);
         $this->error = null;
 
-        $userId = session('mfa_pending_user_id');
-        $user = $userId ? User::find($userId) : null;
+        $user = $this->resolveUser();
 
-        if (! $user) {
+        if (! $user || ! $user->is_platform || ! $user->mfaSecret?->isConfirmed()) {
             $this->redirect(route('login'), navigate: true);
 
             return;
