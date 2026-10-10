@@ -1,5 +1,6 @@
 <?php
 
+use App\Domains\Pwa\Http\Controllers\PushController;
 use App\Domains\Pwa\Http\Controllers\PwaController;
 use App\Http\Controllers\HelpController;
 use App\Livewire\Akademik\AttendanceIndex;
@@ -321,5 +322,8 @@ Route::prefix('pwa')->name('pwa.')->group(function (): void {
         Route::get('/profil', PwaProfil::class)->name('profil');
         Route::post('/ganti-anak', [PwaController::class, 'switchChild'])->name('switch-child');
         Route::post('/keluar', [PwaController::class, 'logout'])->name('logout');
+        Route::get('/push/vapid-key', [PushController::class, 'vapidKey'])->name('push.vapid-key');
+        Route::post('/push/subscribe', [PushController::class, 'subscribe'])->name('push.subscribe');
+        Route::delete('/push/unsubscribe', [PushController::class, 'unsubscribe'])->name('push.unsubscribe');
     });
 });
