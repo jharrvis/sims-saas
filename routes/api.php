@@ -4,12 +4,14 @@ use App\Domains\Akademik\Http\Controllers\AkademikController;
 use App\Domains\Akademik\Http\Controllers\GradeController;
 use App\Domains\Akademik\Http\Controllers\RombelController;
 use App\Domains\Bk\Http\Controllers\BkController;
+use App\Domains\Ekskul\Http\Controllers\EkskulController;
 use App\Domains\ERapor\Http\Controllers\ERaporController;
 use App\Domains\Identity\Http\Controllers\AuthController;
 use App\Domains\Kepegawaian\Http\Controllers\EmployeeController;
 use App\Domains\Kesiswaan\Http\Controllers\StudentController;
 use App\Domains\Keuangan\Http\Controllers\KeuanganController;
 use App\Domains\Laporan\Http\Controllers\ReportController;
+use App\Domains\Lms\Http\Controllers\LmsController;
 use App\Domains\Pengaturan\Http\Controllers\SettingController;
 use App\Domains\Pengumuman\Http\Controllers\AnnouncementController;
 use App\Domains\Perpus\Http\Controllers\PerpusController;
@@ -153,6 +155,24 @@ Route::prefix('v1')->group(function (): void {
             Route::get('pinjam', [PerpusController::class, 'loanIndex'])->middleware('permission:perpus.view');
             Route::post('pinjam', [PerpusController::class, 'loanStore'])->middleware('permission:perpus.pinjam');
             Route::post('pinjam/{loan}/kembali', [PerpusController::class, 'loanReturn'])->middleware('permission:perpus.kembali');
+        });
+
+        Route::prefix('ekskul')->middleware('module:ekstrakurikuler')->group(function (): void {
+            Route::get('/', [EkskulController::class, 'index'])->middleware('permission:ekskul.view');
+            Route::post('/', [EkskulController::class, 'store'])->middleware('permission:ekskul.create');
+            Route::get('/{ekskul}', [EkskulController::class, 'show'])->middleware('permission:ekskul.view');
+            Route::post('/{ekskul}/anggota', [EkskulController::class, 'addMember'])->middleware('permission:ekskul.update');
+            Route::delete('/{ekskul}/anggota/{studentId}', [EkskulController::class, 'removeMember'])->middleware('permission:ekskul.update');
+            Route::get('/prestasi/data', [EkskulController::class, 'achievementIndex'])->middleware('permission:prestasi.view');
+            Route::post('/prestasi/data', [EkskulController::class, 'achievementStore'])->middleware('permission:prestasi.create');
+        });
+
+        Route::prefix('lms')->middleware('module:lms_mini')->group(function (): void {
+            Route::get('tugas', [LmsController::class, 'index'])->middleware('permission:lms.view');
+            Route::post('tugas', [LmsController::class, 'store'])->middleware('permission:lms.tugas.create');
+            Route::get('tugas/{assignment}', [LmsController::class, 'show'])->middleware('permission:lms.view');
+            Route::post('tugas/{assignment}/kumpul', [LmsController::class, 'submit'])->middleware('permission:lms.kumpul');
+            Route::post('pengumpulan/{submission}/nilai', [LmsController::class, 'grade'])->middleware('permission:lms.nilai');
         });
     });
 });

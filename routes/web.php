@@ -16,6 +16,10 @@ use App\Livewire\Auth\TenantSwitcher;
 use App\Livewire\Auth\VerifyMfa;
 use App\Livewire\Bk\CounselingForm;
 use App\Livewire\Bk\CounselingIndex;
+use App\Livewire\Ekskul\AchievementIndex;
+use App\Livewire\Ekskul\EkskulForm;
+use App\Livewire\Ekskul\EkskulIndex;
+use App\Livewire\Ekskul\EkskulShow;
 use App\Livewire\ERapor\RaporIndex;
 use App\Livewire\ERapor\RaporShow;
 use App\Livewire\Kepegawaian\EmployeeForm;
@@ -26,6 +30,9 @@ use App\Livewire\Kesiswaan\StudentShow;
 use App\Livewire\Keuangan\InvoiceIndex;
 use App\Livewire\Keuangan\InvoiceShow;
 use App\Livewire\Laporan\ReportIndex;
+use App\Livewire\Lms\AssignmentForm;
+use App\Livewire\Lms\AssignmentIndex;
+use App\Livewire\Lms\AssignmentShow;
 use App\Livewire\Pengaturan\AcademicYearIndex;
 use App\Livewire\Pengaturan\ModuleIndex;
 use App\Livewire\Pengaturan\SchoolProfile;
@@ -160,5 +167,22 @@ Route::middleware('auth')->group(function (): void {
         Route::get('/tambah', BookForm::class)->name('create')->middleware('permission:perpus.buku');
         Route::get('/pinjam', LoanIndex::class)->name('pinjam')->middleware('permission:perpus.pinjam');
         Route::get('/{book}/ubah', BookForm::class)->name('edit')->middleware('permission:perpus.buku');
+    });
+
+    // Ekstrakurikuler & Prestasi — modul add-on (feature flag)
+    Route::prefix('ekskul')->name('ekskul.')->middleware('module:ekstrakurikuler')->group(function (): void {
+        Route::get('/', EkskulIndex::class)->name('index')->middleware('permission:ekskul.view');
+        Route::get('/tambah', EkskulForm::class)->name('create')->middleware('permission:ekskul.create');
+        Route::get('/prestasi', AchievementIndex::class)->name('prestasi')->middleware('permission:prestasi.view');
+        Route::get('/{ekskul}/ubah', EkskulForm::class)->name('edit')->middleware('permission:ekskul.update');
+        Route::get('/{ekskul}', EkskulShow::class)->name('show')->middleware('permission:ekskul.view');
+    });
+
+    // LMS Mini — modul add-on (feature flag)
+    Route::prefix('lms')->name('lms.')->middleware('module:lms_mini')->group(function (): void {
+        Route::get('/', AssignmentIndex::class)->name('index')->middleware('permission:lms.view');
+        Route::get('/buat', AssignmentForm::class)->name('create')->middleware('permission:lms.tugas.create');
+        Route::get('/{assignment}/ubah', AssignmentForm::class)->name('edit')->middleware('permission:lms.tugas.update');
+        Route::get('/{assignment}', AssignmentShow::class)->name('show')->middleware('permission:lms.view');
     });
 });
