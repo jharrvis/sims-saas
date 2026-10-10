@@ -38,6 +38,8 @@ class ModuleSeeder extends Seeder
             ['kode' => 'transportasi', 'nama' => 'Antar-Jemput / Transportasi', 'kategori' => 'addon'],
             ['kode' => 'kantin', 'nama' => 'Kantin / Koperasi Digital', 'kategori' => 'addon'],
             ['kode' => 'survei', 'nama' => 'Survei & Evaluasi', 'kategori' => 'addon'],
+            ['kode' => 'alumni', 'nama' => 'Alumni & Karier', 'kategori' => 'addon'],
+            ['kode' => 'organisasi', 'nama' => 'Organisasi Grup Sekolah', 'kategori' => 'addon'],
         ];
     }
 

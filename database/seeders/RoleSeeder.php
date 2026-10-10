@@ -73,6 +73,8 @@ class RoleSeeder extends Seeder
                 'kantin.view', 'kantin.produk', 'kantin.kasir',
                 'survei.view', 'survei.create', 'survei.update', 'survei.delete',
                 'survei.isi', 'survei.hasil',
+                'alumni.view', 'alumni.create', 'alumni.update', 'alumni.delete',
+                'organisasi.view', 'organisasi.create', 'organisasi.update', 'organisasi.delete',
                 'pengguna.view', 'pengguna.create', 'pengguna.update',
                 'pengguna.delete', 'pengguna.reset-password',
                 'peran.view', 'peran.create', 'peran.update', 'peran.delete',

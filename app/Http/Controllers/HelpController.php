@@ -55,6 +55,8 @@ class HelpController extends Controller
             'transportasi' => ['Antar-Jemput', 'Rute dan penumpang', 'bus'],
             'kantin' => ['Kantin Digital', 'Produk, kasir, dan transaksi', 'store'],
             'survei' => ['Survei & Evaluasi', 'Survei dan hasil agregat', 'clipboard-list'],
+            'alumni' => ['Alumni & Karier', 'Data alumni dan tracer study', 'briefcase'],
+            'organisasi' => ['Organisasi', 'Pengurus dan kegiatan organisasi', 'users-round'],
             'pengaturan' => ['Pengaturan', 'Profil sekolah, tahun ajaran, modul', 'settings'],
             'peran' => ['Peran & Hak Akses', 'Daftar peran pengguna', 'key-round'],
             'faq' => ['Pertanyaan Umum', 'Jawaban pertanyaan umum', 'circle-help'],

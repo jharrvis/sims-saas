@@ -320,7 +320,19 @@ Halaman utama menampilkan **rekap poin tertinggi** serta riwayat pelanggaran yan
 2. **Isi survei:** buka survei berstatus Aktif → **Isi** → jawab → **Kirim Jawaban**.
 3. **Lihat hasil:** klik **Hasil** untuk agregat: distribusi jawaban pilihan ganda dan rata-rata skala.
 
-## 34. Pertanyaan Umum
+## 34. Alumni & Karier
+
+1. **Data alumni:** menu **Alumni** → **Tambah Alumni**, bisa ditautkan ke data siswa atau diisi manual.
+2. **Riwayat karier:** buka detail alumni → **Riwayat Karier** → **+ Tambah** (kuliah/kerja/wirausaha + institusi). Cocok untuk tracer study.
+3. **Statistik:** filter berdasarkan tahun lulus dan status karier.
+
+## 35. Organisasi
+
+1. **Tambah organisasi:** menu **Organisasi** → **Tambah Organisasi** (jenis: OSIS/MPK/Pramuka/… + pembina).
+2. **Pengurus:** buka detail → cari siswa → **+** dengan jabatan dan periode. Siswa yang sama tidak bisa didaftarkan dua kali.
+3. **Kegiatan:** tambah kegiatan dengan tanggal dan status (rencana → berjalan → selesai).
+
+## 36. Pertanyaan Umum
 
 **Saya lupa tidak menerima kode WhatsApp.**
 Tunggu 60 detik lalu klik kirim ulang. Maksimal 3 kali per 15 menit. Pastikan nomor terdaftar & WhatsApp aktif.

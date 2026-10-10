@@ -32,6 +32,8 @@ Format mengikuti [Keep a Changelog](https://keepachangelog.com/id/1.1.0/).
 - Antar-Jemput / Transportasi (add-on): rute + sopir/kendaraan/kapasitas, titik penjemputan terurut, penumpang dengan batas kapasitas; di belakang feature flag `module:transportasi`
 - Kantin / Koperasi Digital (add-on): produk + stok, kasir POS (keranjang, bayar, kembalian), checkout transaksional anti-oversell, riwayat + omzet harian; di belakang feature flag `module:kantin`
 - Survei & Evaluasi (add-on): survei dengan pertanyaan pilihan ganda/skala/teks, periode buka-tutup, pengisian responden, agregat hasil (distribusi & rata-rata); di belakang feature flag `module:survei`
+- Alumni & Karier (add-on): data alumni (taut opsional ke siswa), riwayat karier tracer study (kuliah/kerja/wirausaha), statistik distribusi status; di belakang feature flag `module:alumni`
+- Organisasi (add-on): organisasi (OSIS/MPK/Pramuka/…), pengurus siswa dengan jabatan anti-duplikat, kegiatan dengan status; di belakang feature flag `module:organisasi`
 
 ### Keamanan
 - Isolasi tenant fail-closed: query model tenant tanpa konteks melempar exception (diuji)

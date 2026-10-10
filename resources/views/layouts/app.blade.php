@@ -80,6 +80,12 @@
             @can('survei.view')
                 <x-nav-link href="{{ route('survei.index') }}" icon="clipboard-list" label="Survei" :active="request()->routeIs('survei.*')" />
             @endcan
+            @can('alumni.view')
+                <x-nav-link href="{{ route('alumni.index') }}" icon="briefcase" label="Alumni" :active="request()->routeIs('alumni.*')" />
+            @endcan
+            @can('organisasi.view')
+                <x-nav-link href="{{ route('organisasi.index') }}" icon="users-round" label="Organisasi" :active="request()->routeIs('organisasi.*')" />
+            @endcan
             @can('bk.view')
                 <x-nav-link href="{{ route('bk.index') }}" icon="heart-handshake" label="BK & Konseling" :active="request()->routeIs('bk.*')" />
             @endcan
