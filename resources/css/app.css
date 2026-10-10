@@ -1,0 +1,20 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+
+/* Dark mode berbasis class, sesuai design system (darkMode: 'class') */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Token design system SIMS — port dari design/tailwind.config.js */
+@theme {
+    --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+
+    --color-primary: #3c50e0;
+    --color-secondary: #80caee;
+    --color-success: #219653;
+    --color-danger: #d34053;
+    --color-warning: #ffa70b;
+    --color-boxdark: #24303f;
+    --color-boxdark2: #1a222c;
+}
