@@ -14,6 +14,8 @@ use App\Livewire\Auth\Login;
 use App\Livewire\Auth\SetupTwoFactor;
 use App\Livewire\Auth\TenantSwitcher;
 use App\Livewire\Auth\VerifyMfa;
+use App\Livewire\ERapor\RaporIndex;
+use App\Livewire\ERapor\RaporShow;
 use App\Livewire\Kepegawaian\EmployeeForm;
 use App\Livewire\Kepegawaian\EmployeeIndex;
 use App\Livewire\Kesiswaan\StudentForm;
@@ -31,6 +33,9 @@ use App\Livewire\Ppdb\PpdbApplicantForm;
 use App\Livewire\Ppdb\PpdbApplicantIndex;
 use App\Livewire\Ppdb\PpdbApplicantShow;
 use App\Livewire\Ppdb\PpdbPeriodIndex;
+use App\Livewire\Tatib\ViolationForm;
+use App\Livewire\Tatib\ViolationIndex;
+use App\Livewire\Tatib\ViolationTypeIndex;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -121,5 +126,19 @@ Route::middleware('auth')->group(function (): void {
         Route::get('/', SchoolProfile::class)->name('profil')->middleware('permission:sekolah.view');
         Route::get('/tahun-ajaran', AcademicYearIndex::class)->name('tahun-ajaran')->middleware('permission:tahun-ajaran.view');
         Route::get('/modul', ModuleIndex::class)->name('modul')->middleware('permission:sekolah.view');
+    });
+
+    // E-Rapor — modul add-on (feature flag)
+    Route::prefix('erapor')->name('erapor.')->middleware('module:e_rapor')->group(function (): void {
+        Route::get('/', RaporIndex::class)->name('index')->middleware('permission:erapor.view');
+        Route::get('/siswa/{student}/semester/{semester}', RaporShow::class)->name('show')->middleware('permission:erapor.view');
+    });
+
+    // Tata Tertib — modul add-on (feature flag)
+    Route::prefix('tatib')->name('tatib.')->middleware('module:tata_tertib')->group(function (): void {
+        Route::get('/', ViolationIndex::class)->name('index')->middleware('permission:tatib.view');
+        Route::get('/catat', ViolationForm::class)->name('create')->middleware('permission:tatib.create');
+        Route::get('/jenis', ViolationTypeIndex::class)->name('jenis')->middleware('permission:tatib.view');
+        Route::get('/{violation}/ubah', ViolationForm::class)->name('edit')->middleware('permission:tatib.update');
     });
 });
