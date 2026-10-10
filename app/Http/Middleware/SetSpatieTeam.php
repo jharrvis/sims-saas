@@ -18,9 +18,11 @@ final class SetSpatieTeam
 {
     public function handle(Request $request, Closure $next): Response
     {
+        // Spatie teams mewajibkan team_id non-null pada pivot; operator
+        // platform (tanpa tenant) memakai sentinel 0.
         $schoolId = app(TenantContext::class)->schoolId();
 
-        app(PermissionRegistrar::class)->setPermissionsTeamId($schoolId);
+        app(PermissionRegistrar::class)->setPermissionsTeamId($schoolId ?? 0);
 
         return $next($request);
     }
