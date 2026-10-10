@@ -6,6 +6,7 @@ use App\Domains\Akademik\Http\Controllers\RombelController;
 use App\Domains\Identity\Http\Controllers\AuthController;
 use App\Domains\Kepegawaian\Http\Controllers\EmployeeController;
 use App\Domains\Kesiswaan\Http\Controllers\StudentController;
+use App\Domains\Ppdb\Http\Controllers\PpdbController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function (): void {
@@ -70,5 +71,17 @@ Route::prefix('v1')->group(function (): void {
         Route::get('nilai/rapor', [GradeController::class, 'rapor'])->middleware('permission:nilai.view');
         Route::post('nilai/rilis', [GradeController::class, 'release'])->middleware('permission:nilai.release');
         Route::get('nilai/siswa', [GradeController::class, 'forStudent'])->middleware('permission:nilai.view');
+
+        // PPDB — modul add-on
+        Route::prefix('ppdb')->middleware('module:ppdb')->group(function (): void {
+            Route::get('periode', [PpdbController::class, 'periodIndex'])->middleware('permission:ppdb.periode.view');
+            Route::post('periode', [PpdbController::class, 'periodStore'])->middleware('permission:ppdb.periode.create');
+            Route::get('pendaftar', [PpdbController::class, 'applicantIndex'])->middleware('permission:ppdb.pendaftar.view');
+            Route::post('pendaftar', [PpdbController::class, 'applicantStore'])->middleware('permission:ppdb.pendaftar.create');
+            Route::get('pendaftar/{applicant}', [PpdbController::class, 'applicantShow'])->middleware('permission:ppdb.pendaftar.view');
+            Route::post('pendaftar/{applicant}/status', [PpdbController::class, 'applicantStatus'])->middleware('permission:ppdb.pendaftar.verify|ppdb.pendaftar.approve');
+            Route::post('pendaftar/{applicant}/seleksi', [PpdbController::class, 'applicantSelect'])->middleware('permission:ppdb.seleksi.input');
+            Route::post('pendaftar/{applicant}/daftar-ulang', [PpdbController::class, 'applicantEnroll'])->middleware('permission:ppdb.pendaftar.enroll');
+        });
     });
 });

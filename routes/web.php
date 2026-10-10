@@ -18,6 +18,10 @@ use App\Livewire\Kepegawaian\EmployeeIndex;
 use App\Livewire\Kesiswaan\StudentForm;
 use App\Livewire\Kesiswaan\StudentIndex;
 use App\Livewire\Kesiswaan\StudentShow;
+use App\Livewire\Ppdb\PpdbApplicantForm;
+use App\Livewire\Ppdb\PpdbApplicantIndex;
+use App\Livewire\Ppdb\PpdbApplicantShow;
+use App\Livewire\Ppdb\PpdbPeriodIndex;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -69,5 +73,13 @@ Route::middleware('auth')->group(function (): void {
     Route::prefix('nilai')->name('nilai.')->group(function (): void {
         Route::get('/input', GradeInput::class)->name('input')->middleware('permission:nilai.input');
         Route::get('/leger', GradeLeger::class)->name('leger')->middleware('permission:nilai.rekap');
+    });
+
+    // PPDB — modul add-on (feature flag)
+    Route::prefix('ppdb')->name('ppdb.')->middleware('module:ppdb')->group(function (): void {
+        Route::get('/', PpdbPeriodIndex::class)->name('index')->middleware('permission:ppdb.periode.view');
+        Route::get('/pendaftar/{period}', PpdbApplicantIndex::class)->name('pendaftar.index')->middleware('permission:ppdb.pendaftar.view');
+        Route::get('/pendaftar/{period}/tambah', PpdbApplicantForm::class)->name('pendaftar.create')->middleware('permission:ppdb.pendaftar.create');
+        Route::get('/pendaftar/detail/{applicant}', PpdbApplicantShow::class)->name('pendaftar.show')->middleware('permission:ppdb.pendaftar.view');
     });
 });
