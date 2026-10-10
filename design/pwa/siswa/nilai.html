@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="id" class="antialiased">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>SIMS — Nilai Akademik</title>
+    <meta name="theme-color" content="#3c50e0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <link rel="manifest" href="/pwa/manifest.json">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        school: '#3c50e0',
+                        'school-dark': '#2a3cb0',
+                    }
+                }
+            }
+        }
+    </script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://unpkg.com/lucide@0.475.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * { -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Inter', sans-serif; background: #f8fafc; }
+        .safe-bottom { padding-bottom: env(safe-area-inset-bottom, 0); }
+        .bottom-nav { padding-bottom: calc(0.75rem + env(safe-area-inset-bottom, 0)); }
+        [x-cloak] { display: none !important; }
+        .app-shell { max-width: 480px; margin: 0 auto; min-height: 100dvh; background: #f8fafc; position: relative; box-shadow: 0 0 40px rgba(0,0,0,0.12); }
+        .slide-up { animation: slideUp 0.3s ease-out; }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .offline-banner { display: none; }
+        @media (prefers-color-scheme: dark) { body { background: #0f172a; } }
+    </style>
+</head>
+<body x-data="{}" x-init="" x-cloak>
+
+    <!-- Offline Banner -->
+    <div id="offline-banner" class="offline-banner fixed top-0 left-0 right-0 z-[100] bg-slate-800 text-white text-center py-2 text-xs font-semibold">
+         Mode Offline — Data terakhir tersimpan
+    </div>
+
+    <!-- Toast -->
+    <div class="fixed top-4 left-1/2 -translate-x-1/2 z-[99] flex flex-col gap-2 w-[calc(100%-2rem)] max-w-sm" x-show="toast.show" x-transition>
+        <div class="rounded-xl p-3 shadow-xl border flex items-center gap-3 bg-white"
+             :class="toast.type === 'success' ? 'border-green-200' : 'border-red-200'">
+            <i :data-lucide="toast.type === 'success' ? 'check-circle-2' : 'x-circle'" class="w-5 h-5 flex-shrink-0" :class="toast.type === 'success' ? 'text-green-500' : 'text-red-500'"></i>
+            <p class="text-sm font-medium text-slate-700" x-text="toast.message"></p>
+        </div>
+    </div>
+
+    <div class="app-shell">
+        
+    <div class="bg-[#3c50e0] px-5 pt-12 pb-6">
+        <h1 class="text-white text-xl font-extrabold">Nilai Akademik</h1>
+        <p class="text-blue-100 text-sm mt-1">Semester Ganjil 2026/2027</p>
+    </div>
+    <div class="px-4 mt-4 pb-28">
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 mb-5 flex items-center gap-4">
+            <div class="flex-1 text-center border-r border-slate-100"><p class="text-2xl font-extrabold text-[#3c50e0]">85.5</p><p class="text-xs text-slate-500 font-medium">Rata-rata</p></div>
+            <div class="flex-1 text-center border-r border-slate-100"><p class="text-2xl font-extrabold text-amber-500">4</p><p class="text-xs text-slate-500 font-medium">Peringkat</p></div>
+            <div class="flex-1 text-center"><p class="text-sm font-extrabold text-success">Sangat Baik</p><p class="text-xs text-slate-500 font-medium">Predikat</p></div>
+        </div>
+        <p class="text-xs text-warning bg-warning/10 rounded-lg px-3 py-2 mb-4 flex items-center gap-2"><i data-lucide="lock" class="w-3.5 h-3.5"></i> Beberapa nilai belum dirilis oleh guru.</p>
+        <div class="space-y-3">
+            <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
+                <div class="flex justify-between items-start mb-2"><div><p class="font-bold text-slate-800 text-sm">Matematika</p><p class="text-xs text-slate-400">Drs. Rahmad H.</p></div><div class="text-right"><p class="text-lg font-extrabold text-danger">72</p><p class="text-[10px] text-danger">Di bawah KKM</p></div></div>
+                <div class="w-full bg-slate-100 rounded-full h-1.5"><div class="bg-danger h-1.5 rounded-full" style="width:72%"></div></div>
+            </div>
+            <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
+                <div class="flex justify-between items-start mb-2"><div><p class="font-bold text-slate-800 text-sm">Bahasa Indonesia</p><p class="text-xs text-slate-400">Ibu Ratna Dewi</p></div><div class="text-right"><p class="text-lg font-extrabold text-success">88</p><p class="text-[10px] text-success">Di atas KKM</p></div></div>
+                <div class="w-full bg-slate-100 rounded-full h-1.5"><div class="bg-success h-1.5 rounded-full" style="width:88%"></div></div>
+            </div>
+            <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
+                <div class="flex justify-between items-start mb-2"><div><p class="font-bold text-slate-800 text-sm">IPA</p></div><div class="text-right"><p class="text-lg font-extrabold text-slate-400">—</p><p class="text-[10px] text-slate-400">Belum dirilis</p></div></div>
+                <div class="w-full bg-slate-100 rounded-full h-1.5"><div class="bg-slate-300 h-1.5 rounded-full" style="width:0%"></div></div>
+            </div>
+        </div>
+    </div>
+    
+    <nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] bg-white border-t border-slate-200 bottom-nav z-50">
+        <div class="flex justify-around items-center pt-2 pb-1">
+            <a href="index.html" class="flex flex-col items-center gap-0.5 px-4 text-slate-400">
+                <i data-lucide="home" class="w-6 h-6"></i>
+                <span class="text-[10px] font-medium">Beranda</span>
+            </a>
+            <a href="jadwal.html" class="flex flex-col items-center gap-0.5 px-4 text-slate-400">
+                <i data-lucide="calendar-days" class="w-6 h-6"></i>
+                <span class="text-[10px] font-medium">Jadwal</span>
+            </a>
+            <a href="absensi.html" class="flex flex-col items-center gap-0.5 px-4 text-slate-400">
+                <i data-lucide="check-square" class="w-6 h-6"></i>
+                <span class="text-[10px] font-medium">Absensi</span>
+            </a>
+            <a href="nilai.html" class="flex flex-col items-center gap-0.5 px-4 text-[#3c50e0]">
+                <i data-lucide="file-bar-chart" class="w-6 h-6"></i>
+                <span class="text-[10px] font-medium">Nilai</span>
+            </a>
+            <a href="profil.html" class="flex flex-col items-center gap-0.5 px-4 text-slate-400">
+                <i data-lucide="user" class="w-6 h-6"></i>
+                <span class="text-[10px] font-medium">Profil</span>
+            </a>
+        </div>
+    </nav>
+
+    </div>
+
+    <script>
+    // PWA Service Worker Registration
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/pwa/sw.js').catch(() => {});
+    }
+    // Offline detection
+    window.addEventListener('offline', () => { document.getElementById('offline-banner').style.display = 'block'; });
+    window.addEventListener('online', () => { document.getElementById('offline-banner').style.display = 'none'; });
+    // Re-init Lucide after Alpine
+    document.addEventListener('alpine:initialized', () => { if (typeof lucide !== 'undefined') lucide.createIcons(); });
+    
+    </script>
+</body>
+</html>

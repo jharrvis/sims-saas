@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="id" class="antialiased">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>SIMS — Profil Orang Tua</title>
+    <meta name="theme-color" content="#3c50e0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <link rel="manifest" href="/pwa/manifest.json">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="../../assets/js/tailwind-config.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://unpkg.com/lucide@0.475.0"></script>
+    <style>
+        * { -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Inter', sans-serif; background: #f8fafc; }
+        .safe-bottom { padding-bottom: env(safe-area-inset-bottom, 0); }
+        .bottom-nav { padding-bottom: calc(0.75rem + env(safe-area-inset-bottom, 0)); }
+        [x-cloak] { display: none !important; }
+        .app-shell { max-width: 480px; margin: 0 auto; min-height: 100dvh; background: #f8fafc; position: relative; box-shadow: 0 0 40px rgba(0,0,0,0.12); }
+        .offline-banner { display: none; }
+    </style>
+</head>
+<body x-data="{ consentModal: false }" x-cloak>
+    <!-- Offline Banner -->
+    <div id="offline-banner" class="offline-banner fixed top-0 left-0 right-0 z-[100] bg-slate-800 text-white text-center py-2 text-xs font-semibold">
+        Mode Offline — Data tersimpan secara lokal
+    </div>
+
+    <div class="app-shell">
+        <!-- Header -->
+        <div class="bg-primary px-5 pt-12 pb-16 relative overflow-hidden text-white">
+            <h1 class="text-xl font-extrabold relative z-10">Profil Orang Tua / Wali</h1>
+            <p class="text-blue-100 text-xs mt-1">Akun Terpadu SIMS Multi-Sekolah</p>
+        </div>
+
+        <div class="px-4 pb-28">
+            <!-- Profil Card -->
+            <div class="bg-white rounded-2xl shadow-xl border border-slate-100 p-5 -mt-10 relative z-10 mb-4">
+                <div class="flex items-center gap-4">
+                    <div class="w-16 h-16 rounded-2xl bg-blue-100 text-primary flex items-center justify-center font-bold text-2xl border-4 border-white shadow-md flex-shrink-0">
+                        H
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-extrabold text-slate-800">Bpk. Haryanto</h2>
+                        <p class="text-xs text-slate-500 mt-0.5">0812-3456-7890</p>
+                        <span class="inline-flex items-center gap-1 text-[10px] bg-success/10 text-success font-bold px-2 py-0.5 rounded-full mt-1.5">
+                            <i data-lucide="check-circle" class="w-3 h-3"></i> WhatsApp Terverifikasi
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pengaturan & Hak Akses Data -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 divide-y divide-slate-100 mb-4">
+                <div class="p-4">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Keamanan & Kebijakan Data (P0-07 / UU PDP)</p>
+                    <a href="../../persetujuan-data.html" class="flex items-center justify-between py-2 text-slate-700 hover:text-primary transition-colors">
+                        <div class="flex items-center gap-3">
+                            <i data-lucide="shield-check" class="w-5 h-5 text-primary"></i>
+                            <div>
+                                <p class="text-sm font-semibold">Persetujuan Data Anak</p>
+                                <p class="text-[11px] text-slate-400">Kelola izin pemrosesan data & riwayat versi</p>
+                            </div>
+                        </div>
+                        <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400"></i>
+                    </a>
+                </div>
+
+                <div class="p-4">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Akun & Preferensi</p>
+                    <a href="../../tenant-switcher.html" class="flex items-center justify-between py-2 text-slate-700 hover:text-primary transition-colors">
+                        <div class="flex items-center gap-3">
+                            <i data-lucide="school" class="w-5 h-5 text-slate-500"></i>
+                            <div>
+                                <p class="text-sm font-semibold">Ganti Sekolah / Keanggotaan</p>
+                                <p class="text-[11px] text-slate-400">SD Negeri 1 Nusantara</p>
+                            </div>
+                        </div>
+                        <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400"></i>
+                    </a>
+                    <a href="../../setup-2fa.html" class="flex items-center justify-between py-2 text-slate-700 hover:text-primary transition-colors mt-2">
+                        <div class="flex items-center gap-3">
+                            <i data-lucide="key-round" class="w-5 h-5 text-slate-500"></i>
+                            <div>
+                                <p class="text-sm font-semibold">Keamanan 2FA / TOTP</p>
+                                <p class="text-[11px] text-slate-400">Autentikasi dua faktor akun</p>
+                            </div>
+                        </div>
+                        <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Logout -->
+            <button @click="window.location.href='../login.html'" class="w-full py-3.5 border-2 border-danger/30 text-danger font-bold rounded-xl hover:bg-danger hover:text-white transition-colors flex items-center justify-center gap-2 text-sm">
+                <i data-lucide="log-out" class="w-4 h-4"></i> Keluar dari Akun
+            </button>
+        </div>
+
+        <!-- Bottom Navigation -->
+        <nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] bg-white border-t border-slate-200 bottom-nav z-50">
+            <div class="flex justify-around items-center pt-2 pb-1">
+                <a href="index.html" class="flex flex-col items-center gap-0.5 px-4 text-slate-400">
+                    <i data-lucide="home" class="w-6 h-6"></i>
+                    <span class="text-[10px] font-medium">Beranda</span>
+                </a>
+                <a href="anak.html" class="flex flex-col items-center gap-0.5 px-4 text-slate-400">
+                    <i data-lucide="users" class="w-6 h-6"></i>
+                    <span class="text-[10px] font-medium">Anak</span>
+                </a>
+                <a href="keuangan.html" class="flex flex-col items-center gap-0.5 px-4 text-slate-400">
+                    <i data-lucide="wallet" class="w-6 h-6"></i>
+                    <span class="text-[10px] font-medium">Keuangan</span>
+                </a>
+                <a href="pesan.html" class="flex flex-col items-center gap-0.5 px-4 text-slate-400">
+                    <i data-lucide="message-square" class="w-6 h-6"></i>
+                    <span class="text-[10px] font-medium">Pesan</span>
+                </a>
+                <a href="profil.html" class="flex flex-col items-center gap-0.5 px-4 text-primary font-bold">
+                    <i data-lucide="user" class="w-6 h-6"></i>
+                    <span class="text-[10px] font-medium">Profil</span>
+                </a>
+            </div>
+        </nav>
+    </div>
+
+    <script>
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/pwa/sw.js').catch(() => {});
+    }
+    document.addEventListener('alpine:initialized', () => { if (typeof lucide !== 'undefined') lucide.createIcons(); });
+    </script>
+</body>
+</html>
