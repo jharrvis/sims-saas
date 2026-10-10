@@ -60,6 +60,10 @@ class RoleSeeder extends Seeder
                 'tatib.view', 'tatib.create', 'tatib.update', 'tatib.delete',
                 'bk.view', 'bk.create', 'bk.update', 'bk.delete',
                 'perpus.view', 'perpus.buku', 'perpus.pinjam', 'perpus.kembali',
+                'ekskul.view', 'ekskul.create', 'ekskul.update', 'ekskul.delete',
+                'prestasi.view', 'prestasi.create', 'prestasi.update', 'prestasi.delete',
+                'lms.view', 'lms.tugas.create', 'lms.tugas.update', 'lms.tugas.delete',
+                'lms.nilai', 'lms.kumpul',
                 'pengguna.view', 'pengguna.create', 'pengguna.update',
                 'pengguna.delete', 'pengguna.reset-password',
                 'peran.view', 'peran.create', 'peran.update', 'peran.delete',
@@ -104,6 +108,8 @@ class RoleSeeder extends Seeder
                 'laporan.view',
                 'tatib.view', 'tatib.create', 'tatib.update',
                 'perpus.view', 'perpus.buku', 'perpus.pinjam', 'perpus.kembali',
+                'ekskul.view', 'ekskul.create', 'ekskul.update',
+                'prestasi.view', 'prestasi.create', 'prestasi.update',
                 'dashboard.view',
             ],
             'wali-kelas' => [
@@ -124,6 +130,7 @@ class RoleSeeder extends Seeder
                 'jadwal.view',
                 'absensi.view', 'absensi.create',
                 'nilai.view', 'nilai.input', 'nilai.import', 'nilai.update', 'nilai.rekap', // ◐ mapel ampuannya
+                'lms.view', 'lms.tugas.create', 'lms.tugas.update', 'lms.tugas.delete', 'lms.nilai',
                 'dashboard.view',
             ],
             'guru-bk' => [
@@ -139,6 +146,7 @@ class RoleSeeder extends Seeder
                 'tahun-ajaran.view',
                 'siswa.view', // ◐ datanya sendiri (policy)
                 'nilai.view', // ◐ nilai sendiri, hanya yang sudah dirilis (FR-707)
+                'lms.view', 'lms.kumpul', // ◐ tugas kelasnya + kumpul jawaban
                 'dashboard.view',
             ],
             'orang-tua' => [

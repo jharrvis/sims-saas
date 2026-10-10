@@ -30,6 +30,8 @@ class ModuleSeeder extends Seeder
             ['kode' => 'tata_tertib', 'nama' => 'Tata Tertib & Poin', 'kategori' => 'addon'],
             ['kode' => 'bk_konseling', 'nama' => 'BK & Konseling', 'kategori' => 'addon'],
             ['kode' => 'perpustakaan', 'nama' => 'Perpustakaan Digital', 'kategori' => 'addon'],
+            ['kode' => 'ekstrakurikuler', 'nama' => 'Ekstrakurikuler & Prestasi', 'kategori' => 'addon'],
+            ['kode' => 'lms_mini', 'nama' => 'LMS Mini / Tugas Online', 'kategori' => 'addon'],
         ];
     }
 

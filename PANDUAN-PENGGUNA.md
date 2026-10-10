@@ -275,7 +275,19 @@ Halaman utama menampilkan **rekap poin tertinggi** serta riwayat pelanggaran yan
 2. Stok otomatis berkurang; peminjaman ditolak bila stok habis.
 3. Klik **Tandai Kembali** saat buku dikembalikan — keterlambatan otomatis dihitung dendanya (Rp1.000/hari).
 
-## 22. Pertanyaan Umum
+## 23. Ekstrakurikuler & Prestasi
+
+**Ekstrakurikuler:** menu Ekstrakurikuler → **Tambah Ekstrakurikuler** (nama, jadwal latihan, pembina). Klik **Kelola Anggota** untuk menambah/mengeluarkan siswa.
+
+**Prestasi:** klik **Prestasi** → **Catat Prestasi**, pilih siswa, isi nama prestasi, kategori (akademik/non-akademik), tingkat (sekolah → internasional), dan tanggal.
+
+## 24. LMS Mini / Tugas Online
+
+1. **Buat tugas:** menu Tugas Online → **Buat Tugas**, pilih mapel dan kelas, tulis instruksi, tentukan deadline.
+2. **Kumpulkan jawaban:** buka detail tugas → isi nama siswa dan jawaban → **Kumpulkan**. Pengumpulan ulang menimpa yang lama.
+3. **Nilai:** di daftar pengumpulan, isi nilai (0–100) dan feedback per siswa → **Simpan Nilai**. Keterlambatan otomatis ditandai.
+
+## 25. Pertanyaan Umum
 
 **Saya lupa tidak menerima kode WhatsApp.**
 Tunggu 60 detik lalu klik kirim ulang. Maksimal 3 kali per 15 menit. Pastikan nomor terdaftar & WhatsApp aktif.

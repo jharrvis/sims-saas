@@ -47,6 +47,8 @@ class HelpController extends Controller
             'tatib' => ['Tata Tertib', 'Pelanggaran dan poin', 'shield-alert'],
             'bk' => ['BK & Konseling', 'Sesi konseling siswa', 'heart-handshake'],
             'perpus' => ['Perpustakaan', 'Katalog dan peminjaman buku', 'library'],
+            'ekskul' => ['Ekstrakurikuler & Prestasi', 'Ekstrakurikuler dan prestasi', 'medal'],
+            'lms' => ['LMS Mini / Tugas Online', 'Tugas, pengumpulan, penilaian', 'pen-line'],
             'pengaturan' => ['Pengaturan', 'Profil sekolah, tahun ajaran, modul', 'settings'],
             'peran' => ['Peran & Hak Akses', 'Daftar peran pengguna', 'key-round'],
             'faq' => ['Pertanyaan Umum', 'Jawaban pertanyaan umum', 'circle-help'],

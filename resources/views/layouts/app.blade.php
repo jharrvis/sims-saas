@@ -56,6 +56,12 @@
             @can('perpus.view')
                 <x-nav-link href="{{ route('perpus.index') }}" icon="library" label="Perpustakaan" :active="request()->routeIs('perpus.*')" />
             @endcan
+            @can('ekskul.view')
+                <x-nav-link href="{{ route('ekskul.index') }}" icon="medal" label="Ekstrakurikuler" :active="request()->routeIs('ekskul.*')" />
+            @endcan
+            @can('lms.view')
+                <x-nav-link href="{{ route('lms.index') }}" icon="pen-line" label="Tugas Online" :active="request()->routeIs('lms.*')" />
+            @endcan
             @can('bk.view')
                 <x-nav-link href="{{ route('bk.index') }}" icon="heart-handshake" label="BK & Konseling" :active="request()->routeIs('bk.*')" />
             @endcan

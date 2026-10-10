@@ -24,6 +24,8 @@ Format mengikuti [Keep a Changelog](https://keepachangelog.com/id/1.1.0/).
 - Tata Tertib (add-on): master jenis pelanggaran (ringan/sedang/berat + bobot poin), pencatatan pelanggaran per siswa, rekap poin tertinggi; di belakang feature flag `module:tata_tertib`
 - BK & Konseling (add-on): penjadwalan sesi konseling (individu/kelompok/klasikal), catatan rahasia + tindak lanjut, status terjadwal/selesai/batal; di belakang feature flag `module:bk_konseling`
 - Perpustakaan Digital (add-on): katalog buku + stok tersedia, peminjaman dengan batas stok, pengembalian otomatis hitung denda keterlambatan; di belakang feature flag `module:perpustakaan`
+- Ekstrakurikuler & Prestasi (add-on): daftar ekskul + kelola anggota, pencatatan prestasi berjenjang (sekolah → internasional); di belakang feature flag `module:ekstrakurikuler`
+- LMS Mini / Tugas Online (add-on): pembuatan tugas per mapel/kelas, pengumpulan jawaban, penilaian + feedback; di belakang feature flag `module:lms_mini`
 
 ### Keamanan
 - Isolasi tenant fail-closed: query model tenant tanpa konteks melempar exception (diuji)
