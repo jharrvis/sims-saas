@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Broadcast;
 
+use App\Domains\Platform\Services\QuotaService;
 use App\Models\Broadcast;
 use App\Models\Rombel;
 use Carbon\Carbon;
@@ -54,6 +55,10 @@ class BroadcastForm extends Component
 
     public function save(): void
     {
+        // Trial: broadcast tidak tersedia (PRD §9.5).
+        abort_if(! app(QuotaService::class)->allows('broadcast'),
+            403, 'Broadcast tidak tersedia pada masa trial.');
+
         $data = $this->validate([
             'judul' => ['required', 'string', 'max:200'],
             'pesan' => ['required', 'string', 'max:5000'],

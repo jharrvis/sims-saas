@@ -61,6 +61,7 @@ class HelpController extends Controller
             'qr-login' => ['QR Login Siswa', 'Kartu QR cetak & tantangan layar kelas', 'qr-code'],
             'notifikasi' => ['Notifikasi Push', 'Mengaktifkan & jenis notifikasi PWA', 'bell'],
             'pengaturan' => ['Pengaturan', 'Profil sekolah, tahun ajaran, modul', 'settings'],
+            'langganan' => ['Langganan & Pembayaran', 'Paket, tagihan, bayar via Midtrans', 'credit-card'],
             'peran' => ['Peran & Hak Akses', 'Daftar peran pengguna', 'key-round'],
             'faq' => ['Pertanyaan Umum', 'Jawaban pertanyaan umum', 'circle-help'],
         ];

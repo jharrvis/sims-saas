@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Kesiswaan;
 
+use App\Domains\Platform\Services\QuotaService;
 use App\Models\Student;
 use App\Tenancy\TenantContext;
 use Illuminate\Validation\Rule;
@@ -76,6 +77,17 @@ class StudentForm extends Component
     public function save(): void
     {
         $this->validate();
+
+        // Kuota siswa (trial: maks. 100) — hanya untuk siswa baru.
+        if (! $this->student?->exists) {
+            $quota = app(QuotaService::class)->check('siswa_aktif');
+
+            if (! $quota['boleh']) {
+                $this->addError('nama', 'Kuota siswa tercapai ('.$quota['terpakai'].'/'.$quota['batas'].'). Hubungi operator untuk upgrade paket.');
+
+                return;
+            }
+        }
 
         $data = [
             'nis' => $this->nis,

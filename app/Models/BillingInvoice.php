@@ -33,6 +33,9 @@ class BillingInvoice extends Model
         'jatuh_tempo',
         'dibayar_pada',
         'metode_bayar',
+        'midtrans_order_id',
+        'snap_token',
+        'payment_url',
     ];
 
     protected function casts(): array

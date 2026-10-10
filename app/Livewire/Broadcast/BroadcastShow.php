@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Broadcast;
 
 use App\Domains\Broadcast\Services\BroadcastService;
+use App\Domains\Platform\Services\QuotaService;
 use App\Models\Broadcast;
 use Illuminate\View\View;
 use Livewire\Component;
@@ -28,6 +29,9 @@ class BroadcastShow extends Component
     public function kirimSekarang(BroadcastService $service): void
     {
         $this->authorize('broadcast.kirim');
+
+        abort_if(! app(QuotaService::class)->allows('broadcast'),
+            403, 'Broadcast tidak tersedia pada masa trial.');
 
         abort_if(! $this->broadcast->isSiapKirim(), 422, 'Broadcast belum siap dikirim.');
 
