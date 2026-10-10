@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="id" class="antialiased">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>SIMS — Masuk ke Akun</title>
+    <meta name="theme-color" content="#3c50e0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <link rel="manifest" href="/pwa/manifest.json">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        school: '#3c50e0',
+                        'school-dark': '#2a3cb0',
+                    }
+                }
+            }
+        }
+    </script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://unpkg.com/lucide@0.475.0"></script>
+    <style>
+        * { -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Inter', sans-serif; background: #f8fafc; }
+        .safe-bottom { padding-bottom: env(safe-area-inset-bottom, 0); }
+        .bottom-nav { padding-bottom: calc(0.75rem + env(safe-area-inset-bottom, 0)); }
+        [x-cloak] { display: none !important; }
+        .app-shell { max-width: 480px; margin: 0 auto; min-height: 100dvh; background: #f8fafc; position: relative; box-shadow: 0 0 40px rgba(0,0,0,0.12); }
+        .slide-up { animation: slideUp 0.3s ease-out; }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .offline-banner { display: none; }
+        @media (prefers-color-scheme: dark) { body { background: #0f172a; } }
+    </style>
+</head>
+<body x-data="{toast: {show: false, message: '', type: 'success'}}" x-init="" x-cloak>
+
+    <!-- Offline Banner -->
+    <div id="offline-banner" class="offline-banner fixed top-0 left-0 right-0 z-[100] bg-slate-800 text-white text-center py-2 text-xs font-semibold">
+         Mode Offline — Data terakhir tersimpan
+    </div>
+
+    <!-- Toast -->
+    <div class="fixed top-4 left-1/2 -translate-x-1/2 z-[99] flex flex-col gap-2 w-[calc(100%-2rem)] max-w-sm" x-show="toast.show" x-transition>
+        <div class="rounded-xl p-3 shadow-xl border flex items-center gap-3 bg-white"
+             :class="toast.type === 'success' ? 'border-green-200' : 'border-red-200'">
+            <i :data-lucide="toast.type === 'success' ? 'check-circle-2' : 'x-circle'" class="w-5 h-5 flex-shrink-0" :class="toast.type === 'success' ? 'text-green-500' : 'text-red-500'"></i>
+            <p class="text-sm font-medium text-slate-700" x-text="toast.message"></p>
+        </div>
+    </div>
+
+    <div class="app-shell">
+        
+    <div class="min-h-[100dvh] flex flex-col items-center justify-center px-6 py-10">
+        <div class="w-full max-w-sm">
+            <!-- Logo -->
+            <div class="text-center mb-10">
+                <div class="w-20 h-20 rounded-2xl bg-[#3c50e0] flex items-center justify-center mx-auto mb-4 shadow-lg">
+                    <i data-lucide="graduation-cap" class="w-10 h-10 text-white"></i>
+                </div>
+                <h1 class="text-2xl font-extrabold text-slate-800">SIMS</h1>
+                <p class="text-sm text-slate-500 mt-1">Sistem Informasi Manajemen Sekolah</p>
+                <div class="mt-2 inline-flex items-center gap-1.5 bg-slate-100 rounded-full px-3 py-1">
+                    <div class="w-2 h-2 rounded-full bg-[#3c50e0]"></div>
+                    <span class="text-xs font-medium text-slate-600">SD Negeri 1 Nusantara</span>
+                </div>
+            </div>
+
+            <!-- Tab Selector -->
+            <div x-data="{mode: 'wa'}" class="w-full">
+                <div class="flex bg-slate-100 rounded-xl p-1 mb-6">
+                    <button @click="mode='wa'" :class="mode==='wa' ? 'bg-white shadow-sm text-[#3c50e0] font-bold' : 'text-slate-500'" class="flex-1 py-2 rounded-lg text-sm transition-all">WhatsApp OTP</button>
+                    <button @click="mode='pw'" :class="mode==='pw' ? 'bg-white shadow-sm text-[#3c50e0] font-bold' : 'text-slate-500'" class="flex-1 py-2 rounded-lg text-sm transition-all">Username</button>
+                </div>
+
+                <!-- WA OTP -->
+                <div x-show="mode==='wa'" class="space-y-4 slide-up">
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1.5">Nomor WhatsApp</label>
+                        <div class="flex">
+                            <span class="inline-flex items-center px-3 rounded-l-xl border border-r-0 border-slate-200 bg-slate-100 text-slate-600 text-sm font-medium">+62</span>
+                            <input type="tel" placeholder="812-3456-7890" class="flex-1 border border-slate-200 rounded-r-xl py-3 px-4 text-sm outline-none focus:border-[#3c50e0] focus:ring-1 focus:ring-[#3c50e0]">
+                        </div>
+                    </div>
+                    <button @click="window.location.href='siswa/index.html'" class="w-full py-3.5 bg-[#3c50e0] text-white font-bold rounded-xl hover:bg-[#2a3cb0] transition-colors text-sm shadow-lg shadow-[#3c50e0]/30">Kirim Kode OTP</button>
+                    <p class="text-xs text-center text-slate-400">Kode verifikasi akan dikirim melalui WhatsApp</p>
+                </div>
+
+                <!-- Username/Password -->
+                <div x-show="mode==='pw'" class="space-y-4 slide-up">
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1.5">Username / NIS</label>
+                        <input type="text" placeholder="Masukkan username" class="w-full border border-slate-200 rounded-xl py-3 px-4 text-sm outline-none focus:border-[#3c50e0] focus:ring-1 focus:ring-[#3c50e0]">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1.5">Password</label>
+                        <input type="password" placeholder="••••••••" class="w-full border border-slate-200 rounded-xl py-3 px-4 text-sm outline-none focus:border-[#3c50e0] focus:ring-1 focus:ring-[#3c50e0]">
+                    </div>
+                    <button @click="window.location.href='siswa/index.html'" class="w-full py-3.5 bg-[#3c50e0] text-white font-bold rounded-xl hover:bg-[#2a3cb0] transition-colors text-sm shadow-lg shadow-[#3c50e0]/30">Masuk</button>
+                    <div class="text-center"><a href="ortu/index.html" class="text-xs text-[#3c50e0] font-medium hover:underline">Masuk sebagai Orang Tua →</a></div>
+                </div>
+            </div>
+        </div>
+        <p class="text-xs text-slate-400 mt-10 text-center">SIMS &bull; Dibuat dengan  untuk pendidikan Indonesia</p>
+    </div>
+
+    </div>
+
+    <script>
+    // PWA Service Worker Registration
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/pwa/sw.js').catch(() => {});
+    }
+    // Offline detection
+    window.addEventListener('offline', () => { document.getElementById('offline-banner').style.display = 'block'; });
+    window.addEventListener('online', () => { document.getElementById('offline-banner').style.display = 'none'; });
+    // Re-init Lucide after Alpine
+    document.addEventListener('alpine:initialized', () => { if (typeof lucide !== 'undefined') lucide.createIcons(); });
+    
+    </script>
+</body>
+</html>
