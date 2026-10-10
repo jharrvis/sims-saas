@@ -18,6 +18,8 @@ use App\Livewire\Kepegawaian\EmployeeIndex;
 use App\Livewire\Kesiswaan\StudentForm;
 use App\Livewire\Kesiswaan\StudentIndex;
 use App\Livewire\Kesiswaan\StudentShow;
+use App\Livewire\Keuangan\InvoiceIndex;
+use App\Livewire\Keuangan\InvoiceShow;
 use App\Livewire\Ppdb\PpdbApplicantForm;
 use App\Livewire\Ppdb\PpdbApplicantIndex;
 use App\Livewire\Ppdb\PpdbApplicantShow;
@@ -81,5 +83,11 @@ Route::middleware('auth')->group(function (): void {
         Route::get('/pendaftar/{period}', PpdbApplicantIndex::class)->name('pendaftar.index')->middleware('permission:ppdb.pendaftar.view');
         Route::get('/pendaftar/{period}/tambah', PpdbApplicantForm::class)->name('pendaftar.create')->middleware('permission:ppdb.pendaftar.create');
         Route::get('/pendaftar/detail/{applicant}', PpdbApplicantShow::class)->name('pendaftar.show')->middleware('permission:ppdb.pendaftar.view');
+    });
+
+    // Keuangan — modul add-on (feature flag)
+    Route::prefix('keuangan')->name('keuangan.')->middleware('module:keuangan')->group(function (): void {
+        Route::get('/', InvoiceIndex::class)->name('index')->middleware('permission:keuangan.tagihan.view');
+        Route::get('/{invoice}', InvoiceShow::class)->name('show')->middleware('permission:keuangan.tagihan.view');
     });
 });

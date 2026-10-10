@@ -6,6 +6,7 @@ use App\Domains\Akademik\Http\Controllers\RombelController;
 use App\Domains\Identity\Http\Controllers\AuthController;
 use App\Domains\Kepegawaian\Http\Controllers\EmployeeController;
 use App\Domains\Kesiswaan\Http\Controllers\StudentController;
+use App\Domains\Keuangan\Http\Controllers\KeuanganController;
 use App\Domains\Ppdb\Http\Controllers\PpdbController;
 use Illuminate\Support\Facades\Route;
 
@@ -82,6 +83,18 @@ Route::prefix('v1')->group(function (): void {
             Route::post('pendaftar/{applicant}/status', [PpdbController::class, 'applicantStatus'])->middleware('permission:ppdb.pendaftar.verify|ppdb.pendaftar.approve');
             Route::post('pendaftar/{applicant}/seleksi', [PpdbController::class, 'applicantSelect'])->middleware('permission:ppdb.seleksi.input');
             Route::post('pendaftar/{applicant}/daftar-ulang', [PpdbController::class, 'applicantEnroll'])->middleware('permission:ppdb.pendaftar.enroll');
+        });
+
+        // Keuangan — modul add-on
+        Route::prefix('keuangan')->middleware('module:keuangan')->group(function (): void {
+            Route::get('jenis-tagihan', [KeuanganController::class, 'feeTypeIndex'])->middleware('permission:keuangan.tagihan.view');
+            Route::post('jenis-tagihan', [KeuanganController::class, 'feeTypeStore'])->middleware('permission:keuangan.tagihan.create');
+            Route::get('tagihan', [KeuanganController::class, 'invoiceIndex'])->middleware('permission:keuangan.tagihan.view');
+            Route::post('tagihan/generate', [KeuanganController::class, 'invoiceGenerate'])->middleware('permission:keuangan.tagihan.generate');
+            Route::get('tagihan/{invoice}', [KeuanganController::class, 'invoiceShow'])->middleware('permission:keuangan.tagihan.view');
+            Route::post('tagihan/{invoice}/bayar', [KeuanganController::class, 'paymentStore'])->middleware('permission:keuangan.bayar.create');
+            Route::get('laporan/ringkasan', [KeuanganController::class, 'summary'])->middleware('permission:keuangan.laporan.view');
+            Route::get('laporan/tunggakan', [KeuanganController::class, 'arrears'])->middleware('permission:keuangan.laporan.view');
         });
     });
 });

@@ -14,6 +14,8 @@ Format mengikuti [Keep a Changelog](https://keepachangelog.com/id/1.1.0/).
 - Akademik: mata pelajaran + KKM, jadwal mingguan dengan deteksi bentrok guru & ruang (FR-502), absensi harian H/I/S/A + kunci (FR-604) + rekap
 - Nilai: semester, komponen berbobot, input nilai (validasi 0–100), nilai akhir berbobot, leger (FR-706), rapor (FR-705), rilis nilai ke PWA (FR-707)
 - PPDB Online (add-on): periode, formulir pendaftar, verifikasi berkas, seleksi (tes + wawancara), pengumuman kelulusan, daftar ulang → otomatis menjadi data siswa; di belakang feature flag `module:ppdb` → 403 `MODULE_DISABLED`
+- Keuangan SPP (add-on): jenis tagihan, generate tagihan massal per periode, pembayaran bertahap + kuitansi otomatis, status lunas/sebagian/jatuh tempo, ringkasan arus kas & tunggakan; di belakang feature flag `module:keuangan`
+- `PANDUAN-PENGGUNA.md`: panduan lengkap berbahasa Indonesia untuk pengguna akhir (login WA OTP → semua modul)
 
 ### Keamanan
 - Isolasi tenant fail-closed: query model tenant tanpa konteks melempar exception (diuji)

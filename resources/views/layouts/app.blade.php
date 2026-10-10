@@ -44,7 +44,9 @@
             @can('ppdb.periode.view')
                 <x-nav-link href="{{ route('ppdb.index') }}" icon="user-plus" label="PPDB" :active="request()->routeIs('ppdb.*')" />
             @endcan
-            <x-nav-link href="#" icon="wallet" label="Keuangan SPP" />
+            @can('keuangan.tagihan.view')
+                <x-nav-link href="{{ route('keuangan.index') }}" icon="wallet" label="Keuangan SPP" :active="request()->routeIs('keuangan.*')" />
+            @endcan
             <x-nav-link href="#" icon="megaphone" label="Pengumuman" />
             <x-nav-link href="#" icon="bar-chart-3" label="Laporan" />
             <x-nav-link href="#" icon="settings" label="Pengaturan" />

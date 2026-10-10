@@ -44,6 +44,8 @@ class PermissionSeeder extends Seeder
                 'ppdb.pendaftar.view', 'ppdb.pendaftar.create', 'ppdb.pendaftar.update',
                 'ppdb.pendaftar.verify', 'ppdb.pendaftar.approve', 'ppdb.pendaftar.enroll',
                 'ppdb.seleksi.input', 'ppdb.pengumuman.create',
+                'keuangan.tagihan.view', 'keuangan.tagihan.create', 'keuangan.tagihan.generate',
+                'keuangan.bayar.create', 'keuangan.laporan.view',
                 'pengguna.view', 'pengguna.create', 'pengguna.update',
                 'pengguna.delete', 'pengguna.reset-password',
                 'peran.view', 'peran.create', 'peran.update', 'peran.delete',
