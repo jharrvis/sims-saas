@@ -80,6 +80,7 @@ class RoleSeeder extends Seeder
                 'peran.view', 'peran.create', 'peran.update', 'peran.delete',
                 'peran.assign',
                 'dashboard.view',
+                'qr.view', 'qr.manage',
                 'audit-log.view', 'audit-log.export',
             ],
             'kepala-sekolah' => [
@@ -99,6 +100,7 @@ class RoleSeeder extends Seeder
                 'erapor.view', 'erapor.cetak',
                 'bk.view',
                 'dashboard.view',
+                'qr.view',
                 'audit-log.view',
             ],
             'tata-usaha' => [
@@ -122,6 +124,7 @@ class RoleSeeder extends Seeder
                 'ekskul.view', 'ekskul.create', 'ekskul.update',
                 'prestasi.view', 'prestasi.create', 'prestasi.update',
                 'dashboard.view',
+                'qr.view', 'qr.manage',
             ],
             'wali-kelas' => [
                 'tahun-ajaran.view',
@@ -134,6 +137,7 @@ class RoleSeeder extends Seeder
                 'tatib.view', 'tatib.create', 'tatib.update', 'tatib.delete',
                 'bk.view', // catatan konseling rahasia: hanya BK/admin/kepsek
                 'dashboard.view',
+                'qr.view', 'qr.manage',
             ],
             'guru-mapel' => [
                 'tahun-ajaran.view',
@@ -143,6 +147,7 @@ class RoleSeeder extends Seeder
                 'nilai.view', 'nilai.input', 'nilai.import', 'nilai.update', 'nilai.rekap', // ◐ mapel ampuannya
                 'lms.view', 'lms.tugas.create', 'lms.tugas.update', 'lms.tugas.delete', 'lms.nilai',
                 'dashboard.view',
+                'qr.view', 'qr.manage',
             ],
             'guru-bk' => [
                 'tahun-ajaran.view',
@@ -152,6 +157,7 @@ class RoleSeeder extends Seeder
                 'nilai.view',
                 'bk.view', 'bk.create', 'bk.update', 'bk.delete',
                 'dashboard.view',
+                'qr.view', 'qr.manage',
             ],
             'siswa' => [
                 'tahun-ajaran.view',

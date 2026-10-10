@@ -13,6 +13,6 @@ parameters:
     # Pest mengikat closure test ke TestCase saat runtime; Larastan tidak
     # dapat menyimpulkan $this di dalam closure it()/test().
     ignoreErrors:
-        - '#Call to an undefined method Pest\\PendingCalls\\TestCall::(actingAs|assertAuthenticatedAs|postJson|getJson|deleteJson|get|withSession|seed|withoutVite)\(\)#'
+        - '#Call to an undefined method Pest\\PendingCalls\\TestCall::(actingAs|assertAuthenticated|assertAuthenticatedAs|assertGuest|assertEquals|postJson|getJson|deleteJson|get|withSession|withHeader|seed|withoutVite|travel)\(\)#'
         - '#Access to an undefined property Pest\\PendingCalls\\TestCall::\$(app|school|user|keuangan|kesiswaan|ta|admin|rombel|guru|mapel|semester|komponen|siswa|period|feeType|jenis|book|kategori|nasi|teh|wali)#'
         - '#Unable to resolve the template type T(Key|Value) in call to function collect#'

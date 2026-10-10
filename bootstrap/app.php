@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Middleware\EnsureTenantResolved;
 use App\Http\Middleware\PwaContextMiddleware;
+use App\Http\Middleware\QrSessionLimit;
 use App\Http\Middleware\RequireMfa;
 use App\Http\Middleware\RequireModule;
 use App\Http\Middleware\ResolveTenant;
@@ -32,6 +34,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'mfa' => RequireMfa::class,
             'pwa.context' => PwaContextMiddleware::class,
+            'qr.limit' => QrSessionLimit::class,
+            'tenant.resolved' => EnsureTenantResolved::class,
             'module' => RequireModule::class,
             'role' => RoleMiddleware::class,
             'permission' => PermissionMiddleware::class,

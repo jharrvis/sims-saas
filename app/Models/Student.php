@@ -7,6 +7,7 @@ namespace App\Models;
 use App\Concerns\BelongsToSchool;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 
@@ -48,6 +49,16 @@ class Student extends Model
         return $this->belongsToMany(Guardian::class, 'guardian_student')
             ->withPivot('hubungan')
             ->withTimestamps();
+    }
+
+    /**
+     * Kartu QR login terbaru (aktif maupun riwayat).
+     *
+     * @return HasOne<QrLoginCard, $this>
+     */
+    public function qrCard(): HasOne
+    {
+        return $this->hasOne(QrLoginCard::class)->latestOfMany();
     }
 
     /**

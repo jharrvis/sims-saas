@@ -69,6 +69,7 @@ class PermissionSeeder extends Seeder
                 'survei.isi', 'survei.hasil',
                 'alumni.view', 'alumni.create', 'alumni.update', 'alumni.delete',
                 'organisasi.view', 'organisasi.create', 'organisasi.update', 'organisasi.delete',
+                'qr.view', 'qr.manage',
                 'pengguna.view', 'pengguna.create', 'pengguna.update',
                 'pengguna.delete', 'pengguna.reset-password',
                 'peran.view', 'peran.create', 'peran.update', 'peran.delete',

@@ -5,6 +5,16 @@
         <p class="text-sm text-slate-500 mt-1">Portal Siswa & Orang Tua</p>
     </div>
 
+    @if (session('error'))
+        <div class="mb-4 rounded-xl bg-danger/10 text-danger px-4 py-3 text-sm font-semibold">{{ session('error') }}</div>
+    @endif
+
+    <div class="grid grid-cols-2 gap-1 rounded-xl bg-slate-100 p-1 mb-6 text-sm font-semibold">
+        <button type="button" id="tab-otp" class="rounded-lg py-2.5 bg-white shadow text-slate-800" onclick="pwaTab('otp')">Kode OTP</button>
+        <button type="button" id="tab-qr" class="rounded-lg py-2.5 text-slate-500" onclick="pwaTab('qr')">Pindai QR</button>
+    </div>
+
+    <div id="panel-otp">
     @if ($step === 1)
         <form wire:submit="requestOtp" class="space-y-4">
             <div>
@@ -38,4 +48,61 @@
             </div>
         </form>
     @endif
+    </div>
+
+    <div id="panel-qr" class="hidden">
+        <p class="text-sm text-slate-500 mb-3 text-center">Arahkan kamera ke kartu QR siswa.</p>
+        <div id="qr-reader" class="rounded-xl overflow-hidden border border-slate-200"></div>
+        <p id="qr-status" class="text-sm text-center mt-3 text-slate-500"></p>
+        <button type="button" id="qr-start" onclick="pwaQrStart()"
+                class="mt-3 w-full rounded-xl bg-primary py-3.5 text-white font-bold hover:bg-primary/90">
+            Nyalakan Kamera
+        </button>
+    </div>
 </div>
+
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script>
+function pwaTab(which) {
+    const otp = which === 'otp';
+    document.getElementById('panel-otp').classList.toggle('hidden', !otp);
+    document.getElementById('panel-qr').classList.toggle('hidden', otp);
+    document.getElementById('tab-otp').className = 'rounded-lg py-2.5 ' + (otp ? 'bg-white shadow text-slate-800' : 'text-slate-500');
+    document.getElementById('tab-qr').className = 'rounded-lg py-2.5 ' + (!otp ? 'bg-white shadow text-slate-800' : 'text-slate-500');
+    if (!otp) pwaQrStop(); else pwaQrStop();
+}
+let pwaQrScanner = null;
+function pwaQrStart() {
+    const status = document.getElementById('qr-status');
+    if (typeof Html5Qrcode === 'undefined') { status.textContent = 'Pustaka pemindai gagal dimuat.'; return; }
+    pwaQrScanner = new Html5Qrcode('qr-reader');
+    document.getElementById('qr-start').classList.add('hidden');
+    status.textContent = 'Menyalakan kamera…';
+    pwaQrScanner.start({ facingMode: 'environment' }, { fps: 10, qrbox: 220 },
+        (token) => {
+            pwaQrStop();
+            status.textContent = 'Memverifikasi…';
+            fetch(@json(route('pwa.qr.redeem')), {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content, 'Accept': 'application/json' },
+                body: JSON.stringify({ token: token.trim() }),
+            }).then(async (r) => {
+                const data = await r.json();
+                if (r.ok && data.ok) { window.location.href = data.redirect; return; }
+                status.textContent = (data.errors && data.errors.token ? data.errors.token[0] : null) || data.message || 'Kode QR tidak valid.';
+                document.getElementById('qr-start').classList.remove('hidden');
+            }).catch(() => {
+                status.textContent = 'Jaringan bermasalah. Coba lagi.';
+                document.getElementById('qr-start').classList.remove('hidden');
+            });
+        },
+        () => {}
+    ).catch(() => {
+        status.textContent = 'Kamera tidak dapat diakses. Izinkan akses kamera lalu coba lagi.';
+        document.getElementById('qr-start').classList.remove('hidden');
+    });
+}
+function pwaQrStop() {
+    if (pwaQrScanner) { try { pwaQrScanner.stop(); pwaQrScanner.clear(); } catch (e) {} pwaQrScanner = null; }
+}
+</script>

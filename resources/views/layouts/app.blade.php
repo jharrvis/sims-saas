@@ -29,6 +29,9 @@
             @can('siswa.view')
                 <x-nav-link href="{{ route('siswa.index') }}" icon="users" label="Data Siswa" :active="request()->routeIs('siswa.*')" />
             @endcan
+            @can('qr.view')
+                <x-nav-link href="{{ route('qr.kartu') }}" icon="qr-code" label="QR Login" :active="request()->routeIs('qr.*')" />
+            @endcan
             @can('guru.view')
                 <x-nav-link href="{{ route('guru.index') }}" icon="graduation-cap" label="Data Guru" :active="request()->routeIs('guru.*')" />
             @endcan

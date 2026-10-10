@@ -8,6 +8,7 @@ use App\Models\Guardian;
 use App\Models\Membership;
 use App\Models\Student;
 use App\Models\User;
+use App\Scopes\SchoolScope;
 use Spatie\Permission\PermissionRegistrar;
 
 /**
@@ -18,7 +19,25 @@ use Spatie\Permission\PermissionRegistrar;
 class PwaIdentityService
 {
     /**
+     * Tautkan akun ke satu siswa: users.student_id + membership + peran siswa.
+     * Idempoten.
+     */
+    public function linkStudent(User $user, Student $student): void
+    {
+        if ($user->student_id !== $student->id) {
+            $user->forceFill(['student_id' => $student->id])->save();
+        }
+
+        $this->ensureMembership($user, $student->school_id, 'siswa');
+    }
+
+    /**
      * Tautkan akun ke siswa/wali berdasarkan nomor WA. Idempoten.
+     *
+     * Pencarian identitas memakai kunci global yang eksplisit (nomor WA yang
+     * sudah terverifikasi OTP): tenant scope dilepas karena pada titik ini
+     * user justru belum punya membership/tenant. Aman karena nomor WA unik
+     * per sekolah dan OTP sudah membuktikan kepemilikan nomor.
      */
     public function linkByPhone(User $user): void
     {
@@ -30,16 +49,19 @@ class PwaIdentityService
 
         // 1. Akun siswa: cocokkan students.phone (1:1).
         if ($user->student_id === null) {
-            $student = Student::where('phone', $phone)->first();
+            $student = Student::withoutGlobalScope(SchoolScope::class)
+                ->where('phone', $phone)
+                ->first();
 
             if ($student !== null) {
-                $user->forceFill(['student_id' => $student->id])->save();
-                $this->ensureMembership($user, $student->school_id, 'siswa');
+                $this->linkStudent($user, $student);
             }
         }
 
         // 2. Akun orang tua: cocokkan guardians.no_wa (1:N lintas sekolah).
-        $guardians = Guardian::where('no_wa', $phone)->get();
+        $guardians = Guardian::withoutGlobalScope(SchoolScope::class)
+            ->where('no_wa', $phone)
+            ->get();
 
         foreach ($guardians as $guardian) {
             $user->guardians()->syncWithoutDetaching([$guardian->id]);
