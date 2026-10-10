@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="id" class="antialiased">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIMS — Platform Admin - Plan & Quota Management</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="assets/js/tailwind-config.js"></script>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://unpkg.com/lucide@0.475.0"></script>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans transition-colors duration-200 dark:bg-boxdark2 dark:text-slate-200"
+      x-data="appData()" x-init="initApp()" x-cloak>
+
+    <div class="min-h-screen flex flex-col">
+        <header class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between border-b border-slate-800">
+            <div class="flex items-center gap-3">
+                <a href="platform-tenants.html" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 transition-colors"><i data-lucide="arrow-left" class="w-4 h-4"></i></a>
+                <span class="font-extrabold text-base tracking-wide">PENGATURAN PAKET & LIMIT KUOTA SAAS (PF-02)</span>
+            </div>
+            <a href="platform-tenants.html" class="text-xs text-primary font-bold hover:underline">Kembali ke Daftar Tenant</a>
+        </header>
+
+        <main class="flex-1 p-6 max-w-6xl mx-auto w-full space-y-6">
+            <div>
+                <h1 class="text-2xl font-black text-slate-800 dark:text-white">Tiering Paket & Batas Kuota (ADR-0003)</h1>
+                <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Konfigurasi kuota default per tier dan aturan dunning sistem.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Rintisan / Basic -->
+                <div class="bg-white dark:bg-boxdark rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm relative">
+                    <h3 class="font-bold text-lg text-slate-800 dark:text-white">Tier Basic</h3>
+                    <p class="text-2xl font-black text-slate-800 dark:text-white mt-2">Rp 499.000 <span class="text-xs font-normal text-slate-400">/ bulan</span></p>
+                    <p class="text-xs text-slate-500 mt-1">Untuk sekolah kecil / rintisan</p>
+
+                    <div class="mt-6 space-y-3 text-xs divide-y divide-slate-100 dark:divide-slate-800">
+                        <div class="pt-2 flex justify-between"><span>Maks Siswa:</span><span class="font-bold">300 Siswa</span></div>
+                        <div class="pt-2 flex justify-between"><span>Maks Staf & Guru:</span><span class="font-bold">20 Staf</span></div>
+                        <div class="pt-2 flex justify-between"><span>Kapasitas Storage:</span><span class="font-bold">10 GB</span></div>
+                        <div class="pt-2 flex justify-between"><span>Notif WA / bln:</span><span class="font-bold">1.000 Pesan</span></div>
+                        <div class="pt-2 flex justify-between"><span>Domain:</span><span class="font-bold">{sekolah}.sims.id</span></div>
+                    </div>
+                    <button class="w-full mt-6 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold hover:bg-slate-50 dark:hover:bg-slate-800">Edit Konfigurasi</button>
+                </div>
+
+                <!-- Pro -->
+                <div class="bg-white dark:bg-boxdark rounded-2xl p-6 border-2 border-primary shadow-lg relative">
+                    <span class="absolute -top-3 right-6 bg-primary text-white text-[10px] font-black px-3 py-1 rounded-full uppercase">Paling Populer</span>
+                    <h3 class="font-bold text-lg text-slate-800 dark:text-white">Tier Pro</h3>
+                    <p class="text-2xl font-black text-primary mt-2">Rp 999.000 <span class="text-xs font-normal text-slate-400">/ bulan</span></p>
+                    <p class="text-xs text-slate-500 mt-1">Sekolah standar menengah</p>
+
+                    <div class="mt-6 space-y-3 text-xs divide-y divide-slate-100 dark:divide-slate-800">
+                        <div class="pt-2 flex justify-between"><span>Maks Siswa:</span><span class="font-bold">1.500 Siswa</span></div>
+                        <div class="pt-2 flex justify-between"><span>Maks Staf & Guru:</span><span class="font-bold">75 Staf</span></div>
+                        <div class="pt-2 flex justify-between"><span>Kapasitas Storage:</span><span class="font-bold">50 GB</span></div>
+                        <div class="pt-2 flex justify-between"><span>Notif WA / bln:</span><span class="font-bold">5.000 Pesan</span></div>
+                        <div class="pt-2 flex justify-between"><span>Semua 16 Add-on:</span><span class="font-bold text-success">Termasuk</span></div>
+                    </div>
+                    <button class="w-full mt-6 py-2 rounded-xl bg-primary text-white text-xs font-bold hover:bg-blue-700">Edit Konfigurasi</button>
+                </div>
+
+                <!-- Enterprise -->
+                <div class="bg-white dark:bg-boxdark rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm relative">
+                    <h3 class="font-bold text-lg text-slate-800 dark:text-white">Tier Enterprise</h3>
+                    <p class="text-2xl font-black text-slate-800 dark:text-white mt-2">Mulai Rp 2.500.000</p>
+                    <p class="text-xs text-slate-500 mt-1">Yayasan multi-kampus / SMK besar</p>
+
+                    <div class="mt-6 space-y-3 text-xs divide-y divide-slate-100 dark:divide-slate-800">
+                        <div class="pt-2 flex justify-between"><span>Maks Siswa:</span><span class="font-bold">Unlimited</span></div>
+                        <div class="pt-2 flex justify-between"><span>Maks Staf & Guru:</span><span class="font-bold">Unlimited</span></div>
+                        <div class="pt-2 flex justify-between"><span>Kapasitas Storage:</span><span class="font-bold">200 GB+</span></div>
+                        <div class="pt-2 flex justify-between"><span>Custom Domain:</span><span class="font-bold text-success">Didukung CNAME</span></div>
+                        <div class="pt-2 flex justify-between"><span>SLA Uptime:</span><span class="font-bold">99.9%</span></div>
+                    </div>
+                    <button class="w-full mt-6 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold hover:bg-slate-50 dark:hover:bg-slate-800">Edit Konfigurasi</button>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="assets/js/app.js"></script>
+</body>
+</html>
