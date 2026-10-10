@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="id" class="antialiased">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIMS — Login Cepat Kartu QR Siswa</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="assets/js/tailwind-config.js"></script>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://unpkg.com/lucide@0.475.0"></script>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans transition-colors duration-200 dark:bg-boxdark2 dark:text-slate-200"
+      x-data="appData()" x-init="initApp()" x-cloak>
+
+    <div class="min-h-screen flex items-center justify-center p-4 bg-slate-900 text-white">
+        <div class="w-full max-w-md text-center space-y-6">
+            <div class="w-16 h-16 rounded-2xl bg-primary flex items-center justify-center mx-auto shadow-xl">
+                <i data-lucide="qr-code" class="w-8 h-8 text-white"></i>
+            </div>
+            <div>
+                <h1 class="text-2xl font-black">Login QR Kartu Siswa</h1>
+                <p class="text-xs text-slate-400 mt-1">Arahkan kartu pelajar Anda ke depan kamera scanner sekolah</p>
+            </div>
+
+            <!-- Kamera Mock Box -->
+            <div class="relative w-72 h-72 mx-auto bg-black rounded-3xl border-2 border-primary/50 overflow-hidden flex items-center justify-center shadow-2xl">
+                <div class="absolute inset-4 border-2 border-dashed border-primary/60 rounded-2xl animate-pulse"></div>
+                <div class="w-full h-1 bg-red-500 absolute top-1/2 -translate-y-1/2 shadow-lg shadow-red-500/50"></div>
+                <i data-lucide="camera" class="w-12 h-12 text-slate-700"></i>
+                <div class="absolute bottom-3 bg-black/60 px-3 py-1 rounded-full text-[10px] text-slate-300">Menunggu scan kartu...</div>
+            </div>
+
+            <div class="space-y-3">
+                <button @click="window.location.href='pwa/siswa/index.html'" class="w-full py-3 bg-primary hover:bg-blue-600 text-white font-bold text-xs rounded-xl transition-colors">
+                    Simulasikan Scan Berhasil (Ahmad Fauzi)
+                </button>
+                <a href="login.html" class="text-xs text-slate-400 hover:text-white block">Masuk menggunakan Username & Password biasa</a>
+            </div>
+        </div>
+    </div>
+    <script src="assets/js/app.js"></script>
+</body>
+</html>
