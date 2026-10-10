@@ -35,6 +35,7 @@ Format mengikuti [Keep a Changelog](https://keepachangelog.com/id/1.1.0/).
 - Alumni & Karier (add-on): data alumni (taut opsional ke siswa), riwayat karier tracer study (kuliah/kerja/wirausaha), statistik distribusi status; di belakang feature flag `module:alumni`
 - Organisasi (add-on): organisasi (OSIS/MPK/Pramuka/…), pengurus siswa dengan jabatan anti-duplikat, kegiatan dengan status; di belakang feature flag `module:organisasi`
 - Keamanan (audit): `/pilih-sekolah` dipindah ke middleware `auth` (sebelumnya di `guest` sehingga tidak terjangkau user login); dashboard `/` kini wajib `auth`; middleware baru `mfa` menegakkan FR-904 — akun platform tanpa MFA terkonfirmasi dipaksa ke `2fa/setup`, dan sesi tanpa verifikasi MFA (mis. via remember-me) dipaksa ke `mfa.verify`; tambah tautan "Ganti Sekolah" di navigasi untuk akun multi-sekolah
+- PWA Siswa & Orang Tua (`/pwa`, Dok 07 P-01 s.d. P-06): login WA OTP dengan penautan otomatis ke siswa/wali via nomor WA (+ membership & peran siswa/orang-tua); beranda peran-aware; Nilai (hanya yang dirilis, FR-707); Jadwal seminggu; Absensi + rekap; Pengumuman; Tagihan (read-only); Profil & perangkat + mode profil anak untuk orang tua multi-anak (tercatat di audit, Dok 09 §3.4); manifest + service worker + ikon agar installable; tamu PWA diarahkan ke login PWA
 
 ### Keamanan
 - Isolasi tenant fail-closed: query model tenant tanpa konteks melempar exception (diuji)

@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Domains\Akademik\Http\Controllers;
 
 use App\Domains\Akademik\Services\GradeCalculationService;
+use App\Domains\Akademik\Services\ReleasedGradeService;
 use App\Models\Grade;
 use App\Models\GradeComponent;
 use App\Models\GradeRelease;
-use App\Models\Semester;
 use App\Models\Student;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -133,7 +133,7 @@ class GradeController extends Controller
     /**
      * Nilai untuk PWA siswa/orang tua — hanya yang sudah dirilis (FR-707).
      */
-    public function forStudent(Request $request, GradeCalculationService $calc): JsonResponse
+    public function forStudent(Request $request, ReleasedGradeService $grades): JsonResponse
     {
         /** @var array<string,mixed> $v */
         $v = $request->validate([
@@ -141,29 +141,6 @@ class GradeController extends Controller
             'semester_id' => ['required', 'integer', 'exists:semesters,id'],
         ]);
 
-        $student = Student::findOrFail($v['student_id']);
-        $semester = Semester::findOrFail($v['semester_id']);
-
-        // Cari rombel aktif siswa pada semester ini
-        $rombelId = $student->rombels()
-            ->wherePivot('academic_year_id', $semester->academic_year_id)
-            ->wherePivot('status', 'aktif')
-            ->value('rombels.id');
-
-        $released = $rombelId !== null && GradeRelease::where('semester_id', $semester->id)
-            ->where('rombel_id', $rombelId)
-            ->exists();
-
-        if (! $released) {
-            return response()->json([
-                'released' => false,
-                'message' => 'Nilai belum dirilis oleh sekolah.',
-            ]);
-        }
-
-        return response()->json([
-            'released' => true,
-            ...$calc->rapor($student->id, $semester->id),
-        ]);
+        return response()->json($grades->rapor((int) $v['student_id'], (int) $v['semester_id']));
     }
 }

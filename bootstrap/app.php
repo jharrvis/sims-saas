@@ -1,9 +1,11 @@
 <?php
 
+use App\Http\Middleware\PwaContextMiddleware;
 use App\Http\Middleware\RequireMfa;
 use App\Http\Middleware\RequireModule;
 use App\Http\Middleware\ResolveTenant;
 use App\Http\Middleware\SetSpatieTeam;
+use Illuminate\Auth\Middleware\Authenticate;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -20,10 +22,16 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Tamu yang membuka area PWA diarahkan ke login PWA, bukan login admin.
+        Authenticate::redirectUsing(fn (Request $request) => $request->is('pwa', 'pwa/*')
+            ? route('pwa.login')
+            : route('login'));
+
         $middleware->append(ResolveTenant::class);
         $middleware->append(SetSpatieTeam::class);
         $middleware->alias([
             'mfa' => RequireMfa::class,
+            'pwa.context' => PwaContextMiddleware::class,
             'module' => RequireModule::class,
             'role' => RoleMiddleware::class,
             'permission' => PermissionMiddleware::class,

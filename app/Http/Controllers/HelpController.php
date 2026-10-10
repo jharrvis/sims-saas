@@ -57,6 +57,7 @@ class HelpController extends Controller
             'survei' => ['Survei & Evaluasi', 'Survei dan hasil agregat', 'clipboard-list'],
             'alumni' => ['Alumni & Karier', 'Data alumni dan tracer study', 'briefcase'],
             'organisasi' => ['Organisasi', 'Pengurus dan kegiatan organisasi', 'users-round'],
+            'pwa' => ['Aplikasi Orang Tua & Siswa', 'Portal PWA: instalasi, login, fitur', 'smartphone'],
             'pengaturan' => ['Pengaturan', 'Profil sekolah, tahun ajaran, modul', 'settings'],
             'peran' => ['Peran & Hak Akses', 'Daftar peran pengguna', 'key-round'],
             'faq' => ['Pertanyaan Umum', 'Jawaban pertanyaan umum', 'circle-help'],

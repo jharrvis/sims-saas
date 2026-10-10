@@ -1,5 +1,6 @@
 <?php
 
+use App\Domains\Pwa\Http\Controllers\PwaController;
 use App\Http\Controllers\HelpController;
 use App\Livewire\Akademik\AttendanceIndex;
 use App\Livewire\Akademik\GradeInput;
@@ -60,6 +61,16 @@ use App\Livewire\Ppdb\PpdbApplicantForm;
 use App\Livewire\Ppdb\PpdbApplicantIndex;
 use App\Livewire\Ppdb\PpdbApplicantShow;
 use App\Livewire\Ppdb\PpdbPeriodIndex;
+use App\Livewire\Pwa\Absensi as PwaAbsensi;
+use App\Livewire\Pwa\Home as PwaHome;
+use App\Livewire\Pwa\Jadwal as PwaJadwal;
+use App\Livewire\Pwa\Login as PwaLogin;
+use App\Livewire\Pwa\Nilai as PwaNilai;
+use App\Livewire\Pwa\Pengumuman as PwaPengumuman;
+use App\Livewire\Pwa\PengumumanShow as PwaPengumumanShow;
+use App\Livewire\Pwa\Profil as PwaProfil;
+use App\Livewire\Pwa\Tagihan as PwaTagihan;
+use App\Livewire\Pwa\Unlinked as PwaUnlinked;
 use App\Livewire\Survei\SurveyFill;
 use App\Livewire\Survei\SurveyForm;
 use App\Livewire\Survei\SurveyIndex;
@@ -277,5 +288,28 @@ Route::middleware(['auth', 'mfa'])->group(function (): void {
         Route::get('/tambah', OrganizationForm::class)->name('create')->middleware('permission:organisasi.create');
         Route::get('/{organization}/ubah', OrganizationForm::class)->name('edit')->middleware('permission:organisasi.update');
         Route::get('/{organization}', OrganizationShow::class)->name('show')->middleware('permission:organisasi.view');
+    });
+});
+
+// PWA Siswa & Orang Tua — mobile-first, installable (Dok 07: P-01 s.d. P-06)
+Route::prefix('pwa')->name('pwa.')->group(function (): void {
+    Route::get('/offline', [PwaController::class, 'offline'])->name('offline');
+
+    Route::middleware('guest')->group(function (): void {
+        Route::get('/login', PwaLogin::class)->name('login');
+    });
+
+    Route::middleware(['auth', 'mfa', 'pwa.context'])->group(function (): void {
+        Route::get('/belum-terhubung', PwaUnlinked::class)->name('unlinked');
+        Route::get('/', PwaHome::class)->name('home');
+        Route::get('/nilai', PwaNilai::class)->name('nilai');
+        Route::get('/jadwal', PwaJadwal::class)->name('jadwal');
+        Route::get('/absensi', PwaAbsensi::class)->name('absensi');
+        Route::get('/pengumuman', PwaPengumuman::class)->name('pengumuman');
+        Route::get('/pengumuman/{announcement}', PwaPengumumanShow::class)->name('pengumuman.show');
+        Route::get('/tagihan', PwaTagihan::class)->name('tagihan');
+        Route::get('/profil', PwaProfil::class)->name('profil');
+        Route::post('/ganti-anak', [PwaController::class, 'switchChild'])->name('switch-child');
+        Route::post('/keluar', [PwaController::class, 'logout'])->name('logout');
     });
 });

@@ -8,6 +8,8 @@ namespace App\Models;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -28,6 +30,7 @@ class User extends Authenticatable
         'phone',
         'password',
         'is_platform',
+        'student_id',
     ];
 
     /**
@@ -68,5 +71,25 @@ class User extends Authenticatable
     public function mfaSecret(): HasOne
     {
         return $this->hasOne(MfaSecret::class);
+    }
+
+    /**
+     * Tautan akun siswa 1:1 (login PWA siswa).
+     *
+     * @return BelongsTo<Student, $this>
+     */
+    public function student(): BelongsTo
+    {
+        return $this->belongsTo(Student::class);
+    }
+
+    /**
+     * Tautan akun orang tua ke data wali (multi-anak lintas sekolah).
+     *
+     * @return BelongsToMany<Guardian, $this>
+     */
+    public function guardians(): BelongsToMany
+    {
+        return $this->belongsToMany(Guardian::class, 'guardian_user')->withTimestamps();
     }
 }
