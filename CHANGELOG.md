@@ -28,6 +28,8 @@ Format mengikuti [Keep a Changelog](https://keepachangelog.com/id/1.1.0/).
 - LMS Mini / Tugas Online (add-on): pembuatan tugas per mapel/kelas, pengumpulan jawaban, penilaian + feedback; di belakang feature flag `module:lms_mini`
 - Notifikasi Terjadwal / Broadcast (add-on): broadcast WA & notifikasi in-app ke siswa/guru/kelas, kirim langsung atau terjadwal (scheduler `broadcast:proses`), log per penerima; di belakang feature flag `module:broadcast`
 - Inventaris & Aset (add-on): kategori, master aset (kode unik/tenant, kondisi, lokasi), riwayat mutasi (masuk/pindah/kondisi/keluar) yang otomatis memperbarui lokasi & kondisi; di belakang feature flag `module:inventaris`
+- UKS & Kesehatan (add-on): kunjungan UKS (keluhan, diagnosa, tindakan, suhu, rujukan), stok & pemakaian obat otomatis mengurangi stok; di belakang feature flag `module:uks`
+- Antar-Jemput / Transportasi (add-on): rute + sopir/kendaraan/kapasitas, titik penjemputan terurut, penumpang dengan batas kapasitas; di belakang feature flag `module:transportasi`
 
 ### Keamanan
 - Isolasi tenant fail-closed: query model tenant tanpa konteks melempar exception (diuji)

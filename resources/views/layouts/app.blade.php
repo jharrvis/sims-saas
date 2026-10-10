@@ -68,6 +68,12 @@
             @can('aset.view')
                 <x-nav-link href="{{ route('aset.index') }}" icon="package" label="Inventaris" :active="request()->routeIs('aset.*')" />
             @endcan
+            @can('uks.view')
+                <x-nav-link href="{{ route('uks.index') }}" icon="heart-pulse" label="UKS" :active="request()->routeIs('uks.*')" />
+            @endcan
+            @can('transportasi.view')
+                <x-nav-link href="{{ route('transportasi.index') }}" icon="bus" label="Antar-Jemput" :active="request()->routeIs('transportasi.*')" />
+            @endcan
             @can('bk.view')
                 <x-nav-link href="{{ route('bk.index') }}" icon="heart-handshake" label="BK & Konseling" :active="request()->routeIs('bk.*')" />
             @endcan

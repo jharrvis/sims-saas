@@ -298,7 +298,17 @@ Halaman utama menampilkan **rekap poin tertinggi** serta riwayat pelanggaran yan
 1. Menu **Inventaris** → **Tambah Aset**: isi kode, nama, kategori (pilih atau buat baru), lokasi, tanggal & harga beli.
 2. Buka **Detail** aset untuk melihat riwayat mutasi; klik **Catat Mutasi** untuk pindah lokasi, ubah kondisi, atau barang keluar — lokasi & kondisi aset diperbarui otomatis.
 
-## 28. Pertanyaan Umum
+## 29. UKS & Kesehatan
+
+1. **Kunjungan:** menu **UKS** → **Catat Kunjungan**, pilih siswa, isi keluhan, diagnosa, tindakan, suhu tubuh, dan rujukan bila perlu.
+2. **Obat:** klik **Obat** → **Tambah Obat** (nama, satuan, stok, stok minimum). Untuk mencatat pemakaian, isi jumlah di kartu obat → **Catat Pakai**; stok otomatis berkurang dan ada peringatan stok rendah.
+
+## 30. Antar-Jemput
+
+1. Menu **Antar-Jemput** → **Tambah Rute**: nama rute, sopir, nomor kendaraan, kapasitas.
+2. Buka **Kelola Rute**: tambah titik penjemputan (nama + jam berangkat) secara berurutan, lalu tambah penumpang per siswa (bisa dikaitkan ke titik tertentu). Kapasitas penuh otomatis menolak penumpang baru.
+
+## 31. Pertanyaan Umum
 
 **Saya lupa tidak menerima kode WhatsApp.**
 Tunggu 60 detik lalu klik kirim ulang. Maksimal 3 kali per 15 menit. Pastikan nomor terdaftar & WhatsApp aktif.

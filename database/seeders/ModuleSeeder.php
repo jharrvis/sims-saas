@@ -34,6 +34,8 @@ class ModuleSeeder extends Seeder
             ['kode' => 'lms_mini', 'nama' => 'LMS Mini / Tugas Online', 'kategori' => 'addon'],
             ['kode' => 'broadcast', 'nama' => 'Notifikasi Terjadwal / Broadcast', 'kategori' => 'addon'],
             ['kode' => 'inventaris', 'nama' => 'Inventaris & Aset', 'kategori' => 'addon'],
+            ['kode' => 'uks', 'nama' => 'UKS & Kesehatan', 'kategori' => 'addon'],
+            ['kode' => 'transportasi', 'nama' => 'Antar-Jemput / Transportasi', 'kategori' => 'addon'],
         ];
     }
 
