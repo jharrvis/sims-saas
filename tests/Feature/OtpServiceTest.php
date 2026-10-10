@@ -11,9 +11,18 @@ class FakeWaSender implements WaSender
 {
     public static ?string $lastCode = null;
 
+    public static ?string $lastText = null;
+
     public function sendOtp(string $phone, string $code, string $schoolName): bool
     {
         self::$lastCode = $code;
+
+        return true;
+    }
+
+    public function sendText(string $phone, string $message): bool
+    {
+        self::$lastText = $message;
 
         return true;
     }
