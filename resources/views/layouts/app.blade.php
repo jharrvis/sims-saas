@@ -32,8 +32,12 @@
             @can('kelas.view')
                 <x-nav-link href="{{ route('kelas.index') }}" icon="school" label="Data Kelas" :active="request()->routeIs('kelas.*')" />
             @endcan
-            <x-nav-link href="#" icon="calendar-days" label="Jadwal Pelajaran" />
-            <x-nav-link href="#" icon="clipboard-check" label="Absensi Siswa" />
+            @can('jadwal.view')
+                <x-nav-link href="{{ route('jadwal.index') }}" icon="calendar-days" label="Jadwal Pelajaran" :active="request()->routeIs('jadwal.*', 'mapel.*')" />
+            @endcan
+            @can('absensi.view')
+                <x-nav-link href="{{ route('absensi.index') }}" icon="clipboard-check" label="Absensi Siswa" :active="request()->routeIs('absensi.*')" />
+            @endcan
             <x-nav-link href="#" icon="award" label="Data Nilai" />
             <x-nav-link href="#" icon="wallet" label="Keuangan SPP" />
             <x-nav-link href="#" icon="megaphone" label="Pengumuman" />

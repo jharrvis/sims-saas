@@ -1,5 +1,6 @@
 <?php
 
+use App\Domains\Akademik\Http\Controllers\AkademikController;
 use App\Domains\Akademik\Http\Controllers\RombelController;
 use App\Domains\Identity\Http\Controllers\AuthController;
 use App\Domains\Kepegawaian\Http\Controllers\EmployeeController;
@@ -44,5 +45,20 @@ Route::prefix('v1')->group(function (): void {
         Route::put('kelas/{rombel}', [RombelController::class, 'update'])->middleware('permission:kelas.update');
         Route::patch('kelas/{rombel}', [RombelController::class, 'update'])->middleware('permission:kelas.update');
         Route::delete('kelas/{rombel}', [RombelController::class, 'destroy'])->middleware('permission:kelas.delete');
+
+        // Akademik: mapel
+        Route::get('mapel', [AkademikController::class, 'subjectIndex'])->middleware('permission:jadwal.view');
+        Route::post('mapel', [AkademikController::class, 'subjectStore'])->middleware('permission:jadwal.create');
+
+        // Akademik: jadwal
+        Route::get('jadwal', [AkademikController::class, 'scheduleIndex'])->middleware('permission:jadwal.view');
+        Route::post('jadwal', [AkademikController::class, 'scheduleStore'])->middleware('permission:jadwal.create');
+        Route::delete('jadwal/{schedule}', [AkademikController::class, 'scheduleDestroy'])->middleware('permission:jadwal.delete');
+
+        // Akademik: absensi
+        Route::get('absensi', [AkademikController::class, 'attendanceIndex'])->middleware('permission:absensi.view');
+        Route::post('absensi', [AkademikController::class, 'attendanceStore'])->middleware('permission:absensi.create');
+        Route::post('absensi/kunci', [AkademikController::class, 'attendanceLock'])->middleware('permission:absensi.kunci');
+        Route::get('absensi/rekap', [AkademikController::class, 'attendanceSummary'])->middleware('permission:absensi.view');
     });
 });

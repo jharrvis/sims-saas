@@ -1,8 +1,12 @@
 <?php
 
+use App\Livewire\Akademik\AttendanceIndex;
 use App\Livewire\Akademik\RombelForm;
 use App\Livewire\Akademik\RombelIndex;
 use App\Livewire\Akademik\RombelShow;
+use App\Livewire\Akademik\ScheduleForm;
+use App\Livewire\Akademik\ScheduleIndex;
+use App\Livewire\Akademik\SubjectIndex;
 use App\Livewire\Auth\Login;
 use App\Livewire\Auth\SetupTwoFactor;
 use App\Livewire\Auth\TenantSwitcher;
@@ -49,4 +53,14 @@ Route::middleware('auth')->group(function (): void {
         Route::get('/{rombel}/ubah', RombelForm::class)->name('edit')->middleware('permission:kelas.update');
         Route::get('/{rombel}', RombelShow::class)->name('show')->middleware('permission:kelas.view');
     });
+
+    // Akademik
+    Route::get('/mapel', SubjectIndex::class)->name('mapel.index')->middleware('permission:jadwal.view');
+
+    Route::prefix('jadwal')->name('jadwal.')->group(function (): void {
+        Route::get('/', ScheduleIndex::class)->name('index')->middleware('permission:jadwal.view');
+        Route::get('/tambah', ScheduleForm::class)->name('create')->middleware('permission:jadwal.create');
+    });
+
+    Route::get('/absensi', AttendanceIndex::class)->name('absensi.index')->middleware('permission:absensi.view');
 });
