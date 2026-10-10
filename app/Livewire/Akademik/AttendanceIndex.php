@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Akademik;
 
+use App\Domains\Pwa\Services\PushService;
 use App\Models\AcademicYear;
 use App\Models\Attendance;
 use App\Models\Rombel;
@@ -83,7 +84,7 @@ class AttendanceIndex extends Component
         }
     }
 
-    public function save(): void
+    public function save(PushService $push): void
     {
         $this->authorize('absensi.create');
 
@@ -92,6 +93,7 @@ class AttendanceIndex extends Component
         }
 
         $rombel = Rombel::findOrFail($this->rombelId);
+        $alpa = collect();
 
         foreach ($this->students() as $s) {
             $status = $this->marks[$s->id] ?? null;
@@ -99,7 +101,7 @@ class AttendanceIndex extends Component
                 continue;
             }
 
-            Attendance::updateOrCreate(
+            $record = Attendance::updateOrCreate(
                 ['student_id' => $s->id, 'tanggal' => $this->tanggal],
                 [
                     'rombel_id' => $rombel->id,
@@ -108,7 +110,14 @@ class AttendanceIndex extends Component
                     'input_by' => auth()->id(),
                 ],
             );
+
+            // Notifikasi orang tua hanya untuk alpa yang baru dicatat.
+            if ($status === 'A' && $record->wasRecentlyCreated) {
+                $alpa->push($s);
+            }
         }
+
+        $push->notifyAbsence($alpa, $this->tanggal);
 
         $this->loadExisting();
         session()->flash('saved', 'Absensi tersimpan.');

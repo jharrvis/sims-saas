@@ -6,9 +6,12 @@ namespace App\Domains\Akademik\Http\Controllers;
 
 use App\Domains\Akademik\Services\GradeCalculationService;
 use App\Domains\Akademik\Services\ReleasedGradeService;
+use App\Domains\Pwa\Services\PushService;
 use App\Models\Grade;
 use App\Models\GradeComponent;
 use App\Models\GradeRelease;
+use App\Models\Rombel;
+use App\Models\Semester;
 use App\Models\Student;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -114,7 +117,7 @@ class GradeController extends Controller
 
     // ---------- Rilis ----------
 
-    public function release(Request $request): JsonResponse
+    public function release(Request $request, PushService $push): JsonResponse
     {
         /** @var array<string,mixed> $v */
         $v = $request->validate([
@@ -125,6 +128,11 @@ class GradeController extends Controller
         $release = GradeRelease::updateOrCreate(
             ['semester_id' => $v['semester_id'], 'rombel_id' => $v['rombel_id']],
             ['dirilis_pada' => now(), 'dirilis_oleh' => $request->user()->id],
+        );
+
+        $push->notifyGradeRelease(
+            Rombel::findOrFail($v['rombel_id']),
+            Semester::findOrFail($v['semester_id']),
         );
 
         return response()->json($release, 201);

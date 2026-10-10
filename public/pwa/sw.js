@@ -64,3 +64,34 @@ self.addEventListener('fetch', (event) => {
     )
   );
 });
+
+// Web Push (FR-1304): tampilkan notifikasi & buka URL saat diketuk.
+self.addEventListener('push', (event) => {
+  const data = event.data ? event.data.json() : {};
+  event.waitUntil(
+    self.registration.showNotification(data.title || 'SIMS', {
+      body: data.body || '',
+      icon: data.icon || '/pwa/icons/icon-192.png',
+      badge: '/pwa/icons/icon-192.png',
+      data: { url: data.url || '/pwa' },
+    })
+  );
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const url = (event.notification.data && event.notification.data.url) || '/pwa';
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((list) => {
+      for (const c of list) {
+        try {
+          if (new URL(c.url).pathname.startsWith('/pwa')) {
+            c.navigate(url);
+            return c.focus();
+          }
+        } catch (e) {}
+      }
+      return clients.openWindow(url);
+    })
+  );
+});

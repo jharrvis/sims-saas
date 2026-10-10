@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Akademik;
 
 use App\Domains\Akademik\Services\GradeCalculationService;
+use App\Domains\Pwa\Services\PushService;
 use App\Models\AcademicYear;
 use App\Models\GradeRelease;
 use App\Models\Rombel;
@@ -32,7 +33,7 @@ class GradeLeger extends Component
             ->orderBy('nama')->value('id');
     }
 
-    public function release(GradeCalculationService $calc): void
+    public function release(GradeCalculationService $calc, PushService $push): void
     {
         $this->authorize('nilai.release');
 
@@ -43,6 +44,11 @@ class GradeLeger extends Component
         GradeRelease::updateOrCreate(
             ['semester_id' => $this->semesterId, 'rombel_id' => $this->rombelId],
             ['dirilis_pada' => now(), 'dirilis_oleh' => auth()->id()],
+        );
+
+        $push->notifyGradeRelease(
+            Rombel::findOrFail($this->rombelId),
+            Semester::findOrFail($this->semesterId),
         );
 
         session()->flash('released', 'Nilai dirilis — sekarang tampil di PWA siswa/orang tua.');

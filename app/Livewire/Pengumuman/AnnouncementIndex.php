@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Pengumuman;
 
+use App\Domains\Pwa\Services\PushService;
 use App\Models\Announcement;
 use Illuminate\View\View;
 use Livewire\Component;
@@ -30,11 +31,12 @@ class AnnouncementIndex extends Component
         $this->resetPage();
     }
 
-    public function publish(Announcement $announcement): void
+    public function publish(Announcement $announcement, PushService $push): void
     {
         $this->authorize('pengumuman.publish');
 
         $announcement->update(['status' => 'tayang']);
+        $push->notifyAnnouncement($announcement->fresh());
         session()->flash('ok', "Pengumuman \"{$announcement->judul}\" ditayangkan.");
     }
 

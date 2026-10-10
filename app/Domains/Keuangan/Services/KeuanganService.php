@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domains\Keuangan\Services;
 
+use App\Domains\Pwa\Services\PushService;
 use App\Models\FeeType;
 use App\Models\Invoice;
 use App\Models\Payment;
@@ -16,7 +17,10 @@ use Illuminate\Support\Facades\DB;
  */
 class KeuanganService
 {
-    public function __construct(private readonly TenantContext $tenant) {}
+    public function __construct(
+        private readonly TenantContext $tenant,
+        private readonly PushService $push,
+    ) {}
 
     /**
      * Generate tagihan massal untuk semua siswa aktif.
@@ -39,7 +43,7 @@ class KeuanganService
                     continue;
                 }
 
-                Invoice::create([
+                $invoice = Invoice::create([
                     'student_id' => $student->id,
                     'fee_type_id' => $feeType->id,
                     'no_invoice' => $this->generateNoInvoice(),
@@ -49,6 +53,8 @@ class KeuanganService
                     'status' => 'unpaid',
                 ]);
                 $count++;
+
+                $this->push->notifyNewInvoice($invoice->load(['student', 'feeType']));
             }
         });
 

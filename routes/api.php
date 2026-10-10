@@ -21,6 +21,7 @@ use App\Domains\Pengaturan\Http\Controllers\SettingController;
 use App\Domains\Pengumuman\Http\Controllers\AnnouncementController;
 use App\Domains\Perpus\Http\Controllers\PerpusController;
 use App\Domains\Ppdb\Http\Controllers\PpdbController;
+use App\Domains\Pwa\Http\Controllers\PushController;
 use App\Domains\Pwa\Http\Controllers\QrApiController;
 use App\Domains\Survei\Http\Controllers\SurveiController;
 use App\Domains\Tatib\Http\Controllers\TatibController;
@@ -46,6 +47,8 @@ Route::prefix('v1')->group(function (): void {
         Route::post('auth/logout', [AuthController::class, 'logout']);
         Route::post('auth/qr/challenge', [QrApiController::class, 'challenge'])->middleware('permission:qr.manage');
         Route::post('auth/qr/revoke-card', [QrApiController::class, 'revokeCard'])->middleware('permission:qr.manage');
+        Route::post('push/subscribe', [PushController::class, 'subscribe']);
+        Route::delete('push/unsubscribe', [PushController::class, 'unsubscribe']);
 
         // Kesiswaan — permission spesifik per aksi (Dok 05)
         Route::get('siswa', [StudentController::class, 'index'])->middleware('permission:siswa.view');
