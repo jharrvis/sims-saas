@@ -54,6 +54,12 @@ use App\Livewire\Ppdb\PpdbPeriodIndex;
 use App\Livewire\Tatib\ViolationForm;
 use App\Livewire\Tatib\ViolationIndex;
 use App\Livewire\Tatib\ViolationTypeIndex;
+use App\Livewire\Transportasi\RouteForm;
+use App\Livewire\Transportasi\RouteIndex;
+use App\Livewire\Transportasi\RouteShow;
+use App\Livewire\Uks\HealthVisitForm;
+use App\Livewire\Uks\HealthVisitIndex;
+use App\Livewire\Uks\MedicineIndex;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -206,5 +212,21 @@ Route::middleware('auth')->group(function (): void {
         Route::get('/tambah', AssetForm::class)->name('create')->middleware('permission:aset.create');
         Route::get('/{asset}/ubah', AssetForm::class)->name('edit')->middleware('permission:aset.update');
         Route::get('/{asset}', AssetShow::class)->name('show')->middleware('permission:aset.view');
+    });
+
+    // UKS & Kesehatan — modul add-on (feature flag)
+    Route::prefix('uks')->name('uks.')->middleware('module:uks')->group(function (): void {
+        Route::get('/', HealthVisitIndex::class)->name('index')->middleware('permission:uks.view');
+        Route::get('/catat', HealthVisitForm::class)->name('create')->middleware('permission:uks.create');
+        Route::get('/obat', MedicineIndex::class)->name('obat')->middleware('permission:uks.obat');
+        Route::get('/{visit}/ubah', HealthVisitForm::class)->name('edit')->middleware('permission:uks.update');
+    });
+
+    // Antar-Jemput — modul add-on (feature flag)
+    Route::prefix('transportasi')->name('transportasi.')->middleware('module:transportasi')->group(function (): void {
+        Route::get('/', RouteIndex::class)->name('index')->middleware('permission:transportasi.view');
+        Route::get('/tambah', RouteForm::class)->name('create')->middleware('permission:transportasi.create');
+        Route::get('/{route}/ubah', RouteForm::class)->name('edit')->middleware('permission:transportasi.update');
+        Route::get('/{route}', RouteShow::class)->name('show')->middleware('permission:transportasi.view');
     });
 });

@@ -19,6 +19,8 @@ use App\Domains\Pengumuman\Http\Controllers\AnnouncementController;
 use App\Domains\Perpus\Http\Controllers\PerpusController;
 use App\Domains\Ppdb\Http\Controllers\PpdbController;
 use App\Domains\Tatib\Http\Controllers\TatibController;
+use App\Domains\Transportasi\Http\Controllers\TransportasiController;
+use App\Domains\Uks\Http\Controllers\UksController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function (): void {
@@ -191,6 +193,23 @@ Route::prefix('v1')->group(function (): void {
             Route::post('kategori', [InventarisController::class, 'categoryStore'])->middleware('permission:aset.create');
             Route::get('/{asset}', [InventarisController::class, 'show'])->middleware('permission:aset.view');
             Route::post('/{asset}/mutasi', [InventarisController::class, 'mutate'])->middleware('permission:aset.mutasi');
+        });
+
+        Route::prefix('uks')->middleware('module:uks')->group(function (): void {
+            Route::get('kunjungan', [UksController::class, 'visitIndex'])->middleware('permission:uks.view');
+            Route::post('kunjungan', [UksController::class, 'visitStore'])->middleware('permission:uks.create');
+            Route::get('obat', [UksController::class, 'medicineIndex'])->middleware('permission:uks.obat');
+            Route::post('obat', [UksController::class, 'medicineStore'])->middleware('permission:uks.obat');
+            Route::post('obat/{medicine}/pakai', [UksController::class, 'medicineUse'])->middleware('permission:uks.obat');
+        });
+
+        Route::prefix('transportasi')->middleware('module:transportasi')->group(function (): void {
+            Route::get('/', [TransportasiController::class, 'index'])->middleware('permission:transportasi.view');
+            Route::post('/', [TransportasiController::class, 'store'])->middleware('permission:transportasi.create');
+            Route::get('/{route}', [TransportasiController::class, 'show'])->middleware('permission:transportasi.view');
+            Route::post('/{route}/titik', [TransportasiController::class, 'addStop'])->middleware('permission:transportasi.update');
+            Route::post('/{route}/penumpang', [TransportasiController::class, 'addMember'])->middleware('permission:transportasi.update');
+            Route::delete('/{route}/penumpang/{studentId}', [TransportasiController::class, 'removeMember'])->middleware('permission:transportasi.update');
         });
     });
 });
