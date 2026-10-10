@@ -26,6 +26,8 @@ Format mengikuti [Keep a Changelog](https://keepachangelog.com/id/1.1.0/).
 - Perpustakaan Digital (add-on): katalog buku + stok tersedia, peminjaman dengan batas stok, pengembalian otomatis hitung denda keterlambatan; di belakang feature flag `module:perpustakaan`
 - Ekstrakurikuler & Prestasi (add-on): daftar ekskul + kelola anggota, pencatatan prestasi berjenjang (sekolah → internasional); di belakang feature flag `module:ekstrakurikuler`
 - LMS Mini / Tugas Online (add-on): pembuatan tugas per mapel/kelas, pengumpulan jawaban, penilaian + feedback; di belakang feature flag `module:lms_mini`
+- Notifikasi Terjadwal / Broadcast (add-on): broadcast WA & notifikasi in-app ke siswa/guru/kelas, kirim langsung atau terjadwal (scheduler `broadcast:proses`), log per penerima; di belakang feature flag `module:broadcast`
+- Inventaris & Aset (add-on): kategori, master aset (kode unik/tenant, kondisi, lokasi), riwayat mutasi (masuk/pindah/kondisi/keluar) yang otomatis memperbarui lokasi & kondisi; di belakang feature flag `module:inventaris`
 
 ### Keamanan
 - Isolasi tenant fail-closed: query model tenant tanpa konteks melempar exception (diuji)

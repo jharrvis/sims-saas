@@ -49,6 +49,8 @@ class HelpController extends Controller
             'perpus' => ['Perpustakaan', 'Katalog dan peminjaman buku', 'library'],
             'ekskul' => ['Ekstrakurikuler & Prestasi', 'Ekstrakurikuler dan prestasi', 'medal'],
             'lms' => ['LMS Mini / Tugas Online', 'Tugas, pengumpulan, penilaian', 'pen-line'],
+            'broadcast' => ['Broadcast', 'Broadcast WA & notifikasi terjadwal', 'send'],
+            'aset' => ['Inventaris & Aset', 'Kelola aset dan mutasi', 'package'],
             'pengaturan' => ['Pengaturan', 'Profil sekolah, tahun ajaran, modul', 'settings'],
             'peran' => ['Peran & Hak Akses', 'Daftar peran pengguna', 'key-round'],
             'faq' => ['Pertanyaan Umum', 'Jawaban pertanyaan umum', 'circle-help'],

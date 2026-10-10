@@ -62,6 +62,12 @@
             @can('lms.view')
                 <x-nav-link href="{{ route('lms.index') }}" icon="pen-line" label="Tugas Online" :active="request()->routeIs('lms.*')" />
             @endcan
+            @can('broadcast.view')
+                <x-nav-link href="{{ route('broadcast.index') }}" icon="send" label="Broadcast" :active="request()->routeIs('broadcast.*')" />
+            @endcan
+            @can('aset.view')
+                <x-nav-link href="{{ route('aset.index') }}" icon="package" label="Inventaris" :active="request()->routeIs('aset.*')" />
+            @endcan
             @can('bk.view')
                 <x-nav-link href="{{ route('bk.index') }}" icon="heart-handshake" label="BK & Konseling" :active="request()->routeIs('bk.*')" />
             @endcan

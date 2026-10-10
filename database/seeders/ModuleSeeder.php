@@ -32,6 +32,8 @@ class ModuleSeeder extends Seeder
             ['kode' => 'perpustakaan', 'nama' => 'Perpustakaan Digital', 'kategori' => 'addon'],
             ['kode' => 'ekstrakurikuler', 'nama' => 'Ekstrakurikuler & Prestasi', 'kategori' => 'addon'],
             ['kode' => 'lms_mini', 'nama' => 'LMS Mini / Tugas Online', 'kategori' => 'addon'],
+            ['kode' => 'broadcast', 'nama' => 'Notifikasi Terjadwal / Broadcast', 'kategori' => 'addon'],
+            ['kode' => 'inventaris', 'nama' => 'Inventaris & Aset', 'kategori' => 'addon'],
         ];
     }
 

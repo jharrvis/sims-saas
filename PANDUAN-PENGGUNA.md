@@ -287,7 +287,18 @@ Halaman utama menampilkan **rekap poin tertinggi** serta riwayat pelanggaran yan
 2. **Kumpulkan jawaban:** buka detail tugas → isi nama siswa dan jawaban → **Kumpulkan**. Pengumpulan ulang menimpa yang lama.
 3. **Nilai:** di daftar pengumpulan, isi nilai (0–100) dan feedback per siswa → **Simpan Nilai**. Keterlambatan otomatis ditandai.
 
-## 25. Pertanyaan Umum
+## 26. Broadcast
+
+1. Menu **Broadcast** → **Buat Broadcast**: tulis judul dan isi pesan, pilih channel (WhatsApp / Notifikasi In-App) dan target (Semua / Siswa / Guru / Per Kelas).
+2. Kosongkan jadwal kirim untuk menyimpan sebagai draf, atau isi tanggal-jam agar otomatis terkirim oleh scheduler.
+3. Klik **Kirim Sekarang** untuk mengirim langsung; halaman detail menampilkan log per penerima (terkirim/gagal).
+
+## 27. Inventaris & Aset
+
+1. Menu **Inventaris** → **Tambah Aset**: isi kode, nama, kategori (pilih atau buat baru), lokasi, tanggal & harga beli.
+2. Buka **Detail** aset untuk melihat riwayat mutasi; klik **Catat Mutasi** untuk pindah lokasi, ubah kondisi, atau barang keluar — lokasi & kondisi aset diperbarui otomatis.
+
+## 28. Pertanyaan Umum
 
 **Saya lupa tidak menerima kode WhatsApp.**
 Tunggu 60 detik lalu klik kirim ulang. Maksimal 3 kali per 15 menit. Pastikan nomor terdaftar & WhatsApp aktif.

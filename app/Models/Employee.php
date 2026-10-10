@@ -20,6 +20,7 @@ class Employee extends Model
         'school_id',
         'nip_nuptk',
         'nama',
+        'phone',
         'jenis',
         'status_kepegawaian',
         'jabatan',
