@@ -23,8 +23,9 @@ use Symfony\Component\HttpFoundation\Response;
  */
 final class ResolveTenant
 {
-    public function handle(Request $request, Closure $next, TenantContext $tenant): Response
+    public function handle(Request $request, Closure $next): Response
     {
+        $tenant = app(TenantContext::class);
         $school = null;
 
         // 1. Resolusi utama via domain — HANYA yang terverifikasi & aktif
