@@ -5,6 +5,7 @@ use App\Http\Middleware\PwaContextMiddleware;
 use App\Http\Middleware\QrSessionLimit;
 use App\Http\Middleware\RequireMfa;
 use App\Http\Middleware\RequireModule;
+use App\Http\Middleware\RequirePlatform;
 use App\Http\Middleware\ResolveTenant;
 use App\Http\Middleware\SetSpatieTeam;
 use Illuminate\Auth\Middleware\Authenticate;
@@ -33,6 +34,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->append(SetSpatieTeam::class);
         $middleware->alias([
             'mfa' => RequireMfa::class,
+            'platform' => RequirePlatform::class,
             'pwa.context' => PwaContextMiddleware::class,
             'qr.limit' => QrSessionLimit::class,
             'tenant.resolved' => EnsureTenantResolved::class,

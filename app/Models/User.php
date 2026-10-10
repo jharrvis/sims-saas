@@ -23,6 +23,19 @@ class User extends Authenticatable
     /** @use HasFactory<UserFactory> */
     use HasApiTokens, HasFactory, HasRoles, Notifiable;
 
+    /**
+     * Guard yang didukung model ini: `web` (tenant) + `platform`
+     * (operator SaaS). Cara resmi Spatie agar satu model User dapat
+     * memegang peran/permission guard `platform` (Dok 05 §4.3)
+     * tanpa mencampuri permission tenant guard `web`.
+     *
+     * @return array<int, string>
+     */
+    public function guardName(): array
+    {
+        return ['web', 'platform'];
+    }
+
     protected $fillable = [
         'username',
         'name',

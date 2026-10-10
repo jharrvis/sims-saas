@@ -58,6 +58,14 @@ use App\Livewire\Pengumuman\AnnouncementIndex;
 use App\Livewire\Perpus\BookForm;
 use App\Livewire\Perpus\BookIndex;
 use App\Livewire\Perpus\LoanIndex;
+use App\Livewire\Platform\AuditIndex as PlatformAudit;
+use App\Livewire\Platform\Dashboard as PlatformDashboard;
+use App\Livewire\Platform\InvoiceIndex as PlatformInvoices;
+use App\Livewire\Platform\ModuleIndex as PlatformModules;
+use App\Livewire\Platform\PlanIndex as PlatformPlans;
+use App\Livewire\Platform\SubscriptionIndex as PlatformSubscriptions;
+use App\Livewire\Platform\TenantIndex as PlatformTenants;
+use App\Livewire\Platform\TenantShow as PlatformTenantShow;
 use App\Livewire\Ppdb\PpdbApplicantForm;
 use App\Livewire\Ppdb\PpdbApplicantIndex;
 use App\Livewire\Ppdb\PpdbApplicantShow;
@@ -299,6 +307,25 @@ Route::middleware(['auth', 'mfa'])->group(function (): void {
         Route::get('/{organization}/ubah', OrganizationForm::class)->name('edit')->middleware('permission:organisasi.update');
         Route::get('/{organization}', OrganizationShow::class)->name('show')->middleware('permission:organisasi.view');
     });
+});
+
+// Panel operator platform (SaaS) — tanpa tenant, khusus is_platform
+Route::prefix('platform')->name('platform.')->middleware(['auth', 'mfa', 'platform'])->group(function (): void {
+    Route::get('/', PlatformDashboard::class)->name('dashboard')->middleware('platform:platform.metrics.view');
+    Route::get('/tenants', PlatformTenants::class)->name('tenants')->middleware('platform:platform.tenant.view');
+    Route::get('/tenants/{schoolId}', PlatformTenantShow::class)->name('tenants.show')->middleware('platform:platform.tenant.view');
+    Route::get('/paket', PlatformPlans::class)->name('plans')->middleware('platform:platform.plan.view');
+    Route::get('/modul', PlatformModules::class)->name('modules')->middleware('platform:platform.module.view');
+    Route::get('/langganan', PlatformSubscriptions::class)->name('subscriptions')->middleware('platform:platform.tenant.view');
+    Route::get('/tagihan', PlatformInvoices::class)->name('invoices')->middleware('platform:platform.tenant.view');
+    Route::get('/audit', PlatformAudit::class)->name('audit')->middleware('platform:platform.audit.view');
+    Route::post('/keluar', function () {
+        auth()->logout();
+        request()->session()->invalidate();
+        request()->session()->regenerateToken();
+
+        return redirect()->route('login');
+    })->name('logout');
 });
 
 // PWA Siswa & Orang Tua — mobile-first, installable (Dok 07: P-01 s.d. P-06)
