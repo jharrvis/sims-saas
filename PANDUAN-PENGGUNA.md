@@ -258,7 +258,24 @@ Klik menu **Pusat Bantuan** di sidebar untuk membuka panduan ini dalam format we
 
 Halaman utama menampilkan **rekap poin tertinggi** serta riwayat pelanggaran yang dapat disaring per kategori.
 
-## 20. Pertanyaan Umum
+## 20. BK & Konseling
+
+1. Buka menu **BK & Konseling** → klik **Jadwalkan Konseling**.
+2. Pilih siswa, tanggal, jenis (Individu/Kelompok/Klasikal), dan topik.
+3. Setelah sesi berlangsung, buka **Ubah / Isi Hasil**: tulis catatan konseling, tindak lanjut, dan ubah status menjadi **Selesai**.
+
+> Catatan konseling bersifat rahasia — hanya guru BK, admin, dan kepala sekolah yang dapat mengaksesnya.
+
+## 21. Perpustakaan
+
+**Katalog:** menu Perpustakaan → **Tambah Buku** (kode, judul, pengarang, jumlah eksemplar).
+
+**Peminjaman:**
+1. Klik **Peminjaman**, pilih buku dan siswa, atur durasi hari, lalu **Catat Pinjam**.
+2. Stok otomatis berkurang; peminjaman ditolak bila stok habis.
+3. Klik **Tandai Kembali** saat buku dikembalikan — keterlambatan otomatis dihitung dendanya (Rp1.000/hari).
+
+## 22. Pertanyaan Umum
 
 **Saya lupa tidak menerima kode WhatsApp.**
 Tunggu 60 detik lalu klik kirim ulang. Maksimal 3 kali per 15 menit. Pastikan nomor terdaftar & WhatsApp aktif.

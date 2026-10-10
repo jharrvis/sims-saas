@@ -22,6 +22,8 @@ Format mengikuti [Keep a Changelog](https://keepachangelog.com/id/1.1.0/).
 - Pengaturan: profil sekolah (nama, NPSN, alamat, kontak), tahun ajaran (tambah + aktifkan), toggle modul add-on per sekolah; UI tab + API v1
 - E-Rapor (add-on): rapor cetak berkop sekolah (nilai + predikat + rata-rata + rekap absensi + catatan wali kelas + tanda tangan), catatan wali per siswa/semester; di belakang feature flag `module:e_rapor`
 - Tata Tertib (add-on): master jenis pelanggaran (ringan/sedang/berat + bobot poin), pencatatan pelanggaran per siswa, rekap poin tertinggi; di belakang feature flag `module:tata_tertib`
+- BK & Konseling (add-on): penjadwalan sesi konseling (individu/kelompok/klasikal), catatan rahasia + tindak lanjut, status terjadwal/selesai/batal; di belakang feature flag `module:bk_konseling`
+- Perpustakaan Digital (add-on): katalog buku + stok tersedia, peminjaman dengan batas stok, pengembalian otomatis hitung denda keterlambatan; di belakang feature flag `module:perpustakaan`
 
 ### Keamanan
 - Isolasi tenant fail-closed: query model tenant tanpa konteks melempar exception (diuji)

@@ -58,6 +58,8 @@ class RoleSeeder extends Seeder
                 'laporan.view', 'laporan.export',
                 'erapor.view', 'erapor.cetak', 'erapor.catatan',
                 'tatib.view', 'tatib.create', 'tatib.update', 'tatib.delete',
+                'bk.view', 'bk.create', 'bk.update', 'bk.delete',
+                'perpus.view', 'perpus.buku', 'perpus.pinjam', 'perpus.kembali',
                 'pengguna.view', 'pengguna.create', 'pengguna.update',
                 'pengguna.delete', 'pengguna.reset-password',
                 'peran.view', 'peran.create', 'peran.update', 'peran.delete',
@@ -80,6 +82,7 @@ class RoleSeeder extends Seeder
                 'pengumuman.view', 'pengumuman.publish',
                 'laporan.view', 'laporan.export',
                 'erapor.view', 'erapor.cetak',
+                'bk.view',
                 'dashboard.view',
                 'audit-log.view',
             ],
@@ -100,6 +103,7 @@ class RoleSeeder extends Seeder
                 'pengumuman.view', 'pengumuman.create', 'pengumuman.update', 'pengumuman.publish',
                 'laporan.view',
                 'tatib.view', 'tatib.create', 'tatib.update',
+                'perpus.view', 'perpus.buku', 'perpus.pinjam', 'perpus.kembali',
                 'dashboard.view',
             ],
             'wali-kelas' => [
@@ -110,7 +114,8 @@ class RoleSeeder extends Seeder
                 'absensi.view', 'absensi.create', 'absensi.update', 'absensi.kunci',
                 'nilai.view', 'nilai.release', 'nilai.rekap', // ◐ rombel binaannya
                 'erapor.view', 'erapor.cetak', 'erapor.catatan',
-                'tatib.view', 'tatib.create', 'tatib.update', 'tatib.delete', // ◐ rombel binaannya
+                'tatib.view', 'tatib.create', 'tatib.update', 'tatib.delete',
+                'bk.view', // catatan konseling rahasia: hanya BK/admin/kepsek
                 'dashboard.view',
             ],
             'guru-mapel' => [
@@ -127,6 +132,7 @@ class RoleSeeder extends Seeder
                 'wali-murid.view',
                 'absensi.view',
                 'nilai.view',
+                'bk.view', 'bk.create', 'bk.update', 'bk.delete',
                 'dashboard.view',
             ],
             'siswa' => [

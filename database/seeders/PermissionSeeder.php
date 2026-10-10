@@ -51,6 +51,8 @@ class PermissionSeeder extends Seeder
                 'laporan.view', 'laporan.export',
                 'erapor.view', 'erapor.cetak', 'erapor.catatan',
                 'tatib.view', 'tatib.create', 'tatib.update', 'tatib.delete',
+                'bk.view', 'bk.create', 'bk.update', 'bk.delete',
+                'perpus.view', 'perpus.buku', 'perpus.pinjam', 'perpus.kembali',
                 'pengguna.view', 'pengguna.create', 'pengguna.update',
                 'pengguna.delete', 'pengguna.reset-password',
                 'peran.view', 'peran.create', 'peran.update', 'peran.delete',
