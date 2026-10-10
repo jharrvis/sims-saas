@@ -71,6 +71,8 @@ use App\Livewire\Pwa\PengumumanShow as PwaPengumumanShow;
 use App\Livewire\Pwa\Profil as PwaProfil;
 use App\Livewire\Pwa\Tagihan as PwaTagihan;
 use App\Livewire\Pwa\Unlinked as PwaUnlinked;
+use App\Livewire\Qr\QrCardIndex;
+use App\Livewire\Qr\QrChallenge;
 use App\Livewire\Survei\SurveyFill;
 use App\Livewire\Survei\SurveyForm;
 use App\Livewire\Survei\SurveyIndex;
@@ -109,6 +111,13 @@ Route::middleware(['auth', 'mfa'])->group(function (): void {
         Route::get('/tambah', StudentForm::class)->name('create')->middleware('permission:siswa.create');
         Route::get('/{student}/ubah', StudentForm::class)->name('edit')->middleware('permission:siswa.update');
         Route::get('/{student}', StudentShow::class)->name('show')->middleware('permission:siswa.view');
+    });
+
+    // QR Login siswa (Dok 09 S3.3) — kartu cetak + tantangan layar kelas
+    Route::prefix('qr')->name('qr.')->group(function (): void {
+        Route::get('/kartu', QrCardIndex::class)->name('kartu')->middleware('permission:qr.view');
+        Route::get('/kartu/cetak', [PwaController::class, 'qrCetak'])->name('cetak')->middleware('permission:qr.view');
+        Route::get('/tantangan', QrChallenge::class)->name('tantangan')->middleware('permission:qr.manage');
     });
 
     // Kepegawaian
@@ -297,9 +306,10 @@ Route::prefix('pwa')->name('pwa.')->group(function (): void {
 
     Route::middleware('guest')->group(function (): void {
         Route::get('/login', PwaLogin::class)->name('login');
+        Route::post('/qr/redeem', [PwaController::class, 'qrRedeem'])->name('qr.redeem')->middleware('throttle:20,1');
     });
 
-    Route::middleware(['auth', 'mfa', 'pwa.context'])->group(function (): void {
+    Route::middleware(['auth', 'mfa', 'pwa.context', 'qr.limit'])->group(function (): void {
         Route::get('/belum-terhubung', PwaUnlinked::class)->name('unlinked');
         Route::get('/', PwaHome::class)->name('home');
         Route::get('/nilai', PwaNilai::class)->name('nilai');

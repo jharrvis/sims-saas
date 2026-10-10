@@ -21,6 +21,7 @@ use App\Domains\Pengaturan\Http\Controllers\SettingController;
 use App\Domains\Pengumuman\Http\Controllers\AnnouncementController;
 use App\Domains\Perpus\Http\Controllers\PerpusController;
 use App\Domains\Ppdb\Http\Controllers\PpdbController;
+use App\Domains\Pwa\Http\Controllers\QrApiController;
 use App\Domains\Survei\Http\Controllers\SurveiController;
 use App\Domains\Tatib\Http\Controllers\TatibController;
 use App\Domains\Transportasi\Http\Controllers\TransportasiController;
@@ -35,12 +36,16 @@ Route::prefix('v1')->group(function (): void {
         ->middleware('throttle:10,1');
     Route::post('auth/mfa/verify', [AuthController::class, 'verifyMfa'])
         ->middleware('throttle:10,1');
+    Route::post('auth/qr/redeem', [QrApiController::class, 'redeem'])
+        ->middleware('throttle:20,1');
 
-    // Terotentikasi
-    Route::middleware('auth:sanctum')->group(function (): void {
+    // Terotentikasi (tenant dilengkapi setelah auth:sanctum untuk Bearer token)
+    Route::middleware(['auth:sanctum', 'tenant.resolved'])->group(function (): void {
         Route::get('auth/me', [AuthController::class, 'me']);
         Route::post('auth/tenant/switch', [AuthController::class, 'switchTenant']);
         Route::post('auth/logout', [AuthController::class, 'logout']);
+        Route::post('auth/qr/challenge', [QrApiController::class, 'challenge'])->middleware('permission:qr.manage');
+        Route::post('auth/qr/revoke-card', [QrApiController::class, 'revokeCard'])->middleware('permission:qr.manage');
 
         // Kesiswaan — permission spesifik per aksi (Dok 05)
         Route::get('siswa', [StudentController::class, 'index'])->middleware('permission:siswa.view');
