@@ -1,6 +1,7 @@
 <?php
 
 use App\Domains\Akademik\Http\Controllers\AkademikController;
+use App\Domains\Akademik\Http\Controllers\GradeController;
 use App\Domains\Akademik\Http\Controllers\RombelController;
 use App\Domains\Identity\Http\Controllers\AuthController;
 use App\Domains\Kepegawaian\Http\Controllers\EmployeeController;
@@ -60,5 +61,14 @@ Route::prefix('v1')->group(function (): void {
         Route::post('absensi', [AkademikController::class, 'attendanceStore'])->middleware('permission:absensi.create');
         Route::post('absensi/kunci', [AkademikController::class, 'attendanceLock'])->middleware('permission:absensi.kunci');
         Route::get('absensi/rekap', [AkademikController::class, 'attendanceSummary'])->middleware('permission:absensi.view');
+
+        // Akademik: nilai
+        Route::get('nilai/komponen', [GradeController::class, 'componentIndex'])->middleware('permission:nilai.komponen');
+        Route::post('nilai/komponen', [GradeController::class, 'componentStore'])->middleware('permission:nilai.komponen');
+        Route::post('nilai', [GradeController::class, 'store'])->middleware('permission:nilai.input');
+        Route::get('nilai/leger', [GradeController::class, 'leger'])->middleware('permission:nilai.rekap');
+        Route::get('nilai/rapor', [GradeController::class, 'rapor'])->middleware('permission:nilai.view');
+        Route::post('nilai/rilis', [GradeController::class, 'release'])->middleware('permission:nilai.release');
+        Route::get('nilai/siswa', [GradeController::class, 'forStudent'])->middleware('permission:nilai.view');
     });
 });

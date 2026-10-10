@@ -45,6 +45,8 @@ class RoleSeeder extends Seeder
                 'jadwal.view', 'jadwal.create', 'jadwal.update', 'jadwal.delete',
                 'absensi.view', 'absensi.create', 'absensi.update', 'absensi.delete',
                 'absensi.kunci',
+                'nilai.view', 'nilai.input', 'nilai.import', 'nilai.update',
+                'nilai.komponen', 'nilai.lock', 'nilai.release', 'nilai.rekap',
                 'pengguna.view', 'pengguna.create', 'pengguna.update',
                 'pengguna.delete', 'pengguna.reset-password',
                 'peran.view', 'peran.create', 'peran.update', 'peran.delete',
@@ -61,6 +63,7 @@ class RoleSeeder extends Seeder
                 'kelas.view',
                 'jadwal.view',
                 'absensi.view',
+                'nilai.view', 'nilai.komponen', 'nilai.release', 'nilai.rekap',
                 'dashboard.view',
                 'audit-log.view',
             ],
@@ -73,6 +76,7 @@ class RoleSeeder extends Seeder
                 'kelas.view',
                 'jadwal.view', 'jadwal.create', 'jadwal.update',
                 'absensi.view',
+                'nilai.view', 'nilai.rekap',
                 'dashboard.view',
             ],
             'wali-kelas' => [
@@ -81,6 +85,7 @@ class RoleSeeder extends Seeder
                 'wali-murid.view',
                 'jadwal.view',
                 'absensi.view', 'absensi.create', 'absensi.update', 'absensi.kunci',
+                'nilai.view', 'nilai.release', 'nilai.rekap', // ◐ rombel binaannya
                 'dashboard.view',
             ],
             'guru-mapel' => [
@@ -88,6 +93,7 @@ class RoleSeeder extends Seeder
                 'siswa.view', // ◐ hanya kelas ampuannya (policy)
                 'jadwal.view',
                 'absensi.view', 'absensi.create',
+                'nilai.view', 'nilai.input', 'nilai.import', 'nilai.update', 'nilai.rekap', // ◐ mapel ampuannya
                 'dashboard.view',
             ],
             'guru-bk' => [
@@ -95,17 +101,20 @@ class RoleSeeder extends Seeder
                 'siswa.view',
                 'wali-murid.view',
                 'absensi.view',
+                'nilai.view',
                 'dashboard.view',
             ],
             'siswa' => [
                 'tahun-ajaran.view',
                 'siswa.view', // ◐ datanya sendiri (policy)
+                'nilai.view', // ◐ nilai sendiri, hanya yang sudah dirilis (FR-707)
                 'dashboard.view',
             ],
             'orang-tua' => [
                 'tahun-ajaran.view',
                 'siswa.view', // ◐ anaknya (policy)
                 'wali-murid.view',
+                'nilai.view', // ◐ nilai anak, hanya yang sudah dirilis (FR-707)
                 'dashboard.view',
             ],
         ];

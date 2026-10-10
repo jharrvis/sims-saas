@@ -1,6 +1,8 @@
 <?php
 
 use App\Livewire\Akademik\AttendanceIndex;
+use App\Livewire\Akademik\GradeInput;
+use App\Livewire\Akademik\GradeLeger;
 use App\Livewire\Akademik\RombelForm;
 use App\Livewire\Akademik\RombelIndex;
 use App\Livewire\Akademik\RombelShow;
@@ -63,4 +65,9 @@ Route::middleware('auth')->group(function (): void {
     });
 
     Route::get('/absensi', AttendanceIndex::class)->name('absensi.index')->middleware('permission:absensi.view');
+
+    Route::prefix('nilai')->name('nilai.')->group(function (): void {
+        Route::get('/input', GradeInput::class)->name('input')->middleware('permission:nilai.input');
+        Route::get('/leger', GradeLeger::class)->name('leger')->middleware('permission:nilai.rekap');
+    });
 });

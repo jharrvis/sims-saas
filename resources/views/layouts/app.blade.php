@@ -38,7 +38,9 @@
             @can('absensi.view')
                 <x-nav-link href="{{ route('absensi.index') }}" icon="clipboard-check" label="Absensi Siswa" :active="request()->routeIs('absensi.*')" />
             @endcan
-            <x-nav-link href="#" icon="award" label="Data Nilai" />
+            @can('nilai.input')
+                <x-nav-link href="{{ route('nilai.input') }}" icon="award" label="Data Nilai" :active="request()->routeIs('nilai.*')" />
+            @endcan
             <x-nav-link href="#" icon="wallet" label="Keuangan SPP" />
             <x-nav-link href="#" icon="megaphone" label="Pengumuman" />
             <x-nav-link href="#" icon="bar-chart-3" label="Laporan" />

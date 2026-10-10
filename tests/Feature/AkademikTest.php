@@ -14,6 +14,7 @@ use App\Models\User;
 use App\Tenancy\TenantContext;
 use Database\Seeders\PermissionSeeder;
 use Database\Seeders\RoleSeeder;
+use Illuminate\Support\Collection;
 use Spatie\Permission\PermissionRegistrar;
 
 beforeEach(function (): void {
@@ -155,7 +156,7 @@ it('rekap absensi menghitung H/I/S/A per siswa', function (): void {
         '/api/v1/absensi/rekap?rombel_id='.$this->rombel->id.'&dari=2026-10-12&sampai=2026-10-14'
     )->assertOk();
 
-    /** @var \Illuminate\Support\Collection<int, array<string,mixed>> $data */
+    /** @var Collection<int, array<string,mixed>> $data */
     $data = collect($res->json('data'));
     /** @var array<string,mixed>|null $row1 */
     $row1 = $data->firstWhere('student_id', $s1->id);
