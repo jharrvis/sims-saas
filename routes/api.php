@@ -4,9 +4,11 @@ use App\Domains\Akademik\Http\Controllers\AkademikController;
 use App\Domains\Akademik\Http\Controllers\GradeController;
 use App\Domains\Akademik\Http\Controllers\RombelController;
 use App\Domains\Bk\Http\Controllers\BkController;
+use App\Domains\Broadcast\Http\Controllers\BroadcastController;
 use App\Domains\Ekskul\Http\Controllers\EkskulController;
 use App\Domains\ERapor\Http\Controllers\ERaporController;
 use App\Domains\Identity\Http\Controllers\AuthController;
+use App\Domains\Inventaris\Http\Controllers\InventarisController;
 use App\Domains\Kepegawaian\Http\Controllers\EmployeeController;
 use App\Domains\Kesiswaan\Http\Controllers\StudentController;
 use App\Domains\Keuangan\Http\Controllers\KeuanganController;
@@ -173,6 +175,22 @@ Route::prefix('v1')->group(function (): void {
             Route::get('tugas/{assignment}', [LmsController::class, 'show'])->middleware('permission:lms.view');
             Route::post('tugas/{assignment}/kumpul', [LmsController::class, 'submit'])->middleware('permission:lms.kumpul');
             Route::post('pengumpulan/{submission}/nilai', [LmsController::class, 'grade'])->middleware('permission:lms.nilai');
+        });
+
+        Route::prefix('broadcast')->middleware('module:broadcast')->group(function (): void {
+            Route::get('/', [BroadcastController::class, 'index'])->middleware('permission:broadcast.view');
+            Route::post('/', [BroadcastController::class, 'store'])->middleware('permission:broadcast.create');
+            Route::get('/{broadcast}', [BroadcastController::class, 'show'])->middleware('permission:broadcast.view');
+            Route::post('/{broadcast}/kirim', [BroadcastController::class, 'send'])->middleware('permission:broadcast.kirim');
+        });
+
+        Route::prefix('inventaris')->middleware('module:inventaris')->group(function (): void {
+            Route::get('/', [InventarisController::class, 'index'])->middleware('permission:aset.view');
+            Route::post('/', [InventarisController::class, 'store'])->middleware('permission:aset.create');
+            Route::get('kategori', [InventarisController::class, 'categoryIndex'])->middleware('permission:aset.view');
+            Route::post('kategori', [InventarisController::class, 'categoryStore'])->middleware('permission:aset.create');
+            Route::get('/{asset}', [InventarisController::class, 'show'])->middleware('permission:aset.view');
+            Route::post('/{asset}/mutasi', [InventarisController::class, 'mutate'])->middleware('permission:aset.mutasi');
         });
     });
 });

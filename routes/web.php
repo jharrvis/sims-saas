@@ -10,12 +10,18 @@ use App\Livewire\Akademik\RombelShow;
 use App\Livewire\Akademik\ScheduleForm;
 use App\Livewire\Akademik\ScheduleIndex;
 use App\Livewire\Akademik\SubjectIndex;
+use App\Livewire\Aset\AssetForm;
+use App\Livewire\Aset\AssetIndex;
+use App\Livewire\Aset\AssetShow;
 use App\Livewire\Auth\Login;
 use App\Livewire\Auth\SetupTwoFactor;
 use App\Livewire\Auth\TenantSwitcher;
 use App\Livewire\Auth\VerifyMfa;
 use App\Livewire\Bk\CounselingForm;
 use App\Livewire\Bk\CounselingIndex;
+use App\Livewire\Broadcast\BroadcastForm;
+use App\Livewire\Broadcast\BroadcastIndex;
+use App\Livewire\Broadcast\BroadcastShow;
 use App\Livewire\Ekskul\AchievementIndex;
 use App\Livewire\Ekskul\EkskulForm;
 use App\Livewire\Ekskul\EkskulIndex;
@@ -184,5 +190,21 @@ Route::middleware('auth')->group(function (): void {
         Route::get('/buat', AssignmentForm::class)->name('create')->middleware('permission:lms.tugas.create');
         Route::get('/{assignment}/ubah', AssignmentForm::class)->name('edit')->middleware('permission:lms.tugas.update');
         Route::get('/{assignment}', AssignmentShow::class)->name('show')->middleware('permission:lms.view');
+    });
+
+    // Broadcast — modul add-on (feature flag)
+    Route::prefix('broadcast')->name('broadcast.')->middleware('module:broadcast')->group(function (): void {
+        Route::get('/', BroadcastIndex::class)->name('index')->middleware('permission:broadcast.view');
+        Route::get('/buat', BroadcastForm::class)->name('create')->middleware('permission:broadcast.create');
+        Route::get('/{broadcast}/ubah', BroadcastForm::class)->name('edit')->middleware('permission:broadcast.update');
+        Route::get('/{broadcast}', BroadcastShow::class)->name('show')->middleware('permission:broadcast.view');
+    });
+
+    // Inventaris & Aset — modul add-on (feature flag)
+    Route::prefix('aset')->name('aset.')->middleware('module:inventaris')->group(function (): void {
+        Route::get('/', AssetIndex::class)->name('index')->middleware('permission:aset.view');
+        Route::get('/tambah', AssetForm::class)->name('create')->middleware('permission:aset.create');
+        Route::get('/{asset}/ubah', AssetForm::class)->name('edit')->middleware('permission:aset.update');
+        Route::get('/{asset}', AssetShow::class)->name('show')->middleware('permission:aset.view');
     });
 });
