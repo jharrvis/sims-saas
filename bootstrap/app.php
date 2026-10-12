@@ -17,7 +17,7 @@ use Spatie\Permission\Middleware\PermissionMiddleware;
 use Spatie\Permission\Middleware\RoleMiddleware;
 use Spatie\Permission\Middleware\RoleOrPermissionMiddleware;
 
-return Application::configure(basePath: dirname(__DIR__))
+$app = Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
         api: __DIR__.'/../routes/api.php',
@@ -49,3 +49,13 @@ return Application::configure(basePath: dirname(__DIR__))
             fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
         );
     })->create();
+
+// Folder public terpisah dari base path (mis. deploy HestiaCP: app di
+// private/, docroot di public_html/public) — diaktifkan via PUBLIC_PATH.
+$publicPath = $_SERVER['PUBLIC_PATH'] ?? $_ENV['PUBLIC_PATH'] ?? null;
+
+if (is_string($publicPath) && $publicPath !== '') {
+    $app->usePublicPath($publicPath);
+}
+
+return $app;
