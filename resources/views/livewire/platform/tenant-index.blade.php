@@ -6,6 +6,10 @@
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
         <h1 class="text-2xl font-extrabold">Tenant</h1>
         <div class="flex flex-wrap items-center gap-2">
+            @if (auth()->user()?->hasPermissionTo('platform.tenant.create', 'platform'))
+                <a href="{{ route('platform.tenants.create') }}"
+                   class="rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:opacity-90">+ Tambah Tenant</a>
+            @endif
             <input type="search" wire:model.live.debounce.300ms="search" placeholder="Cari nama / NPSN…"
                    aria-label="Cari tenant"
                    class="rounded-lg border border-slate-200 bg-white py-2.5 px-4 text-sm outline-none focus:border-primary">

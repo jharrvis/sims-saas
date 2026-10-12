@@ -34,6 +34,9 @@
             @if ($u->hasPermissionTo('platform.audit.view', 'platform'))
                 <x-nav-link href="{{ route('platform.audit') }}" icon="scroll-text" label="Audit Log" :active="request()->routeIs('platform.audit')" />
             @endif
+            @if ($u->activeMemberships()->exists())
+                <x-nav-link href="{{ route('dashboard') }}" icon="school" label="Dashboard Sekolah" :active="false" />
+            @endif
         </nav>
         <div class="px-5 py-4 border-t border-slate-700/50 text-xs">
             <p class="font-semibold text-white">{{ $u->name }}</p>

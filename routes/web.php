@@ -66,6 +66,7 @@ use App\Livewire\Platform\InvoiceIndex as PlatformInvoices;
 use App\Livewire\Platform\ModuleIndex as PlatformModules;
 use App\Livewire\Platform\PlanIndex as PlatformPlans;
 use App\Livewire\Platform\SubscriptionIndex as PlatformSubscriptions;
+use App\Livewire\Platform\TenantCreate as PlatformTenantCreate;
 use App\Livewire\Platform\TenantIndex as PlatformTenants;
 use App\Livewire\Platform\TenantShow as PlatformTenantShow;
 use App\Livewire\Ppdb\PpdbApplicantForm;
@@ -100,8 +101,10 @@ use App\Livewire\Uks\MedicineIndex;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    // Operator platform tidak punya tenant — langsung ke panel platform.
-    if (auth()->user()?->is_platform) {
+    $user = auth()->user();
+    // Operator platform murni (tanpa membership sekolah) → panel platform.
+    // Yang punya membership tetap bisa membuka dashboard sekolahnya.
+    if ($user?->is_platform && $user->activeMemberships()->doesntExist()) {
         return redirect()->route('platform.dashboard');
     }
 
@@ -324,6 +327,7 @@ Route::middleware(['auth', 'mfa'])->group(function (): void {
 Route::prefix('platform')->name('platform.')->middleware(['auth', 'mfa', 'platform'])->group(function (): void {
     Route::get('/', PlatformDashboard::class)->name('dashboard')->middleware('platform:platform.metrics.view');
     Route::get('/tenants', PlatformTenants::class)->name('tenants')->middleware('platform:platform.tenant.view');
+    Route::get('/tenants/baru', PlatformTenantCreate::class)->name('tenants.create')->middleware('platform:platform.tenant.create');
     Route::get('/tenants/{schoolId}', PlatformTenantShow::class)->name('tenants.show')->middleware('platform:platform.tenant.view');
     Route::get('/paket', PlatformPlans::class)->name('plans')->middleware('platform:platform.plan.view');
     Route::get('/modul', PlatformModules::class)->name('modules')->middleware('platform:platform.module.view');
