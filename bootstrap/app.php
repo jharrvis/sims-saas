@@ -30,13 +30,22 @@ $app = Application::configure(basePath: dirname(__DIR__))
         // mixed content pada redirect Livewire dkk).
         $middleware->trustProxies(at: '*');
 
+        // ResolveTenant & SetSpatieTeam HARUS di grup web (setelah session
+        // dimulai) — bukan global. Sebagai global middleware, keduanya
+        // berjalan sebelum session sehingga $request->user() selalu null
+        // dan fallback membership tidak pernah bekerja di domain pusat.
+        // Tetap berjalan SEBELUM route middleware `auth` (P0-02).
+        $middleware->web(append: [
+            ResolveTenant::class,
+            SetSpatieTeam::class,
+        ]);
+
         // Tamu yang membuka area PWA diarahkan ke login PWA, bukan login admin.
         Authenticate::redirectUsing(fn (Request $request) => $request->is('pwa', 'pwa/*')
             ? route('pwa.login')
             : route('login'));
 
-        $middleware->append(ResolveTenant::class);
-        $middleware->append(SetSpatieTeam::class);
+        // (ResolveTenant & SetSpatieTeam dipindah ke grup web — lihat di atas.)
         $middleware->alias([
             'mfa' => RequireMfa::class,
             'platform' => RequirePlatform::class,

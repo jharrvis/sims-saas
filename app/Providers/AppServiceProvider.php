@@ -7,6 +7,7 @@ use App\Domains\Identity\Services\FonnteWaSender;
 use App\Domains\Identity\Services\LogWaSender;
 use App\Domains\Pwa\Services\PwaContext;
 use App\Tenancy\TenantContext;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use PragmaRX\Google2FA\Google2FA;
 
@@ -36,6 +37,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Paksa URL https bila APP_URL https (produksi di balik Cloudflare).
+        // Lapis kedua setelah trustProxies: menjamin route()/asset() tidak
+        // pernah menghasilkan http:// apapun header yang diterima.
+        if (str_starts_with((string) config('app.url'), 'https://')) {
+            URL::forceScheme('https');
+        }
     }
 }
