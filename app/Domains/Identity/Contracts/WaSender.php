@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Domains\Identity\Contracts;
 
 /**
- * Abstraksi pengirim WhatsApp (Dok 11: provider WA).
- * Implementasi produksi memakai template Meta kategori authentication;
+ * Abstraksi pengirim WhatsApp.
+ * Implementasi produksi: Fonnte (keputusan 12 Okt 2026);
  * implementasi dev (LogWaSender) hanya mencatat ke log.
  */
 interface WaSender

@@ -1,0 +1,121 @@
+# Panduan Deploy Production — HestiaCP
+
+> Keputusan: deploy di HestiaCP; secret diisi manual saat deploy (12 Okt 2026).
+
+## 1. Prasyarat Server
+
+- HestiaCP terinstal, dengan **PHP 8.3** tersedia (Server → Configure → PHP).
+- Ekstensi PHP: `mbstring`, `xml`, `sqlite3`, `curl`, `zip`, `bcmath`, `intl`, `mysqlnd`.
+- Composer terinstal untuk user hosting.
+- MySQL/MariaDB.
+
+## 2. Siapkan Domain & Database (Panel HestiaCP)
+
+1. **Web → Add Web Domain** — mis. `sims.id`.
+   - PHP version: **8.3**.
+   - Aktifkan **SSL** (Let's Encrypt) setelah DNS mengarah ke server.
+   - **Document Root**: arahkan ke folder `public` Laravel
+     (HestiaCP: Web → Edit Domain → Advanced → Document Root → `public`).
+2. **DB → Add Database** — catat nama DB, user, password.
+
+## 3. Deploy Kode
+
+Via SSH sebagai user HestiaCP:
+
+```bash
+cd ~/web/sims.id
+git clone https://github.com/jharrvis/sims-saas.git app
+cd app
+```
+
+> **Penting — file yang belum ada di remote GitHub** (keterbatasan API):
+> upload manual via web GitHub sebelum clone:
+> - `composer.lock` (klik Add file → Upload files di root repo)
+> - `.github/workflows/ci.yml`
+>
+> Tanpa `composer.lock`, `composer install` akan me-resolve dependency baru
+> (berisiko versi berbeda dari yang diuji).
+
+## 4. Konfigurasi `.env`
+
+```bash
+cp .env.example .env
+php artisan key:generate
+```
+
+Isi (secret diberikan saat deploy):
+
+| Key | Keterangan |
+|---|---|
+| `APP_URL` | `https://sims.id` |
+| `DB_CONNECTION` | `mysql` |
+| `DB_HOST` / `DB_PORT` / `DB_DATABASE` / `DB_USERNAME` / `DB_PASSWORD` | dari panel HestiaCP |
+| `WA_DRIVER` | `fonnte` |
+| `FONNTE_TOKEN` | token perangkat Fonnte |
+| `MIDTRANS_MERCHANT_ID` / `MIDTRANS_CLIENT_KEY` / `MIDTRANS_SERVER_KEY` | dashboard Midtrans |
+| `MIDTRANS_IS_PRODUCTION` | `true` (setelah uji sandbox) |
+| `PUSH_VAPID_PUBLIC_KEY` / `PUSH_VAPID_PRIVATE_KEY` | generate baru untuk production |
+| `PUSH_VAPID_SUBJECT` | `mailto:ops@sims.id` |
+| `QUEUE_CONNECTION` | `database` |
+
+## 5. Instalasi & Migrasi
+
+```bash
+composer install --no-dev --optimize-autoloader
+php artisan migrate --force
+php artisan storage:link
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+```
+
+Pastikan writable: `storage/`, `bootstrap/cache/` (owner = user HestiaCP).
+
+Buat akun operator platform pertama:
+
+```bash
+php artisan platform:make-admin 62812xxxxxxx --name="Operator"
+```
+
+## 6. Cron Jobs (Panel HestiaCP → User → Cron Jobs)
+
+Jalankan setiap menit (ganti `user` dan domain sesuai):
+
+```
+* * * * * cd /home/user/web/sims.id/app && php artisan schedule:run >> /dev/null 2>&1
+* * * * * cd /home/user/web/sims.id/app && php artisan queue:work --stop-when-empty --max-time=50 --tries=3 >> /dev/null 2>&1
+```
+
+- Baris 1: scheduler Laravel (broadcast terjadwal, dunning langganan harian).
+- Baris 2: queue worker tanpa supervisor — HestiaCP tidak menyediakan
+  supervisor, jadi worker dijalankan per menit dan berhenti saat antrean kosong.
+  Cukup untuk tahap awal; pindah ke supervisor/daemon bila volume naik.
+
+## 7. Midtrans
+
+1. Di dashboard Midtrans → Settings → Notification URL, isi:
+   `https://sims.id/api/v1/webhooks/midtrans`
+2. Uji dengan **sandbox** dulu (`MIDTRANS_IS_PRODUCTION=false`):
+   daftar trial → terbitkan tagihan → bayar via Snap → pastikan status Lunas.
+3. Setelah lolos, aktifkan production.
+
+## 8. Verifikasi Production
+
+- [ ] `https://sims.id/daftar` — pendaftaran trial berhasil
+- [ ] Login WA OTP — kode benar-benar terkirim via Fonnte
+- [ ] `https://sims.id/platform` — panel operator (akun `platform:make-admin`)
+- [ ] PWA: subscribe push di Profil → kirim pengumuman → notifikasi masuk
+- [ ] Bayar tagihan Midtrans sandbox → webhook → status Lunas
+- [ ] `php artisan schedule:list` — job harian terdaftar
+- [ ] Log: `storage/logs/laravel.log` bersih dari error
+
+## 9. Troubleshooting
+
+| Gejala | Periksa |
+|---|---|
+| 500 saat buka situs | `storage/logs/laravel.log`; permission `storage/` & `bootstrap/cache/` |
+| OTP tidak terkirim | `WA_DRIVER=fonnte`, `FONNTE_TOKEN` terisi; cek log `[WA-OTP]`/`fonnte:` |
+| Job antrean menumpuk | cron `queue:work` aktif; `QUEUE_CONNECTION=database`; tabel `jobs` ada |
+| Dunning tidak jalan | cron `schedule:run` tiap menit; `php artisan schedule:list` |
+| Webhook Midtrans 403 | signature cocok dengan `MIDTRANS_SERVER_KEY` yang benar |
+| Aset 404 (CSS/JS) | jalankan `npm run build` lalu upload folder `public/build`, atau build di server bila Node tersedia |

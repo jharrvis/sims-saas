@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Domains\Identity\Contracts\WaSender;
+use App\Domains\Identity\Services\FonnteWaSender;
 use App\Domains\Identity\Services\LogWaSender;
 use App\Domains\Pwa\Services\PwaContext;
 use App\Tenancy\TenantContext;
@@ -19,8 +20,13 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(TenantContext::class);
         $this->app->singleton(PwaContext::class);
 
-        // Provider WA: LogWaSender untuk dev; Meta Cloud API untuk produksi (Dok 11)
-        $this->app->bind(WaSender::class, LogWaSender::class);
+        // Provider WA: LogWaSender untuk dev; Fonnte untuk produksi
+        // (keputusan pemilik produk 12 Okt 2026).
+        $this->app->bind(WaSender::class, function (): WaSender {
+            return config('wa.driver') === 'fonnte'
+                ? new FonnteWaSender
+                : new LogWaSender;
+        });
 
         $this->app->singleton(Google2FA::class);
     }
