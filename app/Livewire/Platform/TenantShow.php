@@ -15,6 +15,7 @@ use App\Models\Subscription;
 use App\Models\TenantModule;
 use App\Models\TenantQuotaOverride;
 use App\Models\TenantUsage;
+use App\Models\User;
 use App\Scopes\SchoolScope;
 use Illuminate\View\View;
 use Livewire\Component;
@@ -107,6 +108,43 @@ class TenantShow extends Component
             ->where('school_id', $this->school->id)
             ->whereKey($id)
             ->delete();
+    }
+
+    /**
+     * Impersonate: masuk sebagai admin sekolah untuk keperluan dukungan.
+     * Dicatat di audit; target hanya akun non-platform; keluar via stop route.
+     */
+    public function impersonate(): void
+    {
+        $operator = auth()->user();
+        abort_unless($operator->hasPermissionTo('platform.tenant.impersonate', 'platform'), 403);
+
+        $target = User::where('is_platform', false)
+            ->whereHas('memberships', fn ($q) => $q->where('school_id', $this->school->id)->aktif())
+            ->orderBy('id')
+            ->first();
+
+        abort_if(! $target, 404, 'Sekolah ini belum memiliki admin.');
+
+        session([
+            'impersonator_id' => $operator->id,
+            'impersonate_school_id' => $this->school->id,
+            'active_school_id' => $this->school->id,
+        ]);
+
+        AuditLog::create([
+            'school_id' => $this->school->id,
+            'user_id' => $operator->id,
+            'aksi' => 'impersonate.start',
+            'model_type' => User::class,
+            'model_id' => (string) $target->id,
+            'after' => ['target' => $target->name, 'via' => 'platform'],
+            'ip_address' => request()->ip(),
+        ]);
+
+        auth()->login($target);
+
+        $this->redirect(route('dashboard'), navigate: true);
     }
 
     public function render(PlatformService $platform): View

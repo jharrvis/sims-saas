@@ -81,6 +81,7 @@ class PermissionSeeder extends Seeder
             // guard platform (operator SaaS)
             'platform' => [
                 'platform.tenant.view', 'platform.tenant.create', 'platform.tenant.suspend',
+                'platform.tenant.impersonate',
                 'platform.plan.manage', 'platform.plan.view',
                 'platform.module.toggle', 'platform.module.view',
                 'platform.metrics.view',

@@ -79,6 +79,20 @@ class User extends Authenticatable
     }
 
     /**
+     * Nama route tujuan setelah login berhasil.
+     * Akun peran ganda (operator platform + admin sekolah) memilih dulu
+     * di halaman pilih-peran.
+     */
+    public function ruteSetelahLogin(): string
+    {
+        if ($this->is_platform && $this->activeMemberships()->exists()) {
+            return 'pilih-peran';
+        }
+
+        return $this->is_platform ? 'platform.dashboard' : 'dashboard';
+    }
+
+    /**
      * @return HasOne<MfaSecret, $this>
      */
     public function mfaSecret(): HasOne

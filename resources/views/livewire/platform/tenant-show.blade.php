@@ -4,7 +4,15 @@
     @endif
 
     <a href="{{ route('platform.tenants') }}" class="text-sm text-slate-500 hover:underline">← Kembali ke daftar tenant</a>
-    <h1 class="text-2xl font-extrabold mt-1 mb-1">{{ $school->nama }}</h1>
+    <div class="flex flex-wrap items-center justify-between gap-3">
+        <h1 class="text-2xl font-extrabold mt-1 mb-1">{{ $school->nama }}</h1>
+        @if (auth()->user()?->hasPermissionTo('platform.tenant.impersonate', 'platform'))
+            <button wire:click="impersonate" wire:confirm="Masuk sebagai admin {{ $school->nama }}? Aksi ini dicatat di audit log."
+                    class="rounded-lg bg-amber-500 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-600">
+                Masuk sebagai Admin
+            </button>
+        @endif
+    </div>
     <p class="text-sm text-slate-500 mb-6">{{ $school->jenjang }}@if($school->npsn) · NPSN {{ $school->npsn }}@endif · Status: <span class="font-semibold">{{ str_replace('_', ' ', $school->status_langganan) }}</span></p>
 
     <div class="grid lg:grid-cols-2 gap-6">

@@ -19,6 +19,7 @@ use App\Livewire\Aset\AssetForm;
 use App\Livewire\Aset\AssetIndex;
 use App\Livewire\Aset\AssetShow;
 use App\Livewire\Auth\Login;
+use App\Livewire\Auth\PilihPeran;
 use App\Livewire\Auth\SetupTwoFactor;
 use App\Livewire\Auth\TenantSwitcher;
 use App\Livewire\Auth\VerifyMfa;
@@ -98,6 +99,8 @@ use App\Livewire\Transportasi\RouteShow;
 use App\Livewire\Uks\HealthVisitForm;
 use App\Livewire\Uks\HealthVisitIndex;
 use App\Livewire\Uks\MedicineIndex;
+use App\Models\AuditLog;
+use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -124,6 +127,7 @@ Route::get('/mfa/verify', VerifyMfa::class)->name('mfa.verify');
 Route::middleware(['auth', 'mfa'])->group(function (): void {
     Route::get('/2fa/setup', SetupTwoFactor::class)->name('2fa.setup');
     Route::get('/pilih-sekolah', TenantSwitcher::class)->name('tenant.switch');
+    Route::get('/pilih-peran', PilihPeran::class)->name('pilih-peran');
 
     // Langganan sekolah — paket & tagihan milik tenant sendiri
     Route::get('/langganan', LanggananIndex::class)->name('langganan')->middleware('permission:langganan.view');
@@ -342,6 +346,29 @@ Route::prefix('platform')->name('platform.')->middleware(['auth', 'mfa', 'platfo
         return redirect()->route('login');
     })->name('logout');
 });
+
+// Berhenti impersonate — di luar middleware `platform` karena user aktif
+// saat ini adalah admin sekolah yang di-impersonate (bukan operator).
+Route::post('/platform/impersonate/stop', function () {
+    $impersonator = session('impersonator_id') ? User::find(session('impersonator_id')) : null;
+    abort_unless($impersonator?->is_platform, 403, 'Bukan sesi impersonate.');
+
+    $schoolId = session('impersonate_school_id');
+
+    AuditLog::create([
+        'school_id' => $schoolId,
+        'user_id' => $impersonator->id,
+        'aksi' => 'impersonate.stop',
+        'model_type' => User::class,
+        'model_id' => (string) auth()->id(),
+        'ip_address' => request()->ip(),
+    ]);
+
+    auth()->login($impersonator);
+    session()->forget(['impersonator_id', 'impersonate_school_id']);
+
+    return redirect()->route('platform.tenants.show', $schoolId);
+})->middleware(['auth'])->name('platform.impersonate.stop');
 
 // PWA Siswa & Orang Tua — mobile-first, installable (Dok 07: P-01 s.d. P-06)
 Route::prefix('pwa')->name('pwa.')->group(function (): void {

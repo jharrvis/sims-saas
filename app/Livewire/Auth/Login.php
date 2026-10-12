@@ -89,10 +89,8 @@ class Login extends Component
         ]);
 
         // Operator platform langsung ke panel platform, bukan dashboard sekolah.
-        $this->redirect(
-            $user->is_platform ? route('platform.dashboard') : route('dashboard'),
-            navigate: true
-        );
+        // Akun peran ganda (platform + sekolah) memilih dulu di pilih-peran.
+        $this->redirect(route($user->ruteSetelahLogin()), navigate: true);
     }
 
     public function back(): void
