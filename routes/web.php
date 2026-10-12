@@ -100,6 +100,11 @@ use App\Livewire\Uks\MedicineIndex;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
+    // Operator platform tidak punya tenant — langsung ke panel platform.
+    if (auth()->user()?->is_platform) {
+        return redirect()->route('platform.dashboard');
+    }
+
     return view('dashboard');
 })->name('dashboard')->middleware(['auth', 'mfa']);
 

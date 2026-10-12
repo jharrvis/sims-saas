@@ -66,14 +66,14 @@ it('user platform dengan MFA aktif tetapi sesi belum terverifikasi dipaksa ke mf
     $this->actingAs($user)->get('/mfa/verify')->assertOk();
 });
 
-it('user platform dengan sesi MFA terverifikasi bisa membuka dashboard', function (): void {
+it('user platform dengan sesi MFA terverifikasi diarahkan ke panel platform', function (): void {
     $user = buatUserKeamanan('platform3', true);
     konfirmasiMfa($user);
 
     $this->actingAs($user)
         ->withSession(['mfa_verified_'.$user->id => true])
         ->get('/')
-        ->assertOk();
+        ->assertRedirect(route('platform.dashboard'));
 });
 
 it('user biasa tidak pernah dipaksa MFA', function (): void {

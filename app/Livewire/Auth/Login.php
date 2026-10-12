@@ -88,7 +88,11 @@ class Login extends Component
             'ip_address' => request()->ip(),
         ]);
 
-        $this->redirect(route('dashboard'), navigate: true);
+        // Operator platform langsung ke panel platform, bukan dashboard sekolah.
+        $this->redirect(
+            $user->is_platform ? route('platform.dashboard') : route('dashboard'),
+            navigate: true
+        );
     }
 
     public function back(): void

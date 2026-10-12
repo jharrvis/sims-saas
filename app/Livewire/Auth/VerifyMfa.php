@@ -81,7 +81,10 @@ class VerifyMfa extends Component
 
         Auth::login($user, remember: true);
 
-        $this->redirect(route('dashboard'), navigate: true);
+        $this->redirect(
+            $user->is_platform ? route('platform.dashboard') : route('dashboard'),
+            navigate: true
+        );
     }
 
     public function render(): View
