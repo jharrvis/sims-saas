@@ -16,7 +16,7 @@
    - Aktifkan **SSL** (Let's Encrypt) setelah DNS mengarah ke server.
    - **Custom Document Root**: arahkan ke folder `public` Laravel —
      di HestiaCP: Web → Edit Domain → Advanced options → Custom document root,
-     isi `app/public` (relatif terhadap folder domain).
+     isi `public_html/public` (relatif terhadap folder domain).
    - Catatan: folder tujuan harus sudah ada saat di-set (HestiaCP menolak bila
      tidak ada) — jadi lakukan langkah ini **setelah clone di langkah 3**.
 2. **DB → Add Database** — catat nama DB, user, password.
@@ -27,15 +27,15 @@ Via SSH sebagai user HestiaCP:
 
 ```bash
 cd ~/web/simsapp.my.id
-git clone https://github.com/jharrvis/sims-saas.git app
-cd app
+git clone https://github.com/jharrvis/sims-saas.git private/app
+cd private/app
 ```
 
 > Repo ini **private** — clone HTTPS polos akan ditolak GitHub. Pakai salah satu:
 > - Fine-grained PAT (hanya permission Contents: Read di repo ini):
->   `git clone https://<TOKEN>@github.com/jharrvis/sims-saas.git app`
+>   `git clone https://<TOKEN>@github.com/jharrvis/sims-saas.git private/app`
 > - atau SSH deploy key (Settings repo → Deploy keys), lalu
->   `git clone git@github.com:jharrvis/sims-saas.git app`.
+>   `git clone git@github.com:jharrvis/sims-saas.git private/app`.
 > Jangan taruh token di riwayat shell bersama (`export` + variabel bila perlu).
 
 > **Layout HestiaCP (PENTING):** PHP-FPM HestiaCP membatasi `open_basedir`
@@ -111,8 +111,8 @@ php artisan platform:make-admin 62812xxxxxxx --name="Operator"
 Jalankan setiap menit (ganti `user` dan domain sesuai):
 
 ```
-* * * * * cd /home/user/web/simsapp.my.id/app && php artisan schedule:run >> /dev/null 2>&1
-* * * * * cd /home/user/web/simsapp.my.id/app && php artisan queue:work --stop-when-empty --max-time=50 --tries=3 >> /dev/null 2>&1
+* * * * * cd /home/user/web/simsapp.my.id/private/app && php artisan schedule:run >> /dev/null 2>&1
+* * * * * cd /home/user/web/simsapp.my.id/private/app && php artisan queue:work --stop-when-empty --max-time=50 --tries=3 >> /dev/null 2>&1
 ```
 
 - Baris 1: scheduler Laravel (broadcast terjadwal, dunning langganan harian).

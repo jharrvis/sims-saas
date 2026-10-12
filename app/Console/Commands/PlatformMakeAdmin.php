@@ -35,6 +35,7 @@ class PlatformMakeAdmin extends Command
 
         if ($user === null) {
             $user = User::create([
+                'username' => 'platform-'.$phone,
                 'name' => $name,
                 'phone' => $phone,
                 'is_platform' => true,
