@@ -119,8 +119,11 @@ class TenantShow extends Component
         $operator = auth()->user();
         abort_unless($operator->hasPermissionTo('platform.tenant.impersonate', 'platform'), 403);
 
-        $target = User::where('is_platform', false)
-            ->whereHas('memberships', fn ($q) => $q->where('school_id', $this->school->id)->aktif())
+        $target = User::whereHas('memberships', fn ($q) => $q->where('school_id', $this->school->id)->aktif())
+            // Utamakan admin non-platform; operator sendiri boleh bila memang
+            // anggota sekolah (kasus peran ganda). Operator platform lain dikecualikan.
+            ->where(fn ($q) => $q->where('is_platform', false)->orWhere('id', $operator->id))
+            ->orderByRaw('is_platform asc')
             ->orderBy('id')
             ->first();
 

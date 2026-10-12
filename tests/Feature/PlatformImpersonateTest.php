@@ -108,6 +108,23 @@ it('sekolah tanpa admin tidak bisa di-impersonate', function (): void {
         ->assertNotFound();
 });
 
+it('operator peran ganda bisa impersonate dirinya sebagai admin sekolah', function (): void {
+    $operator = opImpersonate();
+    $school = School::create([
+        'nama' => 'SDN Dual Imp', 'slug' => 'sdn-dual-imp-'.uniqid(), 'jenjang' => 'SD',
+        'status' => 'aktif', 'status_langganan' => 'trialing',
+    ]);
+    Membership::create(['user_id' => $operator->id, 'school_id' => $school->id, 'status' => 'aktif']);
+
+    Livewire::actingAs($operator)
+        ->test(TenantShow::class, ['schoolId' => $school->id])
+        ->call('impersonate')
+        ->assertRedirect(route('dashboard'));
+
+    expect(auth()->id())->toBe($operator->id)
+        ->and(session('impersonator_id'))->toBe($operator->id);
+});
+
 it('berhenti impersonate kembali menjadi operator', function (): void {
     $operator = opImpersonate();
     [$school, $admin] = sekolahDenganAdmin('SDN Stop');
