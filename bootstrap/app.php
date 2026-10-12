@@ -25,6 +25,11 @@ $app = Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Di balik Cloudflare (TLS terminasi di edge): percayai header
+        // X-Forwarded-* agar URL yang dibuat ber-scheme https (hindari
+        // mixed content pada redirect Livewire dkk).
+        $middleware->trustProxies(at: '*');
+
         // Tamu yang membuka area PWA diarahkan ke login PWA, bukan login admin.
         Authenticate::redirectUsing(fn (Request $request) => $request->is('pwa', 'pwa/*')
             ? route('pwa.login')
