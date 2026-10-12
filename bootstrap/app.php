@@ -40,6 +40,12 @@ $app = Application::configure(basePath: dirname(__DIR__))
             SetSpatieTeam::class,
         ]);
 
+        // API: resolusi tenant + team harus terjadi SEBELUM SubstituteBindings
+        // agar route model binding ter-scope tenant yang benar.
+        $middleware->api(prepend: [
+            EnsureTenantResolved::class,
+        ]);
+
         // Tamu yang membuka area PWA diarahkan ke login PWA, bukan login admin.
         Authenticate::redirectUsing(fn (Request $request) => $request->is('pwa', 'pwa/*')
             ? route('pwa.login')
