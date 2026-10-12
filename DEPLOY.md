@@ -11,11 +11,14 @@
 
 ## 2. Siapkan Domain & Database (Panel HestiaCP)
 
-1. **Web → Add Web Domain** — mis. `sims.id`.
+1. **Web → Add Web Domain** — mis. `simsapp.my.id`.
    - PHP version: **8.3**.
    - Aktifkan **SSL** (Let's Encrypt) setelah DNS mengarah ke server.
-   - **Document Root**: arahkan ke folder `public` Laravel
-     (HestiaCP: Web → Edit Domain → Advanced → Document Root → `public`).
+   - **Custom Document Root**: arahkan ke folder `public` Laravel —
+     di HestiaCP: Web → Edit Domain → Advanced options → Custom document root,
+     isi `app/public` (relatif terhadap folder domain).
+   - Catatan: folder tujuan harus sudah ada saat di-set (HestiaCP menolak bila
+     tidak ada) — jadi lakukan langkah ini **setelah clone di langkah 3**.
 2. **DB → Add Database** — catat nama DB, user, password.
 
 ## 3. Deploy Kode
@@ -23,10 +26,17 @@
 Via SSH sebagai user HestiaCP:
 
 ```bash
-cd ~/web/sims.id
+cd ~/web/simsapp.my.id
 git clone https://github.com/jharrvis/sims-saas.git app
 cd app
 ```
+
+> Repo ini **private** — clone HTTPS polos akan ditolak GitHub. Pakai salah satu:
+> - Fine-grained PAT (hanya permission Contents: Read di repo ini):
+>   `git clone https://<TOKEN>@github.com/jharrvis/sims-saas.git app`
+> - atau SSH deploy key (Settings repo → Deploy keys), lalu
+>   `git clone git@github.com:jharrvis/sims-saas.git app`.
+> Jangan taruh token di riwayat shell bersama (`export` + variabel bila perlu).
 
 > **Penting — file yang belum ada di remote GitHub** (keterbatasan API):
 > upload manual via web GitHub sebelum clone:
@@ -47,7 +57,7 @@ Isi (secret diberikan saat deploy):
 
 | Key | Keterangan |
 |---|---|
-| `APP_URL` | `https://sims.id` |
+| `APP_URL` | `https://simsapp.my.id` |
 | `DB_CONNECTION` | `mysql` |
 | `DB_HOST` / `DB_PORT` / `DB_DATABASE` / `DB_USERNAME` / `DB_PASSWORD` | dari panel HestiaCP |
 | `WA_DRIVER` | `fonnte` |
@@ -55,7 +65,7 @@ Isi (secret diberikan saat deploy):
 | `MIDTRANS_MERCHANT_ID` / `MIDTRANS_CLIENT_KEY` / `MIDTRANS_SERVER_KEY` | dashboard Midtrans |
 | `MIDTRANS_IS_PRODUCTION` | `true` (setelah uji sandbox) |
 | `PUSH_VAPID_PUBLIC_KEY` / `PUSH_VAPID_PRIVATE_KEY` | generate baru untuk production |
-| `PUSH_VAPID_SUBJECT` | `mailto:ops@sims.id` |
+| `PUSH_VAPID_SUBJECT` | `mailto:ops@simsapp.my.id` |
 | `QUEUE_CONNECTION` | `database` |
 
 ## 5. Instalasi & Migrasi
@@ -82,8 +92,8 @@ php artisan platform:make-admin 62812xxxxxxx --name="Operator"
 Jalankan setiap menit (ganti `user` dan domain sesuai):
 
 ```
-* * * * * cd /home/user/web/sims.id/app && php artisan schedule:run >> /dev/null 2>&1
-* * * * * cd /home/user/web/sims.id/app && php artisan queue:work --stop-when-empty --max-time=50 --tries=3 >> /dev/null 2>&1
+* * * * * cd /home/user/web/simsapp.my.id/app && php artisan schedule:run >> /dev/null 2>&1
+* * * * * cd /home/user/web/simsapp.my.id/app && php artisan queue:work --stop-when-empty --max-time=50 --tries=3 >> /dev/null 2>&1
 ```
 
 - Baris 1: scheduler Laravel (broadcast terjadwal, dunning langganan harian).
@@ -94,16 +104,16 @@ Jalankan setiap menit (ganti `user` dan domain sesuai):
 ## 7. Midtrans
 
 1. Di dashboard Midtrans → Settings → Notification URL, isi:
-   `https://sims.id/api/v1/webhooks/midtrans`
+   `https://simsapp.my.id/api/v1/webhooks/midtrans`
 2. Uji dengan **sandbox** dulu (`MIDTRANS_IS_PRODUCTION=false`):
    daftar trial → terbitkan tagihan → bayar via Snap → pastikan status Lunas.
 3. Setelah lolos, aktifkan production.
 
 ## 8. Verifikasi Production
 
-- [ ] `https://sims.id/daftar` — pendaftaran trial berhasil
+- [ ] `https://simsapp.my.id/daftar` — pendaftaran trial berhasil
 - [ ] Login WA OTP — kode benar-benar terkirim via Fonnte
-- [ ] `https://sims.id/platform` — panel operator (akun `platform:make-admin`)
+- [ ] `https://simsapp.my.id/platform` — panel operator (akun `platform:make-admin`)
 - [ ] PWA: subscribe push di Profil → kirim pengumuman → notifikasi masuk
 - [ ] Bayar tagihan Midtrans sandbox → webhook → status Lunas
 - [ ] `php artisan schedule:list` — job harian terdaftar
