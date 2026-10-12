@@ -38,6 +38,25 @@ cd app
 >   `git clone git@github.com:jharrvis/sims-saas.git app`.
 > Jangan taruh token di riwayat shell bersama (`export` + variabel bila perlu).
 
+> **Layout HestiaCP (PENTING):** PHP-FPM HestiaCP membatasi `open_basedir`
+> ke docroot (`public_html/public`), sehingga `public/index.php` standar
+> tidak bisa me-require `../vendor` & `../bootstrap` (500 kosong, tanpa log).
+> Layout yang dipakai: **kode aplikasi di `private/app/`**, docroot tetap
+> `public_html/public`. Aplikasi mendukung ini via env var:
+> - `APP_BASE_PATH` → `/home/simsapp/web/simsapp.my.id/private/app`
+>   (dibaca `public/index.php`; harus environment variable *asli* dari
+>   web server — `.env` belum ter-load saat itu — jadi diset via `SetEnv`
+>   di `public/.htaccess`, bukan di `.env`)
+> - `PUBLIC_PATH` → `/home/simsapp/web/simsapp.my.id/public_html/public`
+>   (dibaca `bootstrap/app.php` via `usePublicPath()`)
+>
+> Tambahkan di akhir `public_html/public/.htaccess` (server-only):
+> ```apache
+> SetEnv APP_BASE_PATH /home/simsapp/web/simsapp.my.id/private/app
+> SetEnv PUBLIC_PATH /home/simsapp/web/simsapp.my.id/public_html/public
+> ```
+> Cron memakai path baru: `cd /home/simsapp/web/simsapp.my.id/private/app`.
+
 > **Penting — file yang belum ada di remote GitHub** (keterbatasan API):
 > upload manual via web GitHub sebelum clone:
 > - `composer.lock` (klik Add file → Upload files di root repo)
