@@ -15,20 +15,106 @@
                 <option value="lulus">Lulus</option>
                 <option value="keluar">Keluar</option>
             </select>
+            <select wire:model.live="rombel" aria-label="Filter kelas"
+                    class="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-boxdark py-2.5 px-3 text-sm outline-none focus:border-primary dark:text-white">
+                <option value="">Semua kelas</option>
+                @foreach ($rombels as $rombel)
+                    <option value="{{ $rombel->id }}">{{ $rombel->nama }}</option>
+                @endforeach
+            </select>
             @can('siswa.create')
                 <a href="{{ route('siswa.create') }}" class="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 transition-colors">
                     <i data-lucide="plus" class="w-4 h-4"></i> Tambah Siswa
                 </a>
             @endcan
+            @can('siswa.import')
+                <a href="{{ route('siswa.impor') }}" class="inline-flex items-center gap-2 rounded-lg border border-slate-200 dark:border-slate-700 px-4 py-2.5 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                    <i data-lucide="upload" class="w-4 h-4"></i> Impor Excel
+                </a>
+            @endcan
+            <a href="{{ route('siswa.ekspor.excel', array_filter(['search' => $search ?: null, 'status' => $status ?: null, 'rombel_id' => $rombel ?: null])) }}" class="inline-flex items-center gap-2 rounded-lg border border-slate-200 dark:border-slate-700 px-4 py-2.5 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                <i data-lucide="file-spreadsheet" class="w-4 h-4"></i> Export Excel
+            </a>
+            <a href="{{ route('siswa.ekspor.pdf', array_filter(['search' => $search ?: null, 'status' => $status ?: null, 'rombel_id' => $rombel ?: null])) }}" class="inline-flex items-center gap-2 rounded-lg border border-slate-200 dark:border-slate-700 px-4 py-2.5 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                <i data-lucide="file-text" class="w-4 h-4"></i> Export PDF
+            </a>
+            @if ($rombel !== '')
+                <a href="{{ route('siswa.kartu.rombel', ['rombel_id' => $rombel]) }}" class="inline-flex items-center gap-2 rounded-lg border border-slate-200 dark:border-slate-700 px-4 py-2.5 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                    <i data-lucide="credit-card" class="w-4 h-4"></i> Cetak Kartu Rombel
+                </a>
+            @endif
+            @can('siswa.delete')
+                <button type="button" wire:click="toggleTrashed" class="inline-flex items-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-medium transition-colors {{ $showTrashed ? 'border-primary bg-primary/10 text-primary' : 'border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800' }}">
+                    <i data-lucide="trash-2" class="w-4 h-4"></i> {{ $showTrashed ? 'Kembali ke Daftar' : 'Sampah' }}
+                    @if ($trashedCount > 0 && !$showTrashed)
+                        <span class="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-danger px-1.5 text-xs font-bold text-white">{{ $trashedCount }}</span>
+                    @endif
+                </button>
+            @endcan
         </div>
     </div>
+
+    @if ($showTrashed)
+        <div class="mb-4 rounded-xl bg-amber-500/10 border border-amber-500/20 px-4 py-3 text-sm text-amber-700 dark:text-amber-300">
+            Menampilkan sampah — {{ $students->total() }} siswa terhapus. Pulihkan untuk mengembalikan, atau hapus permanen (tidak dapat dibatalkan).
+        </div>
+    @endif
+
+    @if (count($selected) > 0)
+        <div class="mb-4 flex flex-wrap items-center gap-2 rounded-xl border border-primary/30 bg-primary/5 px-4 py-3">
+            <span class="text-sm font-medium">{{ count($selected) }} siswa dipilih</span>
+            <select wire:model="bulkAksi" aria-label="Aksi massal"
+                    class="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-boxdark py-2 px-3 text-sm outline-none focus:border-primary dark:text-white">
+                <option value="">— Pilih aksi —</option>
+                @if ($showTrashed)
+                    <option value="pulihkan">Pulihkan</option>
+                    <option value="hapus_permanen">Hapus Permanen</option>
+                @else
+                    <option value="status">Ubah Status</option>
+                    <option value="rombel">Pindah Rombel</option>
+                    <option value="export">Export Excel</option>
+                    <option value="hapus">Hapus (ke Sampah)</option>
+                @endif
+            </select>
+            @if ($bulkAksi === 'status' && !$showTrashed)
+                <select wire:model="bulkStatus" aria-label="Status baru"
+                        class="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-boxdark py-2 px-3 text-sm outline-none focus:border-primary dark:text-white">
+                    <option value="">— Status baru —</option>
+                    <option value="aktif">Aktif</option>
+                    <option value="pindah">Pindah</option>
+                    <option value="lulus">Lulus</option>
+                    <option value="keluar">Keluar</option>
+                    <option value="do">DO</option>
+                </select>
+            @endif
+            @if ($bulkAksi === 'rombel' && !$showTrashed)
+                <select wire:model="bulkRombelId" aria-label="Rombel tujuan"
+                        class="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-boxdark py-2 px-3 text-sm outline-none focus:border-primary dark:text-white">
+                    <option value="">— Rombel tujuan —</option>
+                    @foreach ($rombels as $rombel)
+                        <option value="{{ $rombel->id }}">{{ $rombel->nama }}</option>
+                    @endforeach
+                </select>
+            @endif
+            <button type="button" wire:click="bulkTerapkan"
+                    @if (in_array($bulkAksi, ['hapus', 'hapus_permanen'], true)) wire:confirm="Yakin menjalankan aksi ini untuk {{ count($selected) }} siswa?" @endif
+                    class="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
+                Terapkan
+            </button>
+            @error('bulkAksi') <p class="w-full text-xs text-danger">{{ $message }}</p> @enderror
+        </div>
+    @endif
 
     <div class="rounded-xl border border-slate-200 bg-white shadow-sm dark:bg-boxdark dark:border-slate-700 overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full table-auto">
                 <thead>
                     <tr class="border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+                        <th class="py-3 px-3 w-10">
+                            <input type="checkbox" wire:model.live="selectAll" aria-label="Pilih semua di halaman ini" class="rounded">
+                        </th>
                         <th class="py-3 px-5 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Nama Siswa</th>
+                        <th class="py-3 px-5 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Kelas</th>
                         <th class="py-3 px-5 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">NIS / NISN</th>
                         <th class="py-3 px-5 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">L/P</th>
                         <th class="py-3 px-5 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Status</th>
@@ -37,9 +123,35 @@
                 </thead>
                 <tbody>
                     @forelse ($students as $siswa)
-                        <tr class="border-b border-slate-100 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-800/30">
+                        <tr wire:key="siswa-{{ $siswa->id }}" class="border-b border-slate-100 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-800/30">
+                            <td class="py-3 px-3">
+                                <input type="checkbox" wire:model.live="selected" value="{{ $siswa->id }}" aria-label="Pilih {{ $siswa->nama }}" class="rounded">
+                            </td>
                             <td class="py-3 px-5">
-                                <div class="font-medium text-slate-800 dark:text-white">{{ $siswa->nama }}</div>
+                                <div class="flex items-center gap-3">
+                                    @php
+                                        $namaParts = preg_split('/\s+/', trim($siswa->nama));
+                                        $inisial = strtoupper(mb_substr($namaParts[0], 0, 1) . (count($namaParts) > 1 ? mb_substr(end($namaParts), 0, 1) : ''));
+                                        $avatarColors = [
+                                            'bg-primary/10 text-primary',
+                                            'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
+                                            'bg-amber-500/10 text-amber-600 dark:text-amber-400',
+                                            'bg-sky-500/10 text-sky-600 dark:text-sky-400',
+                                            'bg-violet-500/10 text-violet-600 dark:text-violet-400',
+                                            'bg-rose-500/10 text-rose-600 dark:text-rose-400',
+                                        ];
+                                        $avatarColor = $avatarColors[abs(crc32($siswa->nama)) % count($avatarColors)];
+                                    @endphp
+                                    @if ($siswa->fotoUrl())
+                                        <img src="{{ $siswa->fotoUrl() }}" alt="" class="h-9 w-9 shrink-0 rounded-full object-cover">
+                                    @else
+                                        <div class="h-9 w-9 shrink-0 rounded-full {{ $avatarColor }} flex items-center justify-center text-xs font-bold" aria-hidden="true">{{ $inisial }}</div>
+                                    @endif
+                                    <div class="font-medium text-slate-800 dark:text-white">{{ $siswa->nama }}</div>
+                                </div>
+                            </td>
+                            <td class="py-3 px-5 text-sm text-slate-600 dark:text-slate-300">
+                                {{ $siswa->rombels->first()?->nama ?? '—' }}
                             </td>
                             <td class="py-3 px-5 text-sm text-slate-600 dark:text-slate-300">
                                 {{ $siswa->nis }}@if($siswa->nisn)<span class="text-slate-400"> / {{ $siswa->nisn }}</span>@endif
@@ -53,22 +165,38 @@
                             </td>
                             <td class="py-3 px-5 text-right">
                                 <div class="inline-flex items-center gap-1">
-                                    @can('siswa.view')
-                                        <a href="{{ route('siswa.show', $siswa) }}" class="p-2 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700" aria-label="Lihat {{ $siswa->nama }}">
-                                            <i data-lucide="eye" class="w-4 h-4"></i>
-                                        </a>
-                                    @endcan
-                                    @can('siswa.update')
-                                        <a href="{{ route('siswa.edit', $siswa) }}" class="p-2 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700" aria-label="Ubah {{ $siswa->nama }}">
-                                            <i data-lucide="pencil" class="w-4 h-4"></i>
-                                        </a>
-                                    @endcan
+                                    @if ($showTrashed)
+                                        @can('siswa.delete')
+                                            <button type="button" wire:click="restore({{ $siswa->id }})" class="p-2 rounded-lg text-success hover:bg-success/10" aria-label="Pulihkan {{ $siswa->nama }}">
+                                                <x-icon name="undo-2" class="w-4 h-4" />
+                                            </button>
+                                            <button type="button" wire:click="forceDelete({{ $siswa->id }})" wire:confirm="Hapus permanen {{ $siswa->nama }}? Data tidak dapat dikembalikan lagi." class="p-2 rounded-lg text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20" aria-label="Hapus permanen {{ $siswa->nama }}">
+                                                <x-icon name="trash-2" class="w-4 h-4" />
+                                            </button>
+                                        @endcan
+                                    @else
+                                        @can('siswa.view')
+                                            <a href="{{ route('siswa.show', $siswa) }}" class="p-2 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700" aria-label="Lihat {{ $siswa->nama }}">
+                                                <x-icon name="eye" class="w-4 h-4" />
+                                            </a>
+                                        @endcan
+                                        @can('siswa.update')
+                                            <a href="{{ route('siswa.edit', $siswa) }}" class="p-2 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700" aria-label="Ubah {{ $siswa->nama }}">
+                                                <x-icon name="pencil" class="w-4 h-4" />
+                                            </a>
+                                        @endcan
+                                        @can('siswa.delete')
+                                            <button type="button" wire:click="delete({{ $siswa->id }})" wire:confirm="Pindah data siswa {{ $siswa->nama }} ke sampah? Data bisa dipulihkan dari Sampah." class="p-2 rounded-lg text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20" aria-label="Hapus {{ $siswa->nama }}">
+                                                <x-icon name="trash-2" class="w-4 h-4" />
+                                            </button>
+                                        @endcan
+                                    @endif
                                 </div>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="py-12 text-center text-sm text-slate-500 dark:text-slate-400">
+                            <td colspan="7" class="py-12 text-center text-sm text-slate-500 dark:text-slate-400">
                                 Tidak ada data siswa.
                             </td>
                         </tr>
