@@ -51,6 +51,22 @@ class QrLoginService
     }
 
     /**
+     * Token QR login untuk kartu pelajar, atau null bila penerbit tak punya
+     * izin `qr.manage` (kartu memakai QR identifikasi saja, tanpa rotasi).
+     *
+     * Mencetak kartu = menerbitkan kredensial: token lama dinonaktifkan dan
+     * sesi QR siswa dicabut, sehingga kartu lama berhenti berlaku.
+     */
+    public function tokenForKartu(Student $student, ?User $by): ?string
+    {
+        if ($by === null || ! $by->can('qr.manage')) {
+            return null;
+        }
+
+        return $this->issueCard($student, $by);
+    }
+
+    /**
      * Cabut kartu siswa (hilang) — sesi QR yang memakai kartu ini ikut gugur.
      */
     public function revokeCard(Student $student): bool

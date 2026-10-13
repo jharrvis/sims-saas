@@ -36,6 +36,7 @@
     .field b { color: #1e293b; }
     td.qr { width: 20mm; text-align: right; }
     .qr-img { width: 19mm; height: 19mm; }
+    .qr-cap { font-size: 6pt; color: #475569; text-align: center; margin-top: 0.5mm; }
     .page-break { page-break-after: always; }
 </style>
 </head>
@@ -83,6 +84,7 @@
                                                 </td>
                                                 <td class="qr">
                                                     <img class="qr-img" src="{{ $k['qr'] }}">
+                                                    <div class="qr-cap">{{ ($k['qrLogin'] ?? false) ? 'Pindai untuk login' : 'Identifikasi' }}</div>
                                                 </td>
                                             </tr>
                                         </table>

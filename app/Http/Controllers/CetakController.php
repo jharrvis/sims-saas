@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Domains\Akademik\Services\GradeCalculationService;
 use App\Domains\ERapor\Services\ERaporService;
+use App\Domains\Pwa\Services\QrLoginService;
 use App\Models\AcademicYear;
 use App\Models\Rombel;
 use App\Models\Schedule;
@@ -142,10 +143,14 @@ class CetakController extends Controller
     }
 
     /**
-     * Cetak kartu pelajar satu siswa (foto + biodata + QR identifikasi).
+     * Cetak kartu pelajar satu siswa (foto + biodata + QR login).
      *
-     * QR berisi `SISWA:{nis}` — hanya identifikasi, BUKAN token login
-     * (token login QR ada di modul QR terpisah).
+     * QR kartu = token QR login siswa (32-char hex, persis sama dengan QR
+     * pada kartu QR login): memindainya di login PWA akan masuk sebagai
+     * siswa tersebut. Mencetak kartu menerbitkan (rotasi) kredensial login
+     * QR, jadi butuh izin `qr.manage`. Tanpa izin itu, kartu memakai QR
+     * identifikasi `SISWA:{nis}` (tidak bisa dipakai login) agar pencetakan
+     * tidak terblokir.
      */
     public function kartuPelajar(Student $student): Response
     {
@@ -184,7 +189,7 @@ class CetakController extends Controller
     /**
      * Data satu kartu: siswa + rombel aktif + foto absolut + QR base64.
      *
-     * @return array{siswa: Student, rombel: ?Rombel, fotoAbs: ?string, qr: string}
+     * @return array{siswa: Student, rombel: ?Rombel, fotoAbs: ?string, qr: string, qrLogin: bool}
      */
     private function kartuData(Student $student, ?Rombel $rombel = null): array
     {
@@ -197,11 +202,14 @@ class CetakController extends Controller
             ? Storage::disk('public')->path($student->foto_path)
             : null;
 
+        $token = app(QrLoginService::class)->tokenForKartu($student, auth()->user());
+
         return [
             'siswa' => $student,
             'rombel' => $rombel,
             'fotoAbs' => $fotoAbs,
-            'qr' => $this->qrPngBase64('SISWA:'.$student->nis, 90),
+            'qr' => $this->qrPngBase64($token ?? 'SISWA:'.$student->nis, 90),
+            'qrLogin' => $token !== null,
         ];
     }
 

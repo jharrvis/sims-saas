@@ -226,3 +226,33 @@ it('admin menerbitkan kartu dari UI dan token tampil sekali', function (): void 
     expect(session('qr_fresh_tokens')[$this->siswa->id] ?? null)->not->toBeNull();
     expect(QrLoginCard::where('student_id', $this->siswa->id)->where('aktif', true)->count())->toBe(1);
 });
+
+it('kartu pelajar memakai QR login yang sama (mencetak kartu merotasi token)', function (): void {
+    $qr = app(QrLoginService::class);
+    $lama = $qr->issueCard($this->siswa, $this->admin);
+
+    // tokenForKartu = token yang dicetak pada kartu pelajar (login QR).
+    $baru = $qr->tokenForKartu($this->siswa, $this->admin);
+
+    expect($baru)->not->toBeNull()->and(strlen($baru))->toBe(32)
+        // QR pada kartu bisa ditukar menjadi sesi (persis seperti kartu QR login).
+        ->and($qr->redeem($baru))->not->toBeNull()
+        // Token lama tidak berlaku lagi (rotasi saat cetak), kartu baru aktif.
+        ->and($qr->redeem($lama))->toBeNull()
+        ->and(QrLoginCard::where('student_id', $this->siswa->id)->where('aktif', true)->count())->toBe(1);
+});
+
+it('kartu pelajar tanpa izin qr.manage memakai QR identifikasi tanpa rotasi', function (): void {
+    $qr = app(QrLoginService::class);
+    $lama = $qr->issueCard($this->siswa, $this->admin);
+
+    $penonton = User::create(['username' => 'lihat-saja', 'name' => 'Lihat Saja']);
+    Membership::create(['user_id' => $penonton->id, 'school_id' => $this->school->id, 'status' => 'aktif']);
+    $penonton->givePermissionTo('siswa.view');
+
+    // Tanpa izin qr.manage: tidak ada token login (kartu memakai QR identifikasi).
+    expect($qr->tokenForKartu($this->siswa, $penonton))->toBeNull()
+        // Tanpa rotasi: token lama tetap berlaku, tidak ada kartu baru.
+        ->and($qr->redeem($lama))->not->toBeNull()
+        ->and(QrLoginCard::where('student_id', $this->siswa->id)->where('aktif', true)->count())->toBe(1);
+});
