@@ -1,5 +1,5 @@
 /* Service Worker PWA SIMS — cache-first untuk aset statis, network-first untuk halaman. */
-const CACHE = 'sims-pwa-v1';
+const CACHE = 'sims-pwa-v2';
 const OFFLINE_URL = '/pwa/offline';
 const PRECACHE = [
   '/pwa/manifest.webmanifest',
@@ -42,8 +42,11 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(
       fetch(request)
         .then((response) => {
-          const copy = response.clone();
-          caches.open(CACHE).then((cache) => cache.put(request, copy));
+          // Jangan cache respons error (mis. 403/500) — cache beracun bikin halaman rusak.
+          if (response.ok) {
+            const copy = response.clone();
+            caches.open(CACHE).then((cache) => cache.put(request, copy));
+          }
           return response;
         })
         .catch(() => caches.match(request).then((cached) => cached || caches.match(OFFLINE_URL)))
@@ -57,8 +60,11 @@ self.addEventListener('fetch', (event) => {
       (cached) =>
         cached ||
         fetch(request).then((response) => {
-          const copy = response.clone();
-          caches.open(CACHE).then((cache) => cache.put(request, copy));
+          // Jangan cache respons error (mis. 403) — cache-first + 403 tercache = aset rusak selamanya.
+          if (response.ok) {
+            const copy = response.clone();
+            caches.open(CACHE).then((cache) => cache.put(request, copy));
+          }
           return response;
         })
     )
