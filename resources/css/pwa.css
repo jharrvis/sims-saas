@@ -12,14 +12,13 @@
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-/* App shell: kolom 480px terpusat (design) */
+/* App shell: full width (tanpa kolom 480px terpusat — tidak ada sisi putih kiri/kanan) */
 .app-shell {
-    max-width: 480px;
-    margin: 0 auto;
+    max-width: 100%;
+    margin: 0;
     min-height: 100dvh;
     background: #f8fafc;
     position: relative;
-    box-shadow: 0 0 40px rgba(0, 0, 0, 0.12);
 }
 
 .safe-bottom { padding-bottom: env(safe-area-inset-bottom, 0); }
