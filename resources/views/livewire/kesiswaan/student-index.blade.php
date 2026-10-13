@@ -1,14 +1,15 @@
 <div>
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
-        <div class="relative w-full sm:max-w-xs">
-            <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
-            <input type="search" wire:model.live.debounce.300ms="search" placeholder="Cari nama / NIS / NISN…"
-                   aria-label="Cari siswa"
-                   class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-boxdark py-2.5 pl-10 pr-4 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary dark:text-white">
-        </div>
-        <div class="flex items-center gap-2">
+    {{-- Toolbar: filter kiri, aksi kanan — compact (text-xs, py-2, tanpa wrap label) --}}
+    <div class="mb-5 flex flex-wrap items-center gap-2">
+        <div class="flex flex-wrap items-center gap-2">
+            <div class="relative w-full sm:w-64">
+                <x-icon name="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+                <input type="search" wire:model.live.debounce.300ms="search" placeholder="Cari nama / NIS / NISN…"
+                       aria-label="Cari siswa"
+                       class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-boxdark py-2 pl-9 pr-3 text-xs outline-none focus:border-primary focus:ring-1 focus:ring-primary dark:text-white">
+            </div>
             <select wire:model.live="status" aria-label="Filter status"
-                    class="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-boxdark py-2.5 px-3 text-sm outline-none focus:border-primary dark:text-white">
+                    class="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-boxdark py-2 px-2.5 text-xs outline-none focus:border-primary dark:text-white">
                 <option value="">Semua status</option>
                 <option value="aktif">Aktif</option>
                 <option value="pindah">Pindah</option>
@@ -16,38 +17,53 @@
                 <option value="keluar">Keluar</option>
             </select>
             <select wire:model.live="rombel" aria-label="Filter kelas"
-                    class="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-boxdark py-2.5 px-3 text-sm outline-none focus:border-primary dark:text-white">
+                    class="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-boxdark py-2 px-2.5 text-xs outline-none focus:border-primary dark:text-white">
                 <option value="">Semua kelas</option>
                 @foreach ($rombels as $rombel)
                     <option value="{{ $rombel->id }}">{{ $rombel->nama }}</option>
                 @endforeach
             </select>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-1.5 sm:ml-auto">
             @can('siswa.create')
-                <a href="{{ route('siswa.create') }}" class="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 transition-colors">
-                    <i data-lucide="plus" class="w-4 h-4"></i> Tambah Siswa
+                <a href="{{ route('siswa.create') }}" class="inline-flex items-center gap-1.5 whitespace-nowrap rounded-lg bg-primary px-3 py-2 text-xs font-medium text-white hover:bg-blue-700 transition-colors">
+                    <x-icon name="plus" class="w-3.5 h-3.5" /> Tambah Siswa
                 </a>
             @endcan
             @can('siswa.import')
-                <a href="{{ route('siswa.impor') }}" class="inline-flex items-center gap-2 rounded-lg border border-slate-200 dark:border-slate-700 px-4 py-2.5 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
-                    <i data-lucide="upload" class="w-4 h-4"></i> Impor Excel
+                <a href="{{ route('siswa.impor') }}" title="Impor data siswa dari Excel" class="inline-flex items-center gap-1.5 whitespace-nowrap rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-boxdark px-3 py-2 text-xs font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                    <x-icon name="upload" class="w-3.5 h-3.5" /> Impor
                 </a>
             @endcan
-            <a href="{{ route('siswa.ekspor.excel', array_filter(['search' => $search ?: null, 'status' => $status ?: null, 'rombel_id' => $rombel ?: null])) }}" class="inline-flex items-center gap-2 rounded-lg border border-slate-200 dark:border-slate-700 px-4 py-2.5 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
-                <i data-lucide="file-spreadsheet" class="w-4 h-4"></i> Export Excel
-            </a>
-            <a href="{{ route('siswa.ekspor.pdf', array_filter(['search' => $search ?: null, 'status' => $status ?: null, 'rombel_id' => $rombel ?: null])) }}" class="inline-flex items-center gap-2 rounded-lg border border-slate-200 dark:border-slate-700 px-4 py-2.5 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
-                <i data-lucide="file-text" class="w-4 h-4"></i> Export PDF
-            </a>
+            <details class="relative">
+                <summary class="inline-flex cursor-pointer items-center gap-1 whitespace-nowrap rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-boxdark px-3 py-2 text-xs font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors list-none [&::-webkit-details-marker]:hidden">
+                    <x-icon name="download" class="w-3.5 h-3.5" /> Export
+                    <x-icon name="chevron-down" class="w-3.5 h-3.5 text-slate-400" />
+                </summary>
+                <div class="absolute right-0 z-20 mt-1.5 w-44 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-lg dark:border-slate-700 dark:bg-boxdark">
+                    <a href="{{ route('siswa.ekspor.excel', array_filter(['search' => $search ?: null, 'status' => $status ?: null, 'rombel_id' => $rombel ?: null])) }}" onclick="this.closest('details').removeAttribute('open')" class="flex items-center gap-2 px-3 py-2 text-xs font-medium hover:bg-slate-50 dark:hover:bg-slate-800">
+                        <x-icon name="file-spreadsheet" class="w-4 h-4 text-emerald-600" /> Excel (.xlsx)
+                    </a>
+                    <a href="{{ route('siswa.ekspor.pdf', array_filter(['search' => $search ?: null, 'status' => $status ?: null, 'rombel_id' => $rombel ?: null])) }}" onclick="this.closest('details').removeAttribute('open')" class="flex items-center gap-2 px-3 py-2 text-xs font-medium hover:bg-slate-50 dark:hover:bg-slate-800">
+                        <x-icon name="file-text" class="w-4 h-4 text-red-500" /> PDF
+                    </a>
+                </div>
+            </details>
             @if ($rombel !== '')
-                <a href="{{ route('siswa.kartu.rombel', ['rombel_id' => $rombel]) }}" class="inline-flex items-center gap-2 rounded-lg border border-slate-200 dark:border-slate-700 px-4 py-2.5 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
-                    <i data-lucide="credit-card" class="w-4 h-4"></i> Cetak Kartu Rombel
+                <a href="{{ route('siswa.kartu.rombel', ['rombel_id' => $rombel]) }}" title="Cetak kartu pelajar untuk kelas terpilih" class="inline-flex items-center gap-1.5 whitespace-nowrap rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-boxdark px-3 py-2 text-xs font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                    <x-icon name="id-card" class="w-3.5 h-3.5" /> Cetak Kartu
                 </a>
+            @else
+                <button type="button" disabled title="Pilih kelas dulu untuk mencetak kartu rombel" class="inline-flex cursor-not-allowed items-center gap-1.5 whitespace-nowrap rounded-lg border border-slate-200 dark:border-slate-700 px-3 py-2 text-xs font-medium text-slate-400 dark:text-slate-500">
+                    <x-icon name="id-card" class="w-3.5 h-3.5" /> Cetak Kartu
+                </button>
             @endif
             @can('siswa.delete')
-                <button type="button" wire:click="toggleTrashed" class="inline-flex items-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-medium transition-colors {{ $showTrashed ? 'border-primary bg-primary/10 text-primary' : 'border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800' }}">
-                    <i data-lucide="trash-2" class="w-4 h-4"></i> {{ $showTrashed ? 'Kembali ke Daftar' : 'Sampah' }}
+                <button type="button" wire:click="toggleTrashed" title="{{ $showTrashed ? 'Kembali ke daftar siswa' : 'Lihat siswa terhapus (sampah)' }}" class="inline-flex items-center gap-1.5 whitespace-nowrap rounded-lg border px-3 py-2 text-xs font-medium transition-colors {{ $showTrashed ? 'border-primary bg-primary/10 text-primary' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-boxdark hover:bg-slate-50 dark:hover:bg-slate-800' }}">
+                    <x-icon name="trash-2" class="w-3.5 h-3.5" /> {{ $showTrashed ? 'Kembali' : 'Sampah' }}
                     @if ($trashedCount > 0 && !$showTrashed)
-                        <span class="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-danger px-1.5 text-xs font-bold text-white">{{ $trashedCount }}</span>
+                        <span class="inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-danger px-1 text-[10px] font-bold leading-none text-white">{{ $trashedCount }}</span>
                     @endif
                 </button>
             @endcan
@@ -61,10 +77,10 @@
     @endif
 
     @if (count($selected) > 0)
-        <div class="mb-4 flex flex-wrap items-center gap-2 rounded-xl border border-primary/30 bg-primary/5 px-4 py-3">
-            <span class="text-sm font-medium">{{ count($selected) }} siswa dipilih</span>
+        <div class="mb-4 flex flex-wrap items-center gap-2 rounded-xl border border-primary/30 bg-primary/5 px-3 py-2.5">
+            <span class="text-xs font-medium">{{ count($selected) }} siswa dipilih</span>
             <select wire:model="bulkAksi" aria-label="Aksi massal"
-                    class="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-boxdark py-2 px-3 text-sm outline-none focus:border-primary dark:text-white">
+                    class="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-boxdark py-1.5 px-2.5 text-xs outline-none focus:border-primary dark:text-white">
                 <option value="">— Pilih aksi —</option>
                 @if ($showTrashed)
                     <option value="pulihkan">Pulihkan</option>
@@ -78,7 +94,7 @@
             </select>
             @if ($bulkAksi === 'status' && !$showTrashed)
                 <select wire:model="bulkStatus" aria-label="Status baru"
-                        class="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-boxdark py-2 px-3 text-sm outline-none focus:border-primary dark:text-white">
+                        class="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-boxdark py-1.5 px-2.5 text-xs outline-none focus:border-primary dark:text-white">
                     <option value="">— Status baru —</option>
                     <option value="aktif">Aktif</option>
                     <option value="pindah">Pindah</option>
@@ -89,7 +105,7 @@
             @endif
             @if ($bulkAksi === 'rombel' && !$showTrashed)
                 <select wire:model="bulkRombelId" aria-label="Rombel tujuan"
-                        class="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-boxdark py-2 px-3 text-sm outline-none focus:border-primary dark:text-white">
+                        class="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-boxdark py-1.5 px-2.5 text-xs outline-none focus:border-primary dark:text-white">
                     <option value="">— Rombel tujuan —</option>
                     @foreach ($rombels as $rombel)
                         <option value="{{ $rombel->id }}">{{ $rombel->nama }}</option>
@@ -98,7 +114,7 @@
             @endif
             <button type="button" wire:click="bulkTerapkan"
                     @if (in_array($bulkAksi, ['hapus', 'hapus_permanen'], true)) wire:confirm="Yakin menjalankan aksi ini untuk {{ count($selected) }} siswa?" @endif
-                    class="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
+                    class="rounded-lg bg-primary px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700">
                 Terapkan
             </button>
             @error('bulkAksi') <p class="w-full text-xs text-danger">{{ $message }}</p> @enderror
