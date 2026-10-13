@@ -2,19 +2,24 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#1d4ed8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#3c50e0">
     <title>Offline — SIMS</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    @vite('resources/css/pwa.css')
 </head>
-<body class="bg-slate-100 font-sans">
-<div class="mx-auto max-w-md min-h-dvh bg-white flex flex-col items-center justify-center px-8 text-center">
-    <span class="inline-flex w-16 h-16 rounded-2xl bg-slate-100 items-center justify-center text-3xl">📶</span>
-    <h1 class="text-xl font-extrabold mt-4">Tidak ada koneksi</h1>
+<body class="bg-[#f8fafc] font-sans antialiased">
+<div class="app-shell flex flex-col items-center justify-center px-8 text-center">
+    <div class="w-20 h-20 rounded-2xl bg-[#3c50e0] flex items-center justify-center mx-auto mb-4 shadow-lg">
+        <x-icon name="wifi-off" class="w-10 h-10 text-white" />
+    </div>
+    <h1 class="text-xl font-extrabold text-slate-800">Tidak ada koneksi</h1>
     <p class="text-sm text-slate-500 mt-2">Periksa koneksi internet Anda, lalu coba lagi.</p>
-    <button onclick="window.location.reload()" class="mt-6 rounded-xl bg-primary px-6 py-3 text-white font-bold text-sm">
+    <button onclick="window.location.reload()" class="mt-6 rounded-xl bg-[#3c50e0] px-6 py-3.5 text-white font-bold text-sm shadow-lg shadow-[#3c50e0]/30">
         Coba Lagi
     </button>
 </div>
+<script>
+    window.addEventListener('online', () => window.location.reload());
+</script>
 </body>
 </html>

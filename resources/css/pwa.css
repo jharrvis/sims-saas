@@ -1,0 +1,65 @@
+/* CSS khusus layout PWA — hasil build Vite (menggantikan Tailwind browser CDN).
+   Mewarisi seluruh token design system dari app.css. */
+@import './app.css';
+
+/* --- Port dari design/assets/css/style.css --- */
+[x-cloak] { display: none !important; }
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* App shell: kolom 480px terpusat (design) */
+.app-shell {
+    max-width: 480px;
+    margin: 0 auto;
+    min-height: 100dvh;
+    background: #f8fafc;
+    position: relative;
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.12);
+}
+
+.safe-bottom { padding-bottom: env(safe-area-inset-bottom, 0); }
+.bottom-nav { padding-bottom: calc(0.75rem + env(safe-area-inset-bottom, 0)); }
+
+.slide-up { animation: slideUp 0.3s ease-out; }
+@keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+.offline-banner { display: none; }
+
+/* Print Stylesheet Resmi SIMS (PRD-SIMS-16 Rekomendasi #5) */
+@media print {
+    body {
+        background: white !important;
+        color: black !important;
+        font-size: 11pt;
+    }
+    aside, header, nav, .bottom-nav, button:not(.btn-print-keep), [role="dialog"], #offline-banner, .toast-container {
+        display: none !important;
+    }
+    main {
+        overflow: visible !important;
+        height: auto !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+    .app-shell {
+        box-shadow: none !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+    }
+    table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+    }
+    th, td {
+        border: 1px solid #cbd5e1 !important;
+        padding: 6px 10px !important;
+    }
+    .print-break {
+        page-break-before: always;
+    }
+}

@@ -1,21 +1,59 @@
-<div>
-    <div class="rounded-2xl bg-slate-50 p-4 mb-4">
-        <p class="font-bold">{{ $user->name }}</p>
-        <p class="text-xs text-slate-500 mt-0.5">{{ $user->phone }}</p>
-        <p class="text-[11px] text-slate-400 mt-1">
-            {{ $role === 'orang-tua' ? 'Orang Tua/Wali' : 'Siswa' }}
-            @if ($student) · {{ $student->nama }} @endif
-        </p>
+<div class="px-4 pb-28">
+    {{-- Kartu profil tumpang tindih (design siswa/profil.html & ortu/profil.html) --}}
+    <div class="bg-white rounded-2xl shadow-xl border border-slate-100 p-5 -mt-10 relative z-10 mb-4">
+        <div class="flex items-center gap-4">
+            <div class="w-20 h-20 rounded-2xl overflow-hidden border-4 border-white shadow-md flex-shrink-0 bg-primary/10 text-primary flex items-center justify-center font-extrabold text-2xl">
+                @if ($role !== 'orang-tua' && $student?->fotoUrl())
+                    <img src="{{ $student->fotoUrl() }}" alt="" class="w-full h-full object-cover">
+                @else
+                    {{ mb_substr($role === 'orang-tua' ? $user->name : ($student?->nama ?? $user->name), 0, 1) }}
+                @endif
+            </div>
+            <div class="min-w-0">
+                <h2 class="text-xl font-extrabold text-slate-800 truncate">{{ $role === 'orang-tua' ? $user->name : ($student?->nama ?? $user->name) }}</h2>
+                <p class="text-sm text-slate-500 truncate">{{ $user->phone }}</p>
+                <div class="flex flex-wrap gap-1.5 mt-1.5">
+                    <span class="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full font-bold">
+                        {{ $role === 'orang-tua' ? 'Orang Tua/Wali' : 'Siswa' }}{{ $role === 'orang-tua' && $student ? ' · '.$student->nama : ($role !== 'orang-tua' && $student ? ' · NIS '.$student->nis : '') }}
+                    </span>
+                    <span class="inline-flex items-center gap-1 text-[10px] bg-success/10 text-success font-bold px-2 py-0.5 rounded-full">
+                        <x-icon name="circle-check-big" class="w-3 h-3" /> WhatsApp Terverifikasi
+                    </span>
+                </div>
+            </div>
+        </div>
     </div>
+
+    @if ($role !== 'orang-tua' && $student)
+        {{-- Detail siswa (design siswa/profil.html) --}}
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 divide-y divide-slate-100 mb-4">
+            <div class="flex items-center gap-3 px-5 py-3.5">
+                <x-icon name="graduation-cap" class="w-4 h-4 text-slate-400 shrink-0" />
+                <div><p class="text-xs text-slate-400">NIS / NISN</p><p class="text-sm font-semibold text-slate-700">{{ $student->nis }}{{ $student->nisn ? ' / '.$student->nisn : '' }}</p></div>
+            </div>
+            @if ($student->tgl_lahir)
+                <div class="flex items-center gap-3 px-5 py-3.5">
+                    <x-icon name="calendar" class="w-4 h-4 text-slate-400 shrink-0" />
+                    <div><p class="text-xs text-slate-400">Tanggal Lahir</p><p class="text-sm font-semibold text-slate-700">{{ $student->tgl_lahir->locale('id')->isoFormat('D MMMM Y') }}</p></div>
+                </div>
+            @endif
+            @if ($student->alamat)
+                <div class="flex items-center gap-3 px-5 py-3.5">
+                    <x-icon name="map-pin" class="w-4 h-4 text-slate-400 shrink-0" />
+                    <div><p class="text-xs text-slate-400">Alamat</p><p class="text-sm font-semibold text-slate-700">{{ $student->alamat }}</p></div>
+                </div>
+            @endif
+        </div>
+    @endif
 
     @if ($role === 'orang-tua' && $children->count() > 1)
         <h3 class="font-bold text-sm mb-2">Mode Profil Anak</h3>
-        <div class="space-y-2 mb-4">
+        <div class="space-y-2 mb-2">
             @foreach ($children as $child)
                 <form method="POST" action="{{ route('pwa.switch-child') }}">
                     @csrf
                     <input type="hidden" name="student_id" value="{{ $child->id }}">
-                    <button class="w-full flex items-center justify-between rounded-xl border px-4 py-3 text-left {{ $child->id === $student?->id ? 'border-primary bg-primary/5' : 'border-slate-200' }}">
+                    <button class="w-full flex items-center justify-between rounded-xl border px-4 py-3 text-left {{ $child->id === $student?->id ? 'border-primary bg-primary/5' : 'border-slate-200 bg-white' }}">
                         <span class="text-sm font-semibold">{{ $child->nama }}</span>
                         @if ($child->id === $student?->id)
                             <span class="text-[10px] font-bold text-primary">AKTIF</span>
@@ -28,22 +66,24 @@
     @endif
 
     <h3 class="font-bold text-sm mb-2">Perangkat Aktif</h3>
-    @forelse ($tokens as $t)
-        <div class="flex items-center justify-between rounded-xl border border-slate-100 px-4 py-3 mb-1.5">
-            <div>
-                <p class="text-sm font-semibold">{{ $t->name }}</p>
-                <p class="text-[11px] text-slate-400">
-                    Terakhir dipakai {{ $t->last_used_at?->diffForHumans() ?? 'belum pernah' }}
-                </p>
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 divide-y divide-slate-100 mb-4">
+        @forelse ($tokens as $t)
+            <div class="flex items-center justify-between px-4 py-3">
+                <div class="min-w-0">
+                    <p class="text-sm font-semibold truncate">{{ $t->name }}</p>
+                    <p class="text-[11px] text-slate-400">
+                        Terakhir dipakai {{ $t->last_used_at?->diffForHumans() ?? 'belum pernah' }}
+                    </p>
+                </div>
+                <button wire:click="revokeToken({{ $t->id }})" class="text-xs font-bold text-danger shrink-0 ml-2">Cabut</button>
             </div>
-            <button wire:click="revokeToken({{ $t->id }})" class="text-xs font-bold text-danger">Cabut</button>
-        </div>
-    @empty
-        <p class="text-xs text-slate-400 italic mb-4">Tidak ada token API aktif.</p>
-    @endforelse
+        @empty
+            <p class="text-xs text-slate-400 italic px-4 py-3">Tidak ada token API aktif.</p>
+        @endforelse
+    </div>
 
     <h3 class="font-bold text-sm mb-2">Notifikasi</h3>
-    <div class="rounded-xl border border-slate-100 px-4 py-3 mb-4">
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 px-4 py-3 mb-4">
         <p id="push-status" class="text-xs text-slate-500">Memeriksa status notifikasi…</p>
         <div class="flex gap-2 mt-2">
             <button id="push-enable" onclick="pwaPushEnable()"
@@ -55,8 +95,8 @@
     </div>
 
     <button wire:click="logout"
-            class="w-full mt-4 rounded-xl border border-danger/30 text-danger py-3 font-bold text-sm">
-        Keluar
+            class="w-full mt-4 py-3.5 border-2 border-danger/30 text-danger font-bold rounded-xl hover:bg-danger hover:text-white transition-colors flex items-center justify-center gap-2 text-sm">
+        <x-icon name="log-out" class="w-4 h-4" /> Keluar dari Akun
     </button>
 </div>
 
