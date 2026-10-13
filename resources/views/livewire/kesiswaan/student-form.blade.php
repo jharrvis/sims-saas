@@ -61,6 +61,32 @@
                       class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-transparent py-2.5 px-4 text-sm outline-none focus:border-primary dark:text-white"></textarea>
         </div>
 
+        <div>
+            <span class="block mb-1.5 text-sm font-medium text-slate-700 dark:text-slate-300">Foto Siswa</span>
+            <div class="flex items-start gap-4">
+                <div class="h-20 w-20 shrink-0 overflow-hidden rounded-full bg-primary/10 text-primary flex items-center justify-center text-xl font-bold">
+                    @if ($foto)
+                        <img src="{{ $foto->temporaryUrl() }}" alt="Pratinjau foto" class="h-full w-full object-cover">
+                    @elseif ($student?->fotoUrl())
+                        <img src="{{ $student->fotoUrl() }}" alt="Foto {{ $student->nama }}" class="h-full w-full object-cover">
+                    @else
+                        {{ strtoupper(substr($nama ?: '?', 0, 1)) }}
+                    @endif
+                </div>
+                <div class="space-y-2">
+                    <input type="file" wire:model="foto" accept="image/jpeg,image/png,image/webp"
+                           class="block w-full text-sm text-slate-500 file:mr-3 file:rounded-lg file:border file:border-slate-200 file:bg-slate-50 file:px-4 file:py-2 file:text-sm file:font-medium file:text-slate-700 hover:file:bg-slate-100 dark:file:border-slate-700 dark:file:bg-slate-800 dark:file:text-slate-200">
+                    <p class="text-xs text-slate-500">JPG / PNG / WebP, maks 2 MB. Foto otomatis dikompresi (maks 512×512, JPEG) agar ringan.</p>
+                    @if ($student?->foto_path)
+                        <label class="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
+                            <input type="checkbox" wire:model="hapusFoto" class="rounded"> Hapus foto saat ini (kembali ke avatar inisial)
+                        </label>
+                    @endif
+                    @error('foto') <p class="text-xs text-danger">{{ $message }}</p> @enderror
+                </div>
+            </div>
+        </div>
+
         <div class="flex justify-end gap-3 pt-2">
             <a href="{{ route('siswa.index') }}" class="px-5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-800">Batal</a>
             <button type="submit" wire:loading.attr="disabled" class="px-5 py-2.5 rounded-lg bg-primary text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60">

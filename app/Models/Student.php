@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * @property int|null $school_id
@@ -21,6 +22,7 @@ class Student extends Model
 
     protected $fillable = [
         'school_id',
+        'import_batch_id',
         'nis',
         'nisn',
         'nama',
@@ -39,6 +41,16 @@ class Student extends Model
         return [
             'tgl_lahir' => 'date',
         ];
+    }
+
+    /**
+     * URL publik foto siswa (null bila belum ada foto — pakai avatar inisial).
+     */
+    public function fotoUrl(): ?string
+    {
+        return $this->foto_path
+            ? Storage::disk('public')->url($this->foto_path)
+            : null;
     }
 
     /**

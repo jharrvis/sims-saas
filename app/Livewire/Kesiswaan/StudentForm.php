@@ -4,18 +4,24 @@ declare(strict_types=1);
 
 namespace App\Livewire\Kesiswaan;
 
+use App\Domains\Kesiswaan\Services\StudentPhotoService;
+use App\Domains\Pengaturan\Services\WebhookService;
 use App\Domains\Platform\Services\QuotaService;
+use App\Models\AcademicYear;
 use App\Models\Student;
 use App\Tenancy\TenantContext;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 
 /**
  * Form tambah/ubah siswa (FR-101).
  */
 class StudentForm extends Component
 {
+    use WithFileUploads;
+
     public ?Student $student = null;
 
     public string $nis = '';
@@ -35,6 +41,11 @@ class StudentForm extends Component
     public string $alamat = '';
 
     public string $phone = '';
+
+    /** @var mixed File upload Livewire (TemporaryUploadedFile) */
+    public $foto = null;
+
+    public bool $hapusFoto = false;
 
     public function mount(?Student $student = null): void
     {
@@ -63,7 +74,9 @@ class StudentForm extends Component
             'nis' => ['required', 'string', 'max:30', Rule::unique('students')->where(
                 fn ($q) => $q->where('school_id', $schoolId)
             )->ignore($this->student?->id)],
-            'nisn' => ['nullable', 'string', 'max:20'],
+            'nisn' => ['nullable', 'string', 'max:20', Rule::unique('students')->where(
+                fn ($q) => $q->where('school_id', $schoolId)
+            )->ignore($this->student?->id)],
             'nama' => ['required', 'string', 'max:150'],
             'jk' => ['required', Rule::in(['L', 'P'])],
             'tempat_lahir' => ['nullable', 'string', 'max:100'],
@@ -71,12 +84,22 @@ class StudentForm extends Component
             'agama' => ['nullable', 'string', 'max:30'],
             'alamat' => ['nullable', 'string'],
             'phone' => ['nullable', 'string', 'max:20'],
+            // Foto: maks 2 MB file asli; dikompresi ke maks 512×512 JPEG saat simpan.
+            'foto' => ['nullable', 'image', 'max:2048', 'mimes:jpeg,png,webp'],
         ];
     }
 
     public function save(): void
     {
         $this->validate();
+
+        // US-026: arsip read-only — tolak bila tahun ajaran aktif sudah ditutup.
+        $taId = AcademicYear::where('aktif', true)->value('id');
+        if (! AcademicYear::masihTerbuka($taId)) {
+            $this->addError('nama', 'Tahun ajaran aktif sudah ditutup — data siswa bersifat arsip read-only.');
+
+            return;
+        }
 
         // Kuota siswa (trial: maks. 100) — hanya untuk siswa baru.
         if (! $this->student?->exists) {
@@ -101,10 +124,34 @@ class StudentForm extends Component
             'phone' => $this->phone ?: null,
         ];
 
+        $photoService = app(StudentPhotoService::class);
+        $schoolId = app(TenantContext::class)->requireSchoolId();
+        $oldFotoPath = $this->student?->foto_path;
+
+        // Kompresi + simpan foto baru dulu; file lama dihapus setelah data tersimpan.
+        $newFotoPath = $this->foto
+            ? $photoService->store($this->foto, $schoolId)
+            : null;
+
+        if ($newFotoPath) {
+            $data['foto_path'] = $newFotoPath;
+        } elseif ($this->hapusFoto && $this->student?->exists) {
+            $data['foto_path'] = null;
+        }
+
         if ($this->student?->exists) {
             $this->student->update($data);
         } else {
-            Student::create($data);
+            $student = Student::create($data);
+
+            // US-112: webhook keluar — siswa baru.
+            WebhookService::fire('siswa_baru', (int) $student->school_id, [
+                'student_id' => $student->id,
+            ]);
+        }
+
+        if ($newFotoPath || ($this->hapusFoto && $this->student?->exists)) {
+            $photoService->delete($oldFotoPath);
         }
 
         $this->redirect(route('siswa.index'), navigate: true);
