@@ -33,3 +33,24 @@ it('form siswa menampilkan area drag and drop foto', function (): void {
         ->assertSeeHtml('foto-input')
         ->assertSeeHtml('dataTransfer');
 });
+
+it('dropdown agama berisi 6 agama resmi Indonesia', function (): void {
+    Livewire::test(StudentForm::class)
+        ->assertSee('— Pilih Agama —')
+        ->assertSee('Islam')
+        ->assertSee('Kristen')
+        ->assertSee('Katolik')
+        ->assertSee('Hindu')
+        ->assertSee('Buddha')
+        ->assertSee('Konghucu');
+});
+
+it('agama di luar daftar resmi ditolak saat simpan', function (): void {
+    Livewire::test(StudentForm::class)
+        ->set('nis', '9901')
+        ->set('nama', 'Siswa Agama')
+        ->set('jk', 'L')
+        ->set('agama', 'Atheis')
+        ->call('save')
+        ->assertHasErrors(['agama']);
+});

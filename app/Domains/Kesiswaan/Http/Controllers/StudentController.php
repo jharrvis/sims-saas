@@ -76,7 +76,7 @@ class StudentController extends Controller
             'jk' => ['required', Rule::in(['L', 'P'])],
             'tempat_lahir' => ['nullable', 'string', 'max:100'],
             'tgl_lahir' => ['nullable', 'date'],
-            'agama' => ['nullable', 'string', 'max:30'],
+            'agama' => ['nullable', Rule::in(Student::AGAMAS)],
             'alamat' => ['nullable', 'string'],
             'phone' => ['nullable', 'string', 'max:20'],
         ]);

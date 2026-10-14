@@ -45,8 +45,13 @@
         <div class="grid sm:grid-cols-2 gap-5">
             <div>
                 <label for="agama" class="block mb-1.5 text-sm font-medium text-slate-700 dark:text-slate-300">Agama</label>
-                <input id="agama" type="text" wire:model="agama"
-                       class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-transparent py-2.5 px-4 text-sm outline-none focus:border-primary dark:text-white">
+                <select id="agama" wire:model="agama"
+                        class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-transparent py-2.5 px-4 text-sm outline-none focus:border-primary dark:text-white">
+                    <option value="">— Pilih Agama —</option>
+                    @foreach (\App\Models\Student::AGAMAS as $pilihanAgama)
+                        <option value="{{ $pilihanAgama }}">{{ $pilihanAgama }}</option>
+                    @endforeach
+                </select>
             </div>
             <div>
                 <label for="phone" class="block mb-1.5 text-sm font-medium text-slate-700 dark:text-slate-300">No. HP</label>

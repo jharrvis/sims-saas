@@ -20,6 +20,9 @@ class Student extends Model
 {
     use BelongsToSchool, SoftDeletes;
 
+    /** Daftar agama resmi di Indonesia (6 agama yang diakui pemerintah). */
+    public const AGAMAS = ['Islam', 'Kristen', 'Katolik', 'Hindu', 'Buddha', 'Konghucu'];
+
     protected $fillable = [
         'school_id',
         'import_batch_id',
