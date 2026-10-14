@@ -8,6 +8,7 @@ use App\Concerns\BelongsToSchool;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * @property int|null $school_id
@@ -18,6 +19,7 @@ class Employee extends Model
 
     protected $fillable = [
         'school_id',
+        'import_batch_id',
         'nip_nuptk',
         'nama',
         'phone',
@@ -50,5 +52,12 @@ class Employee extends Model
             'guru_kelas' => 'Guru Kelas',
             default => 'Tendik',
         };
+    }
+
+    public function fotoUrl(): ?string
+    {
+        return $this->foto_path
+            ? Storage::disk('public')->url($this->foto_path)
+            : null;
     }
 }

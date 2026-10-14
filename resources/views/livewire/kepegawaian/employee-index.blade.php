@@ -1,7 +1,7 @@
 <div>
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
         <div class="relative w-full sm:max-w-xs">
-            <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
+            <x-icon name="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <input type="search" wire:model.live.debounce.300ms="search" placeholder="Cari nama / NIP…"
                    aria-label="Cari guru"
                    class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-boxdark py-2.5 pl-10 pr-4 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary dark:text-white">
@@ -16,7 +16,12 @@
             </select>
             @can('guru.create')
                 <a href="{{ route('guru.create') }}" class="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 transition-colors">
-                    <i data-lucide="plus" class="w-4 h-4"></i> Tambah Guru
+                    <x-icon name="plus" class="w-4 h-4" /> Tambah Guru
+                </a>
+            @endcan
+            @can('guru.import')
+                <a href="{{ route('guru.impor') }}" class="inline-flex items-center gap-2 rounded-lg border border-slate-200 dark:border-slate-700 px-4 py-2.5 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                    <x-icon name="upload" class="w-4 h-4" /> Impor Excel
                 </a>
             @endcan
         </div>
@@ -36,7 +41,7 @@
                 </thead>
                 <tbody>
                     @forelse ($employees as $guru)
-                        <tr class="border-b border-slate-100 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-800/30">
+                        <tr wire:key="guru-{{ $guru->id }}" class="border-b border-slate-100 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-800/30">
                             <td class="py-3 px-5">
                                 <div class="font-medium text-slate-800 dark:text-white">{{ $guru->nama }}</div>
                                 @if($guru->jabatan)<div class="text-xs text-slate-500">{{ $guru->jabatan }}</div>@endif
@@ -51,10 +56,20 @@
                             </td>
                             <td class="py-3 px-5 text-right">
                                 <div class="inline-flex items-center gap-1">
+                                    @can('guru.view')
+                                        <a href="{{ route('guru.show', $guru) }}" class="p-2 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700" aria-label="Lihat {{ $guru->nama }}">
+                                            <x-icon name="eye" class="w-4 h-4" />
+                                        </a>
+                                    @endcan
                                     @can('guru.update')
                                         <a href="{{ route('guru.edit', $guru) }}" class="p-2 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700" aria-label="Ubah {{ $guru->nama }}">
-                                            <i data-lucide="pencil" class="w-4 h-4"></i>
+                                            <x-icon name="pencil" class="w-4 h-4" />
                                         </a>
+                                    @endcan
+                                    @can('guru.delete')
+                                        <button type="button" wire:click="delete({{ $guru->id }})" wire:confirm="Hapus data {{ $guru->nama }}? Data yang dihapus tidak dapat dikembalikan lagi." class="p-2 rounded-lg text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20" aria-label="Hapus {{ $guru->nama }}">
+                                            <x-icon name="trash-2" class="w-4 h-4" />
+                                        </button>
                                     @endcan
                                 </div>
                             </td>

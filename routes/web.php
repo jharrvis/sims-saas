@@ -51,6 +51,7 @@ use App\Livewire\Kantin\TransactionIndex;
 use App\Livewire\Kepegawaian\EmployeeForm;
 use App\Livewire\Kepegawaian\EmployeeImport;
 use App\Livewire\Kepegawaian\EmployeeIndex;
+use App\Livewire\Kepegawaian\EmployeeShow;
 use App\Livewire\Kesiswaan\GuardianForm;
 use App\Livewire\Kesiswaan\GuardianIndex;
 use App\Livewire\Kesiswaan\GuardianShow;
@@ -204,6 +205,7 @@ Route::middleware(['auth', 'mfa'])->group(function (): void {
         Route::get('/impor/template', [ImportTemplateController::class, 'guru'])->name('impor.template')->middleware('permission:guru.import');
         Route::get('/tambah', EmployeeForm::class)->name('create')->middleware('permission:guru.create');
         Route::get('/{employee}/ubah', EmployeeForm::class)->name('edit')->middleware('permission:guru.update');
+        Route::get('/{employee}', EmployeeShow::class)->name('show')->middleware('permission:guru.view');
     });
 
     // Kelas (rombel)
