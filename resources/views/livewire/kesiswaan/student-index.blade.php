@@ -19,8 +19,8 @@
             <select wire:model.live="rombel" aria-label="Filter kelas"
                     class="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-boxdark py-2 px-2.5 text-xs outline-none focus:border-primary dark:text-white">
                 <option value="">Semua kelas</option>
-                @foreach ($rombels as $rombel)
-                    <option value="{{ $rombel->id }}">{{ $rombel->nama }}</option>
+                @foreach ($rombels as $rombelOption)
+                    <option value="{{ $rombelOption->id }}">{{ $rombelOption->nama }}</option>
                 @endforeach
             </select>
         </div>
@@ -41,7 +41,25 @@
                     <x-icon name="download" class="w-3.5 h-3.5" /> Export
                     <x-icon name="chevron-down" class="w-3.5 h-3.5 text-slate-400" />
                 </summary>
-                <div class="absolute right-0 z-20 mt-1.5 w-44 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-lg dark:border-slate-700 dark:bg-boxdark">
+                <div class="absolute right-0 z-20 mt-1.5 w-56 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-lg dark:border-slate-700 dark:bg-boxdark">
+                    <p class="cursor-default border-b border-slate-100 px-3 py-2 text-[11px] leading-snug text-slate-500 dark:border-slate-700 dark:text-slate-400">
+                        @if ($showTrashed)
+                            Export mengikuti filter aktif (tanpa sampah)
+                        @else
+                            Export {{ $students->total() }} siswa
+                            @if ($rombel !== '')
+                                · Rombel {{ $rombels->firstWhere('id', (int) $rombel)?->nama ?? 'terpilih' }}
+                            @else
+                                · Semua kelas
+                            @endif
+                            @if ($status !== '')
+                                · Status {{ ucfirst($status) }}
+                            @endif
+                            @if ($search !== '')
+                                · Cari “{{ \Illuminate\Support\Str::limit($search, 15) }}”
+                            @endif
+                        @endif
+                    </p>
                     <a href="{{ route('siswa.ekspor.excel', array_filter(['search' => $search ?: null, 'status' => $status ?: null, 'rombel_id' => $rombel ?: null])) }}" onclick="this.closest('details').removeAttribute('open')" class="flex items-center gap-2 px-3 py-2 text-xs font-medium hover:bg-slate-50 dark:hover:bg-slate-800">
                         <x-icon name="file-spreadsheet" class="w-4 h-4 text-emerald-600" /> Excel (.xlsx)
                     </a>
@@ -107,8 +125,8 @@
                 <select wire:model="bulkRombelId" aria-label="Rombel tujuan"
                         class="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-boxdark py-1.5 px-2.5 text-xs outline-none focus:border-primary dark:text-white">
                     <option value="">— Rombel tujuan —</option>
-                    @foreach ($rombels as $rombel)
-                        <option value="{{ $rombel->id }}">{{ $rombel->nama }}</option>
+                    @foreach ($rombels as $rombelOption)
+                        <option value="{{ $rombelOption->id }}">{{ $rombelOption->nama }}</option>
                     @endforeach
                 </select>
             @endif
