@@ -100,6 +100,18 @@ php artisan view:cache
 
 Pastikan writable: `storage/`, `bootstrap/cache/` (owner = user HestiaCP).
 
+Agar foto siswa (dan file `storage/app/public` lainnya) bisa diakses lewat
+symlink `public/storage` oleh web server (Apache jalan sebagai user lain):
+direktori rantai `private/app`, `private/app/storage`,
+`private/app/storage/app`, `private/app/storage/app/public` harus punya
+`o+x` (traverse saja, tanpa read/list). Tanpa ini foto mengembalikan 403
+`AH00037: Symbolic link not allowed or link target not accessible` walau
+file-nya 644:
+
+```bash
+chmod o+x private/app private/app/storage private/app/storage/app private/app/storage/app/public
+```
+
 Buat akun operator platform pertama:
 
 ```bash
