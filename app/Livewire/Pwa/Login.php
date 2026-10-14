@@ -29,10 +29,18 @@ class Login extends Component
 
     public ?string $info = null;
 
-    public function requestOtp(OtpService $otp): void
+    public function requestOtp(OtpService $otp, PwaIdentityService $identity): void
     {
         $this->validate(['phone' => ['required', 'string', 'max:20']]);
         $this->error = null;
+
+        // Gerbang: OTP hanya dikirim ke nomor yang terdaftar sebagai nomor
+        // WA siswa/wali. Nomor acak ditolak sebelum ada pesan WA terkirim.
+        if (! $identity->isPhoneRegistered($this->phone)) {
+            $this->error = 'Nomor WhatsApp tidak terdaftar di sekolah manapun. Hubungi sekolah untuk mendaftarkan nomor Anda.';
+
+            return;
+        }
 
         try {
             $otp->request($this->phone, 'login', config('app.name', 'SIMS'));

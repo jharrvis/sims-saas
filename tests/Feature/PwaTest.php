@@ -10,6 +10,7 @@ use App\Models\AcademicYear;
 use App\Models\GradeRelease;
 use App\Models\Guardian;
 use App\Models\Membership;
+use App\Models\OtpCode;
 use App\Models\Rombel;
 use App\Models\School;
 use App\Models\Semester;
@@ -194,4 +195,26 @@ it('konteks tenant mengikuti sekolah anak aktif', function (): void {
 
     expect(app(TenantContext::class)->schoolId())->toBe($this->school->id);
     expect(app(PwaContext::class)->activeStudent()?->id)->toBe($this->siswa->id);
+});
+
+it('OTP PWA ditolak untuk nomor yang tidak terdaftar (tanpa WA terkirim)', function (): void {
+    Livewire::test(PwaLogin::class)
+        ->set('phone', '32423424234234324')
+        ->call('requestOtp')
+        ->assertSet('step', 1)
+        ->assertSet('error', 'Nomor WhatsApp tidak terdaftar di sekolah manapun. Hubungi sekolah untuk mendaftarkan nomor Anda.');
+
+    expect(FakeWaSender::$lastCode)->toBeNull()
+        ->and(OtpCode::count())->toBe(0);
+});
+
+it('OTP PWA dikirim untuk nomor siswa yang terdaftar', function (): void {
+    Livewire::test(PwaLogin::class)
+        ->set('phone', '08111000001')
+        ->call('requestOtp')
+        ->assertSet('step', 2)
+        ->assertSet('error', null);
+
+    expect(FakeWaSender::$lastCode)->not->toBeNull()
+        ->and(OtpCode::count())->toBe(1);
 });

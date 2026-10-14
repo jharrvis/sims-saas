@@ -70,6 +70,33 @@ class PwaIdentityService
     }
 
     /**
+     * Cek apakah nomor WA terdaftar sebagai nomor siswa (students.phone)
+     * atau wali (guardians.no_wa) di sekolah manapun. Dipakai gerbang
+     * login PWA: OTP tidak dikirim ke nomor yang tidak terdaftar, agar
+     * tidak jadi celah spam/biaya WA (Fonnte) ke nomor acak.
+     */
+    public function isPhoneRegistered(string $phone): bool
+    {
+        $phone = self::normalize($phone);
+
+        if ($phone === '') {
+            return false;
+        }
+
+        $siswaAda = Student::withoutGlobalScope(SchoolScope::class)
+            ->where('phone', $phone)
+            ->exists();
+
+        if ($siswaAda) {
+            return true;
+        }
+
+        return Guardian::withoutGlobalScope(SchoolScope::class)
+            ->where('no_wa', $phone)
+            ->exists();
+    }
+
+    /**
      * Pastikan ada membership aktif + peran pada tenant terkait.
      */
     private function ensureMembership(User $user, int $schoolId, string $role): void
