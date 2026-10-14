@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Domains\Kepegawaian\Http\Controllers;
 
 use App\Models\Employee;
+use App\Models\Student;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -62,10 +63,26 @@ class EmployeeController extends Controller
         /** @var array<string,mixed> $data */
         $data = $request->validate([
             'nip_nuptk' => ['nullable', 'string', 'max:30'],
+            'nik' => ['nullable', 'string', 'max:20'],
             'nama' => ['required', 'string', 'max:150'],
+            'tempat_lahir' => ['nullable', 'string', 'max:100'],
+            'tgl_lahir' => ['nullable', 'date'],
+            'jk' => ['nullable', Rule::in(['L', 'P'])],
+            'agama' => ['nullable', Rule::in(Student::AGAMAS)],
+            'alamat' => ['nullable', 'string'],
+            'email' => ['nullable', 'email', 'max:150'],
+            'phone' => ['nullable', 'string', 'max:20'],
             'jenis' => ['required', Rule::in(['guru_mapel', 'guru_kelas', 'tendik'])],
             'status_kepegawaian' => ['required', Rule::in(['pns', 'pppk', 'honorer', 'kontrak'])],
             'jabatan' => ['nullable', 'string', 'max:100'],
+            'pendidikan_terakhir' => ['nullable', Rule::in(array_keys(Employee::PENDIDIKAN))],
+            'jurusan' => ['nullable', 'string', 'max:100'],
+            'perguruan_tinggi' => ['nullable', 'string', 'max:150'],
+            'tahun_lulus' => ['nullable', 'integer', 'min:1950', 'max:'.date('Y')],
+            'tmt' => ['nullable', 'date'],
+            'golongan' => ['nullable', Rule::in(Employee::GOLONGAN)],
+            'sertifikasi' => ['nullable', Rule::in(array_keys(Employee::SERTIFIKASI))],
+            'no_sertifikat' => ['nullable', 'string', 'max:50'],
             'status_aktif' => ['sometimes', 'boolean'],
         ]);
 

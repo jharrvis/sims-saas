@@ -31,11 +31,37 @@
 
         <dl class="mt-6 grid sm:grid-cols-2 gap-x-8 gap-y-4 text-sm">
             <div><dt class="text-slate-500 dark:text-slate-400">NIP / NUPTK</dt><dd class="font-medium text-slate-800 dark:text-white">{{ $employee->nip_nuptk ?? '—' }}</dd></div>
+            <div><dt class="text-slate-500 dark:text-slate-400">NIK</dt><dd class="font-medium text-slate-800 dark:text-white">{{ $employee->nik ?? '—' }}</dd></div>
+            <div><dt class="text-slate-500 dark:text-slate-400">Tempat, Tanggal Lahir</dt><dd class="font-medium text-slate-800 dark:text-white">{{ $employee->tempat_lahir ?? '—' }}, {{ $employee->tgl_lahir?->format('d M Y') ?? '—' }}</dd></div>
+            <div><dt class="text-slate-500 dark:text-slate-400">Jenis Kelamin</dt><dd class="font-medium text-slate-800 dark:text-white">{{ $employee->labelJk() }}</dd></div>
+            <div><dt class="text-slate-500 dark:text-slate-400">Agama</dt><dd class="font-medium text-slate-800 dark:text-white">{{ $employee->agama ?? '—' }}</dd></div>
+            <div><dt class="text-slate-500 dark:text-slate-400">Email</dt><dd class="font-medium text-slate-800 dark:text-white">{{ $employee->email ?? '—' }}</dd></div>
+            <div><dt class="text-slate-500 dark:text-slate-400">No. HP</dt><dd class="font-medium text-slate-800 dark:text-white">{{ $employee->phone ?? '—' }}</dd></div>
+            <div><dt class="text-slate-500 dark:text-slate-400">Status</dt><dd class="font-medium text-slate-800 dark:text-white">{{ $employee->status_aktif ? 'Aktif' : 'Nonaktif' }}</dd></div>
+            <div class="sm:col-span-2"><dt class="text-slate-500 dark:text-slate-400">Alamat</dt><dd class="font-medium text-slate-800 dark:text-white">{{ $employee->alamat ?? '—' }}</dd></div>
+        </dl>
+    </div>
+
+    <div class="rounded-xl border border-slate-200 bg-white dark:bg-boxdark dark:border-slate-700 p-6">
+        <h2 class="font-semibold text-slate-800 dark:text-white mb-4">Pendidikan</h2>
+        <dl class="grid sm:grid-cols-2 gap-x-8 gap-y-4 text-sm">
+            <div><dt class="text-slate-500 dark:text-slate-400">Pendidikan Terakhir</dt><dd class="font-medium text-slate-800 dark:text-white">{{ $employee->labelPendidikan() }}</dd></div>
+            <div><dt class="text-slate-500 dark:text-slate-400">Tahun Lulus</dt><dd class="font-medium text-slate-800 dark:text-white">{{ $employee->tahun_lulus ?? '—' }}</dd></div>
+            <div><dt class="text-slate-500 dark:text-slate-400">Jurusan</dt><dd class="font-medium text-slate-800 dark:text-white">{{ $employee->jurusan ?? '—' }}</dd></div>
+            <div><dt class="text-slate-500 dark:text-slate-400">Perguruan Tinggi / Sekolah</dt><dd class="font-medium text-slate-800 dark:text-white">{{ $employee->perguruan_tinggi ?? '—' }}</dd></div>
+        </dl>
+    </div>
+
+    <div class="rounded-xl border border-slate-200 bg-white dark:bg-boxdark dark:border-slate-700 p-6">
+        <h2 class="font-semibold text-slate-800 dark:text-white mb-4">Kepegawaian</h2>
+        <dl class="grid sm:grid-cols-2 gap-x-8 gap-y-4 text-sm">
             <div><dt class="text-slate-500 dark:text-slate-400">Jenis</dt><dd class="font-medium text-slate-800 dark:text-white">{{ $employee->labelJenis() }}</dd></div>
             <div><dt class="text-slate-500 dark:text-slate-400">Status Kepegawaian</dt><dd class="font-medium text-slate-800 dark:text-white">{{ ucfirst($employee->status_kepegawaian) }}</dd></div>
             <div><dt class="text-slate-500 dark:text-slate-400">Jabatan</dt><dd class="font-medium text-slate-800 dark:text-white">{{ $employee->jabatan ?? '—' }}</dd></div>
-            <div><dt class="text-slate-500 dark:text-slate-400">No. HP</dt><dd class="font-medium text-slate-800 dark:text-white">{{ $employee->phone ?? '—' }}</dd></div>
-            <div><dt class="text-slate-500 dark:text-slate-400">Status</dt><dd class="font-medium text-slate-800 dark:text-white">{{ $employee->status_aktif ? 'Aktif' : 'Nonaktif' }}</dd></div>
+            <div><dt class="text-slate-500 dark:text-slate-400">TMT</dt><dd class="font-medium text-slate-800 dark:text-white">{{ $employee->tmt?->format('d M Y') ?? '—' }}</dd></div>
+            <div><dt class="text-slate-500 dark:text-slate-400">Golongan / Pangkat</dt><dd class="font-medium text-slate-800 dark:text-white">{{ $employee->golongan ?? '—' }}</dd></div>
+            <div><dt class="text-slate-500 dark:text-slate-400">Sertifikasi</dt><dd class="font-medium text-slate-800 dark:text-white">{{ $employee->labelSertifikasi() }}</dd></div>
+            <div><dt class="text-slate-500 dark:text-slate-400">No. Sertifikat Pendidik</dt><dd class="font-medium text-slate-800 dark:text-white">{{ $employee->no_sertifikat ?? '—' }}</dd></div>
         </dl>
     </div>
 

@@ -26,8 +26,10 @@ class StudentPhotoService
 
     /**
      * Kompresi + simpan foto baru. Mengembalikan path relatif di disk public.
+     *
+     * @param  string  $folder  folder tujuan, cth. 'siswa-foto' atau 'guru-foto'
      */
-    public function store(UploadedFile $file, int $schoolId): string
+    public function store(UploadedFile $file, int $schoolId, string $folder = 'siswa-foto'): string
     {
         $image = $this->decode($file);
 
@@ -35,12 +37,12 @@ class StudentPhotoService
         $image = $this->resize($image);
         $image = $this->flattenOnWhite($image);
 
-        $tmp = tempnam(sys_get_temp_dir(), 'siswa-foto-').'.jpg';
+        $tmp = tempnam(sys_get_temp_dir(), $folder.'-').'.jpg';
         imagejpeg($image, $tmp, self::JPEG_QUALITY);
         imagedestroy($image);
 
         try {
-            $path = 'siswa-foto/'.$schoolId.'/'.Str::uuid().'.jpg';
+            $path = $folder.'/'.$schoolId.'/'.Str::uuid().'.jpg';
             Storage::disk('public')->put($path, file_get_contents($tmp));
 
             return $path;

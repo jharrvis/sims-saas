@@ -8,24 +8,79 @@ use App\Concerns\BelongsToSchool;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
 
 /**
  * @property int|null $school_id
+ * @property Carbon|null $tgl_lahir
+ * @property Carbon|null $tmt
  */
 class Employee extends Model
 {
     use BelongsToSchool, SoftDeletes;
 
+    /**
+     * Pendidikan terakhir (label tampilan).
+     *
+     * @var array<string,string>
+     */
+    public const PENDIDIKAN = [
+        'sma' => 'SMA/SMK',
+        'd3' => 'D3',
+        'd4' => 'D4',
+        's1' => 'S1',
+        's2' => 'S2',
+        's3' => 'S3',
+    ];
+
+    /**
+     * Golongan/pangkat PNS.
+     *
+     * @var list<string>
+     */
+    public const GOLONGAN = [
+        'I/a', 'I/b', 'I/c', 'I/d',
+        'II/a', 'II/b', 'II/c', 'II/d',
+        'III/a', 'III/b', 'III/c', 'III/d',
+        'IV/a', 'IV/b', 'IV/c', 'IV/d', 'IV/e',
+    ];
+
+    /**
+     * Status sertifikasi pendidik (label tampilan).
+     *
+     * @var array<string,string>
+     */
+    public const SERTIFIKASI = [
+        'belum' => 'Belum Sertifikasi',
+        'proses' => 'Proses Sertifikasi',
+        'sudah' => 'Sudah Sertifikasi',
+    ];
+
     protected $fillable = [
         'school_id',
         'import_batch_id',
         'nip_nuptk',
+        'nik',
         'nama',
+        'tempat_lahir',
+        'tgl_lahir',
+        'jk',
+        'agama',
+        'alamat',
+        'email',
         'phone',
         'jenis',
         'status_kepegawaian',
         'jabatan',
+        'pendidikan_terakhir',
+        'jurusan',
+        'perguruan_tinggi',
+        'tahun_lulus',
+        'tmt',
+        'golongan',
+        'sertifikasi',
+        'no_sertifikat',
         'foto_path',
         'status_aktif',
     ];
@@ -33,6 +88,9 @@ class Employee extends Model
     protected function casts(): array
     {
         return [
+            'tgl_lahir' => 'date',
+            'tahun_lulus' => 'integer',
+            'tmt' => 'date',
             'status_aktif' => 'boolean',
         ];
     }
@@ -52,6 +110,25 @@ class Employee extends Model
             'guru_kelas' => 'Guru Kelas',
             default => 'Tendik',
         };
+    }
+
+    public function labelJk(): string
+    {
+        return match ($this->jk) {
+            'L' => 'Laki-laki',
+            'P' => 'Perempuan',
+            default => '—',
+        };
+    }
+
+    public function labelPendidikan(): string
+    {
+        return self::PENDIDIKAN[$this->pendidikan_terakhir] ?? '—';
+    }
+
+    public function labelSertifikasi(): string
+    {
+        return self::SERTIFIKASI[$this->sertifikasi] ?? '—';
     }
 
     public function fotoUrl(): ?string
