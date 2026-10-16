@@ -46,6 +46,9 @@ Format mengikuti [Keep a Changelog](https://keepachangelog.com/id/1.1.0/).
 - Pengiriman WA via **Fonnte** (keputusan pemilik produk 12 Okt 2026): kontrak `WaSender` + `sendText()`, `FonnteWaSender` (POST `api.fonnte.com/send`, header `Authorization`, field `target`/`message`), binding via `WA_DRIVER` (`log`/`fonnte`) di `config/wa.php`; `FONNTE_TOKEN` diisi saat deploy
 - `DEPLOY.md`: panduan deploy production di **HestiaCP** (keputusan 12 Okt 2026) — domain + PHP 8.3 + SSL, database, clone kode, checklist secret `.env`, composer/migrate/cache, cron `schedule:run` + `queue:work --stop-when-empty` tiap menit, registrasi webhook Midtrans, verifikasi & troubleshooting; catatan file yang harus diupload manual via web GitHub (`composer.lock`, `.github/workflows/ci.yml`)
 
+### Diubah
+- **2FA kini opsional (opt-in), default nonaktif untuk semua pengguna** — sebelumnya wajib untuk peran platform (FR-904). Halaman baru **Pengaturan → Keamanan Akun** (`/pengaturan/keamanan`) untuk mengaktifkan/menonaktifkan 2FA; penonaktifan diverifikasi ulang via OTP WhatsApp dan dicatat di audit (`mfa.disable`). Middleware `mfa` hanya menantang verifikasi bila user sudah mengaktifkan 2FA sendiri. Kebijakan wajib-2FA untuk operator platform dapat dihidupkan kembali via env `MFA_REQUIRED_FOR_PLATFORM=true` (`config/mfa.php`)
+
 ### Keamanan
 - Isolasi tenant fail-closed: query model tenant tanpa konteks melempar exception (diuji)
 - Identitas global + membership (ADR-0004); token satu tenant aktif

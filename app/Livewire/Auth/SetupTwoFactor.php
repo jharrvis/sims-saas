@@ -13,8 +13,9 @@ use Illuminate\View\View;
 use Livewire\Component;
 
 /**
- * Setup 2FA TOTP — wajib untuk peran platform (FR-904).
- * Menampilkan QR + 8 kode pemulihan (sekali tampil).
+ * Setup 2FA TOTP — OPSIONAL (opt-in). Tersedia bagi semua pengguna;
+ * operator platform dipaksa ke sini hanya bila `mfa.require_for_platform`
+ * aktif. Menampilkan QR + 8 kode pemulihan (sekali tampil).
  */
 class SetupTwoFactor extends Component
 {
@@ -62,6 +63,10 @@ class SetupTwoFactor extends Component
         $this->success = '2FA berhasil diaktifkan. Simpan kode pemulihan Anda di tempat aman.';
         $this->qrSvg = '';
         $this->secret = '';
+
+        // Tandai sesi ini sudah terverifikasi agar tidak langsung diminta
+        // verifikasi ulang oleh middleware `mfa` pada request berikutnya.
+        session(['mfa_verified_'.auth()->id() => true]);
     }
 
     private function qrSvg(string $content): string

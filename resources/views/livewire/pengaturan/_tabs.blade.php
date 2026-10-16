@@ -3,6 +3,7 @@ $tabs = [
     ['route' => 'pengaturan.profil', 'label' => 'Profil Sekolah'],
     ['route' => 'pengaturan.tahun-ajaran', 'label' => 'Tahun Ajaran'],
     ['route' => 'pengaturan.modul', 'label' => 'Modul Add-on'],
+    ['route' => 'pengaturan.keamanan', 'label' => 'Keamanan Akun'],
 ];
 @endphp
 <div class="flex gap-1 mb-5 border-b border-slate-200 dark:border-slate-700">

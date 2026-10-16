@@ -11,7 +11,8 @@ use Illuminate\View\View;
 use Livewire\Component;
 
 /**
- * Verifikasi MFA saat login — langkah ke-2 untuk peran platform (FR-904).
+ * Verifikasi MFA saat login — langkah ke-2 bagi user yang mengaktifkan
+ * 2FA (opt-in). Default nonaktif untuk semua pengguna.
  */
 class VerifyMfa extends Component
 {
@@ -30,8 +31,8 @@ class VerifyMfa extends Component
             return;
         }
 
-        // Tidak butuh verifikasi MFA → ke dashboard.
-        if (! $user->is_platform || ! $user->mfaSecret?->isConfirmed()) {
+        // 2FA tidak aktif → tidak perlu verifikasi.
+        if (! $user->hasMfaEnabled()) {
             $this->redirect(route('dashboard'), navigate: true);
         }
     }
@@ -61,7 +62,7 @@ class VerifyMfa extends Component
 
         $user = $this->resolveUser();
 
-        if (! $user || ! $user->is_platform || ! $user->mfaSecret?->isConfirmed()) {
+        if (! $user || ! $user->hasMfaEnabled()) {
             $this->redirect(route('login'), navigate: true);
 
             return;

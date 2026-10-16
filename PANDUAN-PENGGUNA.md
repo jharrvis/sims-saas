@@ -35,7 +35,7 @@ SIMS memakai **login via WhatsApp** — tanpa password yang perlu dihafal.
 
 > **Tips:** Pastikan nomor WhatsApp yang dipakai sama dengan yang terdaftar di sekolah. Jika belum terdaftar, hubungi admin sekolah.
 
-Jika akun Anda **wajib verifikasi 2 langkah** (peran operator), setelah kode WhatsApp Anda diminta memasukkan kode dari aplikasi autentikator (Google Authenticator / Authy). Lihat [bagian 3](#3-mengamankan-akun-dengan-verifikasi-2-langkah).
+Jika Anda sudah **mengaktifkan verifikasi 2 langkah** (opsional), setelah kode WhatsApp Anda diminta memasukkan kode dari aplikasi autentikator (Google Authenticator / Authy). Lihat [bagian 3](#3-mengamankan-akun-dengan-verifikasi-2-langkah).
 
 ---
 
@@ -53,10 +53,14 @@ Data yang Anda lihat selalu milik **satu sekolah aktif** — tidak akan tercampu
 
 ## 3. Mengamankan Akun dengan Verifikasi 2 Langkah
 
-1. Buka **Pengaturan → Keamanan → Aktifkan 2FA**.
+Verifikasi 2 langkah (2FA) bersifat **opsional** — Anda bisa mengaktifkan atau menonaktifkannya sendiri kapan saja.
+
+1. Buka **Pengaturan → Keamanan Akun → Aktifkan 2FA** (atau langsung ke `/pengaturan/keamanan`).
 2. Pindai kode QR dengan aplikasi autentikator di HP Anda.
 3. Masukkan kode 6 digit dari aplikasi untuk konfirmasi.
 4. **Simpan 8 kode cadangan** di tempat aman (dicetak / password manager). Kode ini dipakai jika HP hilang — tiap kode hanya bisa dipakai sekali.
+
+Untuk **menonaktifkan**, buka **Pengaturan → Keamanan Akun → Nonaktifkan 2FA**, lalu masukkan kode OTP WhatsApp untuk konfirmasi. Akun operator platform dapat diwajibkan mengaktifkan 2FA oleh kebijakan sistem.
 
 ---
 

@@ -13,7 +13,11 @@
                     @elseif ($employee?->fotoUrl())
                         <img src="{{ $employee->fotoUrl() }}" alt="Foto {{ $employee->nama }}" class="h-full w-full object-cover">
                     @else
-                        {{ strtoupper(substr($nama ?: '?', 0, 1)) }}
+                        @php
+                            $namaParts = preg_split('/\s+/', trim($nama ?: ''));
+                            $inisial = !empty($namaParts[0]) ? strtoupper(mb_substr($namaParts[0], 0, 1) . (count($namaParts) > 1 ? mb_substr(end($namaParts), 0, 1) : '')) : '?';
+                        @endphp
+                        {{ $inisial }}
                     @endif
                 </div>
                 <p class="text-sm text-slate-600 dark:text-slate-300">Seret &amp; letakkan foto di sini, atau <span class="font-medium text-primary underline">pilih file</span></p>

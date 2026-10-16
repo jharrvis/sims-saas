@@ -101,6 +101,27 @@ class User extends Authenticatable
     }
 
     /**
+     * Apakah 2FA (TOTP) sudah diaktifkan & dikonfirmasi user ini.
+     * 2FA bersifat opt-in: default nonaktif untuk semua pengguna.
+     */
+    public function hasMfaEnabled(): bool
+    {
+        return (bool) $this->mfaSecret?->isConfirmed();
+    }
+
+    /**
+     * Apakah user ini WAJIB memakai 2FA.
+     *
+     * - Selalu true bila user sudah mengaktifkan 2FA sendiri (opt-in).
+     * - Operator platform hanya wajib bila config mfa.require_for_platform=true.
+     */
+    public function mfaRequired(): bool
+    {
+        return $this->hasMfaEnabled()
+            || ($this->is_platform && (bool) config('mfa.require_for_platform', false));
+    }
+
+    /**
      * Tautan akun siswa 1:1 (login PWA siswa).
      *
      * @return BelongsTo<Student, $this>

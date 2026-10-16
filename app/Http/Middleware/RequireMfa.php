@@ -9,11 +9,14 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * FR-904: MFA wajib untuk peran platform (web).
+ * 2FA (TOTP) bersifat OPSIONAL / opt-in — default nonaktif untuk semua pengguna.
  *
- * - Pengguna platform yang belum mengonfirmasi MFA → dipaksa ke 2fa.setup.
- * - Pengguna platform yang MFA-nya sudah aktif tetapi sesi belum terverifikasi
- *   (mis. login ulang via cookie remember-me) → dipaksa ke mfa.verify.
+ * Aturan:
+ * - Bila user TIDAK mewajibkan 2FA → dilewatkan (login cukup WA OTP).
+ * - Bila user sudah mengaktifkan 2FA sendiri → sesi baru wajib diverifikasi
+ *   lewat mfa.verify (termasuk login ulang via cookie remember-me).
+ * - Operator platform hanya dipaksa bila config `mfa.require_for_platform`
+ *   (env MFA_REQUIRED_FOR_PLATFORM) aktif; tanpa flag → tidak dipaksa setup.
  */
 class RequireMfa
 {
@@ -21,12 +24,18 @@ class RequireMfa
     {
         $user = $request->user();
 
-        if ($user === null || ! (bool) $user->is_platform) {
+        if ($user === null) {
             return $next($request);
         }
 
-        // Belum setup/konfirmasi MFA → wajib setup dulu.
-        if (! $user->mfaSecret?->isConfirmed()) {
+        // Default: 2FA nonaktif → langsung lanjut.
+        if (! $user->mfaRequired()) {
+            return $next($request);
+        }
+
+        // Wajib 2FA tetapi belum diaktifkan (mis. platform + flag aktif)
+        // → arahkan ke halaman setup.
+        if (! $user->hasMfaEnabled()) {
             if ($request->routeIs('2fa.setup')) {
                 return $next($request);
             }
@@ -34,7 +43,7 @@ class RequireMfa
             return redirect()->route('2fa.setup');
         }
 
-        // MFA aktif tetapi sesi ini belum terverifikasi → wajib verifikasi.
+        // 2FA aktif tetapi sesi ini belum terverifikasi → minta verifikasi.
         if (! $request->session()->get('mfa_verified_'.$user->id, false)) {
             return redirect()->route('mfa.verify');
         }

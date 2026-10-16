@@ -65,10 +65,11 @@ class AuthController extends Controller
             throw ValidationException::withMessages(['phone' => 'Nomor belum terdaftar.']);
         }
 
-        // MFA wajib untuk peran platform (FR-904)
-        if ($user->is_platform && ! $this->mfaVerified($request, $user)) {
+        // 2FA opt-in: bila user mengaktifkan 2FA → minta langkah verifikasi.
+        if ($user->mfaRequired() && ! $this->mfaVerified($request, $user)) {
             return response()->json([
                 'mfa_required' => true,
+                'enrollment_required' => ! $user->hasMfaEnabled(),
                 'user_id' => $user->id,
             ], 202);
         }

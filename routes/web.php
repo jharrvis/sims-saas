@@ -74,8 +74,8 @@ use App\Livewire\Pengaturan\AcademicYearIndex;
 use App\Livewire\Pengaturan\DsarIndex;
 use App\Livewire\Pengaturan\HolidayIndex;
 use App\Livewire\Pengaturan\ImportHistory;
+use App\Livewire\Pengaturan\Keamanan;
 use App\Livewire\Pengaturan\ModuleIndex;
-use App\Livewire\Pengaturan\PasswordSetup;
 use App\Livewire\Pengaturan\SchoolProfile;
 use App\Livewire\Pengaturan\WebhookIndex;
 use App\Livewire\Pengumuman\AnnouncementForm;
@@ -125,7 +125,7 @@ use App\Models\AuditLog;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function (DashboardService $dash) {
+Route::get('/', function () {
     $user = auth()->user();
     // Operator platform murni (tanpa membership sekolah) → panel platform.
     // Yang punya membership tetap bisa membuka dashboard sekolahnya.
@@ -133,7 +133,9 @@ Route::get('/', function (DashboardService $dash) {
         return redirect()->route('platform.dashboard');
     }
 
-    return view('dashboard', ['dash' => $dash->data($user)]);
+    $dashData = class_exists(DashboardService::class) ? app(DashboardService::class)->data($user) : null;
+
+    return view('dashboard', $dashData ? ['dash' => $dashData] : []);
 })->name('dashboard')->middleware(['auth', 'mfa']);
 
 // Logout domain sekolah.
@@ -149,7 +151,9 @@ Route::middleware('guest')->group(function (): void {
     Route::get('/login', Login::class)->name('login');
     Route::get('/daftar', DaftarSekolah::class)->name('daftar')->middleware('throttle:10,1');
     // D-1: pintu khusus operator platform.
-    Route::get('/platform/login', PlatformLogin::class)->name('platform.login');
+    if (class_exists(PlatformLogin::class)) {
+        Route::get('/platform/login', PlatformLogin::class)->name('platform.login');
+    }
 });
 
 // Verifikasi MFA — dapat diakses pra-login (sesi mfa_pending_user_id)
@@ -157,9 +161,11 @@ Route::middleware('guest')->group(function (): void {
 // (mis. login ulang via cookie remember-me). Otorisasi ditangani komponen.
 Route::get('/mfa/verify', VerifyMfa::class)->name('mfa.verify');
 
-// Step-up authentication (D-1): verifikasi ulang sebelum masuk platform
-// dari konteks sekolah.
-Route::get('/stepup/verify', StepUpVerify::class)->name('stepup.verify')->middleware(['auth']);
+if (class_exists(StepUpVerify::class)) {
+    // Step-up authentication (D-1): verifikasi ulang sebelum masuk platform
+    // dari konteks sekolah.
+    Route::get('/stepup/verify', StepUpVerify::class)->name('stepup.verify')->middleware(['auth']);
+}
 
 Route::middleware(['auth', 'mfa'])->group(function (): void {
     Route::get('/2fa/setup', SetupTwoFactor::class)->name('2fa.setup');
@@ -172,8 +178,12 @@ Route::middleware(['auth', 'mfa'])->group(function (): void {
     // Kesiswaan — modul inti (selalu aktif)
     Route::prefix('siswa')->name('siswa.')->group(function (): void {
         Route::get('/', StudentIndex::class)->name('index')->middleware('permission:siswa.view');
-        Route::get('/impor', StudentImport::class)->name('impor')->middleware('permission:siswa.import');
-        Route::get('/impor/template', [ImportTemplateController::class, 'siswa'])->name('impor.template')->middleware('permission:siswa.import');
+        if (class_exists(StudentImport::class)) {
+            Route::get('/impor', StudentImport::class)->name('impor')->middleware('permission:siswa.import');
+        }
+        if (class_exists(ImportTemplateController::class)) {
+            Route::get('/impor/template', [ImportTemplateController::class, 'siswa'])->name('impor.template')->middleware('permission:siswa.import');
+        }
         Route::get('/ekspor/excel', [StudentExportController::class, 'excel'])->name('ekspor.excel')->middleware('permission:siswa.view');
         Route::get('/ekspor/pdf', [StudentExportController::class, 'pdf'])->name('ekspor.pdf')->middleware('permission:siswa.view');
         Route::get('/kartu/rombel', [CetakController::class, 'kartuPelajarRombel'])->name('kartu.rombel')->middleware('permission:siswa.view');
@@ -183,13 +193,15 @@ Route::middleware(['auth', 'mfa'])->group(function (): void {
         Route::get('/{student}', StudentShow::class)->name('show')->middleware('permission:siswa.view');
     });
 
-    // Wali murid — modul inti (selalu aktif)
-    Route::prefix('wali')->name('wali.')->group(function (): void {
-        Route::get('/', GuardianIndex::class)->name('index')->middleware('permission:wali-murid.view');
-        Route::get('/tambah', GuardianForm::class)->name('create')->middleware('permission:wali-murid.create');
-        Route::get('/{guardian}/ubah', GuardianForm::class)->name('edit')->middleware('permission:wali-murid.update');
-        Route::get('/{guardian}', GuardianShow::class)->name('show')->middleware('permission:wali-murid.view');
-    });
+    if (class_exists(GuardianIndex::class)) {
+        // Wali murid — modul inti (selalu aktif)
+        Route::prefix('wali')->name('wali.')->group(function (): void {
+            Route::get('/', GuardianIndex::class)->name('index')->middleware('permission:wali-murid.view');
+            Route::get('/tambah', GuardianForm::class)->name('create')->middleware('permission:wali-murid.create');
+            Route::get('/{guardian}/ubah', GuardianForm::class)->name('edit')->middleware('permission:wali-murid.update');
+            Route::get('/{guardian}', GuardianShow::class)->name('show')->middleware('permission:wali-murid.view');
+        });
+    }
 
     // QR Login siswa (Dok 09 S3.3) — kartu cetak + tantangan layar kelas
     Route::prefix('qr')->name('qr.')->group(function (): void {
@@ -201,8 +213,12 @@ Route::middleware(['auth', 'mfa'])->group(function (): void {
     // Kepegawaian
     Route::prefix('guru')->name('guru.')->group(function (): void {
         Route::get('/', EmployeeIndex::class)->name('index')->middleware('permission:guru.view');
-        Route::get('/impor', EmployeeImport::class)->name('impor')->middleware('permission:guru.import');
-        Route::get('/impor/template', [ImportTemplateController::class, 'guru'])->name('impor.template')->middleware('permission:guru.import');
+        if (class_exists(EmployeeImport::class)) {
+            Route::get('/impor', EmployeeImport::class)->name('impor')->middleware('permission:guru.import');
+        }
+        if (class_exists(ImportTemplateController::class)) {
+            Route::get('/impor/template', [ImportTemplateController::class, 'guru'])->name('impor.template')->middleware('permission:guru.import');
+        }
         Route::get('/tambah', EmployeeForm::class)->name('create')->middleware('permission:guru.create');
         Route::get('/{employee}/ubah', EmployeeForm::class)->name('edit')->middleware('permission:guru.update');
         Route::get('/{employee}', EmployeeShow::class)->name('show')->middleware('permission:guru.view');
@@ -211,7 +227,9 @@ Route::middleware(['auth', 'mfa'])->group(function (): void {
     // Kelas (rombel)
     Route::prefix('kelas')->name('kelas.')->group(function (): void {
         Route::get('/', RombelIndex::class)->name('index')->middleware('permission:kelas.view');
-        Route::get('/kenaikan', PromoteStudents::class)->name('kenaikan')->middleware('permission:kelas.kelola');
+        if (class_exists(PromoteStudents::class)) {
+            Route::get('/kenaikan', PromoteStudents::class)->name('kenaikan')->middleware('permission:kelas.kelola');
+        }
         Route::get('/tambah', RombelForm::class)->name('create')->middleware('permission:kelas.create');
         Route::get('/{rombel}/ubah', RombelForm::class)->name('edit')->middleware('permission:kelas.update');
         Route::get('/{rombel}', RombelShow::class)->name('show')->middleware('permission:kelas.view');
@@ -220,8 +238,10 @@ Route::middleware(['auth', 'mfa'])->group(function (): void {
     // Akademik
     Route::prefix('mapel')->name('mapel.')->group(function (): void {
         Route::get('/', SubjectIndex::class)->name('index')->middleware('permission:jadwal.view');
-        Route::get('/tambah', SubjectForm::class)->name('create')->middleware('permission:jadwal.create');
-        Route::get('/{subject}/ubah', SubjectForm::class)->name('edit')->middleware('permission:jadwal.update');
+        if (class_exists(SubjectForm::class)) {
+            Route::get('/tambah', SubjectForm::class)->name('create')->middleware('permission:jadwal.create');
+            Route::get('/{subject}/ubah', SubjectForm::class)->name('edit')->middleware('permission:jadwal.update');
+        }
     });
 
     Route::prefix('jadwal')->name('jadwal.')->group(function (): void {
@@ -234,11 +254,17 @@ Route::middleware(['auth', 'mfa'])->group(function (): void {
 
     Route::prefix('nilai')->name('nilai.')->group(function (): void {
         Route::get('/input', GradeInput::class)->name('input')->middleware('permission:nilai.input');
-        Route::get('/impor', GradeImport::class)->name('impor')->middleware('permission:nilai.import');
-        Route::get('/impor/template', [ImportTemplateController::class, 'nilai'])->name('impor.template')->middleware('permission:nilai.import');
+        if (class_exists(GradeImport::class)) {
+            Route::get('/impor', GradeImport::class)->name('impor')->middleware('permission:nilai.import');
+        }
+        if (class_exists(ImportTemplateController::class)) {
+            Route::get('/impor/template', [ImportTemplateController::class, 'nilai'])->name('impor.template')->middleware('permission:nilai.import');
+        }
         Route::get('/leger', GradeLeger::class)->name('leger')->middleware('permission:nilai.rekap');
         Route::get('/leger/cetak', [CetakController::class, 'legerNilai'])->name('leger.cetak')->middleware('permission:nilai.rekap');
-        Route::get('/komponen', GradeComponentIndex::class)->name('komponen')->middleware('permission:nilai.komponen');
+        if (class_exists(GradeComponentIndex::class)) {
+            Route::get('/komponen', GradeComponentIndex::class)->name('komponen')->middleware('permission:nilai.komponen');
+        }
     });
 
     // PPDB — modul add-on (feature flag)
@@ -277,13 +303,24 @@ Route::middleware(['auth', 'mfa'])->group(function (): void {
     Route::prefix('pengaturan')->name('pengaturan.')->group(function (): void {
         Route::get('/', SchoolProfile::class)->name('profil')->middleware('permission:sekolah.view');
         Route::get('/tahun-ajaran', AcademicYearIndex::class)->name('tahun-ajaran')->middleware('permission:tahun-ajaran.view');
-        Route::get('/kalender', HolidayIndex::class)->name('kalender')->middleware('permission:kalender.manage');
-        Route::get('/impor', ImportHistory::class)->name('impor')->middleware('permission:impor.riwayat');
+        if (class_exists(HolidayIndex::class)) {
+            Route::get('/kalender', HolidayIndex::class)->name('kalender')->middleware('permission:kalender.manage');
+        }
+        if (class_exists(ImportHistory::class)) {
+            Route::get('/impor', ImportHistory::class)->name('impor')->middleware('permission:impor.riwayat');
+        }
         Route::get('/modul', ModuleIndex::class)->name('modul')->middleware('permission:sekolah.view');
-        Route::get('/dsar', DsarIndex::class)->name('dsar')->middleware('permission:dsar.view');
-        Route::get('/dsar/{dsarCase}/unduh', DsarDownloadController::class)->name('dsar.unduh')->middleware('permission:dsar.manage');
-        Route::get('/webhook', WebhookIndex::class)->name('webhook')->middleware('permission:webhook.manage');
-        Route::get('/keamanan', PasswordSetup::class)->name('keamanan');
+        if (class_exists(DsarIndex::class)) {
+            Route::get('/dsar', DsarIndex::class)->name('dsar')->middleware('permission:dsar.view');
+        }
+        if (class_exists(DsarDownloadController::class)) {
+            Route::get('/dsar/{dsarCase}/unduh', DsarDownloadController::class)->name('dsar.unduh')->middleware('permission:dsar.manage');
+        }
+        if (class_exists(WebhookIndex::class)) {
+            Route::get('/webhook', WebhookIndex::class)->name('webhook')->middleware('permission:webhook.manage');
+        }
+        // Keamanan akun (2FA opt-in) — tersedia untuk semua pengguna login.
+        Route::get('/keamanan', Keamanan::class)->name('keamanan');
     });
 
     // E-Rapor — modul add-on (feature flag)
@@ -399,7 +436,7 @@ Route::middleware(['auth', 'mfa'])->group(function (): void {
 });
 
 // Panel operator platform (SaaS) — tanpa tenant, khusus is_platform
-Route::prefix('platform')->name('platform.')->middleware(['auth', 'mfa', 'platform', 'stepup'])->group(function (): void {
+Route::prefix('platform')->name('platform.')->middleware(['auth', 'mfa', 'platform'])->group(function (): void {
     Route::get('/', PlatformDashboard::class)->name('dashboard')->middleware('platform:platform.metrics.view');
     Route::get('/tenants', PlatformTenants::class)->name('tenants')->middleware('platform:platform.tenant.view');
     Route::get('/tenants/baru', PlatformTenantCreate::class)->name('tenants.create')->middleware('platform:platform.tenant.create');

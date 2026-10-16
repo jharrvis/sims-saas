@@ -11,6 +11,6 @@ SIMS memakai **login via WhatsApp** — tanpa password yang perlu dihafal.
 
 > **Tips:** Pastikan nomor WhatsApp yang dipakai sama dengan yang terdaftar di sekolah. Jika belum terdaftar, hubungi admin sekolah.
 
-Jika akun Anda **wajib verifikasi 2 langkah** (peran operator), setelah kode WhatsApp Anda diminta memasukkan kode dari aplikasi autentikator (Google Authenticator / Authy). Lihat [bagian 3](#3-mengamankan-akun-dengan-verifikasi-2-langkah).
+Jika Anda sudah **mengaktifkan verifikasi 2 langkah** (opsional), setelah kode WhatsApp Anda akan diminta memasukkan kode dari aplikasi autentikator (Google Authenticator / Authy). Lihat topik **Keamanan Akun** di Pusat Bantuan.
 
 ---

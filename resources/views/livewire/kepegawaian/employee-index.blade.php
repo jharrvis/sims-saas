@@ -20,9 +20,11 @@
                 </a>
             @endcan
             @can('guru.import')
-                <a href="{{ route('guru.impor') }}" class="inline-flex items-center gap-2 rounded-lg border border-slate-200 dark:border-slate-700 px-4 py-2.5 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
-                    <x-icon name="upload" class="w-4 h-4" /> Impor Excel
-                </a>
+                @if (\Illuminate\Support\Facades\Route::has('guru.impor'))
+                    <a href="{{ route('guru.impor') }}" class="inline-flex items-center gap-2 rounded-lg border border-slate-200 dark:border-slate-700 px-4 py-2.5 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                        <x-icon name="upload" class="w-4 h-4" /> Impor Excel
+                    </a>
+                @endif
             @endcan
         </div>
     </div>
@@ -43,8 +45,30 @@
                     @forelse ($employees as $guru)
                         <tr wire:key="guru-{{ $guru->id }}" class="border-b border-slate-100 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-800/30">
                             <td class="py-3 px-5">
-                                <div class="font-medium text-slate-800 dark:text-white">{{ $guru->nama }}</div>
-                                @if($guru->jabatan)<div class="text-xs text-slate-500">{{ $guru->jabatan }}</div>@endif
+                                <div class="flex items-center gap-3">
+                                    @php
+                                        $namaParts = preg_split('/\s+/', trim($guru->nama));
+                                        $inisial = strtoupper(mb_substr($namaParts[0], 0, 1) . (count($namaParts) > 1 ? mb_substr(end($namaParts), 0, 1) : ''));
+                                        $avatarColors = [
+                                            'bg-primary/10 text-primary',
+                                            'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
+                                            'bg-amber-500/10 text-amber-600 dark:text-amber-400',
+                                            'bg-sky-500/10 text-sky-600 dark:text-sky-400',
+                                            'bg-violet-500/10 text-violet-600 dark:text-violet-400',
+                                            'bg-rose-500/10 text-rose-600 dark:text-rose-400',
+                                        ];
+                                        $avatarColor = $avatarColors[abs(crc32($guru->nama)) % count($avatarColors)];
+                                    @endphp
+                                    @if ($guru->fotoUrl())
+                                        <img src="{{ $guru->fotoUrl() }}" alt="" class="h-9 w-9 shrink-0 rounded-full object-cover">
+                                    @else
+                                        <div class="h-9 w-9 shrink-0 rounded-full {{ $avatarColor }} flex items-center justify-center text-xs font-bold" aria-hidden="true">{{ $inisial }}</div>
+                                    @endif
+                                    <div>
+                                        <div class="font-medium text-slate-800 dark:text-white">{{ $guru->nama }}</div>
+                                        @if($guru->jabatan)<div class="text-xs text-slate-500">{{ $guru->jabatan }}</div>@endif
+                                    </div>
+                                </div>
                             </td>
                             <td class="py-3 px-5 text-sm text-slate-600 dark:text-slate-300">{{ $guru->nip_nuptk ?? '—' }}</td>
                             <td class="py-3 px-5 text-sm">{{ $guru->labelJenis() }}</td>

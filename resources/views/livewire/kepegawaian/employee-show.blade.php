@@ -6,11 +6,24 @@
     <div class="rounded-xl border border-slate-200 bg-white dark:bg-boxdark dark:border-slate-700 p-6">
         <div class="flex items-start justify-between gap-4">
             <div class="flex items-center gap-4">
-                <span class="w-16 h-16 shrink-0 overflow-hidden rounded-full bg-primary/10 text-primary flex items-center justify-center text-2xl font-bold">
+                @php
+                    $namaParts = preg_split('/\s+/', trim($employee->nama));
+                    $inisial = strtoupper(mb_substr($namaParts[0], 0, 1) . (count($namaParts) > 1 ? mb_substr(end($namaParts), 0, 1) : ''));
+                    $avatarColors = [
+                        'bg-primary/10 text-primary',
+                        'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
+                        'bg-amber-500/10 text-amber-600 dark:text-amber-400',
+                        'bg-sky-500/10 text-sky-600 dark:text-sky-400',
+                        'bg-violet-500/10 text-violet-600 dark:text-violet-400',
+                        'bg-rose-500/10 text-rose-600 dark:text-rose-400',
+                    ];
+                    $avatarColor = $avatarColors[abs(crc32($employee->nama)) % count($avatarColors)];
+                @endphp
+                <span class="w-16 h-16 shrink-0 overflow-hidden rounded-full {{ $employee->fotoUrl() ? '' : $avatarColor }} flex items-center justify-center text-2xl font-bold">
                     @if ($employee->fotoUrl())
                         <img src="{{ $employee->fotoUrl() }}" alt="Foto {{ $employee->nama }}" class="h-full w-full object-cover">
                     @else
-                        {{ strtoupper(substr($employee->nama, 0, 1)) }}
+                        {{ $inisial }}
                     @endif
                 </span>
                 <div>

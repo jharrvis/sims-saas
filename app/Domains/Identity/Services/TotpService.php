@@ -11,7 +11,8 @@ use Illuminate\Support\Str;
 use PragmaRX\Google2FA\Google2FA;
 
 /**
- * MFA TOTP — wajib untuk peran platform (FR-904, Dok 09).
+ * MFA TOTP — OPT-IN (default nonaktif). Wajib hanya bila user mengaktifkannya
+ * sendiri, atau operator platform saat `mfa.require_for_platform` aktif.
  */
 final class TotpService
 {
@@ -63,6 +64,17 @@ final class TotpService
         $mfa->update(['confirmed_at' => now()]);
 
         return true;
+    }
+
+    /**
+     * Nonaktifkan 2FA — hapus secret TOTP milik user (opt-out).
+     */
+    public function disable(User $user): void
+    {
+        $user->mfaSecret?->delete();
+
+        // Bersihkan relasi ter-cache agar status langsung terbaca nonaktif.
+        $user->unsetRelation('mfaSecret');
     }
 
     /**

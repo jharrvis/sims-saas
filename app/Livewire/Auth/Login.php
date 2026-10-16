@@ -72,8 +72,9 @@ class Login extends Component
             return;
         }
 
-        // MFA wajib untuk peran platform (FR-904)
-        if ($user->is_platform && $user->mfaSecret?->isConfirmed()) {
+        // 2FA opt-in: bila user sudah mengaktifkan 2FA → minta verifikasi TOTP
+        // (semua peran, termasuk platform yang mengaktifkannya sendiri).
+        if ($user->hasMfaEnabled()) {
             session(['mfa_pending_user_id' => $user->id]);
 
             $this->redirect(route('mfa.verify'), navigate: true);
