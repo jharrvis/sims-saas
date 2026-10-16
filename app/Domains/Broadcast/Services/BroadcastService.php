@@ -7,7 +7,9 @@ namespace App\Domains\Broadcast\Services;
 use App\Models\Broadcast;
 use App\Models\Employee;
 use App\Models\Rombel;
+use App\Models\School;
 use App\Models\Student;
+use App\Tenancy\TenantContext;
 use Illuminate\Support\Collection;
 
 /**
@@ -51,22 +53,40 @@ class BroadcastService
     }
 
     /**
-     * Proses semua broadcast terjadwal yang sudah jatuh tempo.
+     * Proses semua broadcast terjadwal yang sudah jatuh tempo, lintas tenant.
+     *
+     * Dijalankan dari console (scheduler) yang TIDAK punya konteks tenant,
+     * sedangkan SchoolScope bersifat fail-closed. Maka kita iterasi tiap
+     * sekolah, pasang TenantContext sementara, lalu pulihkan konteks semula
+     * (penting agar pemanggilan dari dalam request/test tidak mengubah konteks).
      *
      * @return int jumlah broadcast yang diproses
      */
     public function prosesTerjadwal(): int
     {
         $count = 0;
+        $context = app(TenantContext::class);
+        $sebelumnya = $context->school();
 
-        Broadcast::where('status', 'terjadwal')
-            ->whereNotNull('dijadwalkan_pada')
-            ->where('dijadwalkan_pada', '<=', now())
-            ->cursor()
-            ->each(function (Broadcast $broadcast) use (&$count): void {
-                $this->kirim($broadcast);
-                $count++;
-            });
+        foreach (School::query()->get() as $school) {
+            $context->set($school);
+
+            Broadcast::query()
+                ->where('status', 'terjadwal')
+                ->whereNotNull('dijadwalkan_pada')
+                ->where('dijadwalkan_pada', '<=', now())
+                ->cursor()
+                ->each(function (Broadcast $broadcast) use (&$count): void {
+                    $this->kirim($broadcast);
+                    $count++;
+                });
+        }
+
+        if ($sebelumnya !== null) {
+            $context->set($sebelumnya);
+        } else {
+            $context->clear();
+        }
 
         return $count;
     }

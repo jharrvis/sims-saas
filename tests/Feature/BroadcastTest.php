@@ -99,6 +99,59 @@ it('scheduler mengirim broadcast yang sudah jatuh tempo', function (): void {
     )->toBe('terkirim');
 });
 
+it('scheduler memproses broadcast tanpa konteks tenant (dari console)', function (): void {
+    Broadcast::create([
+        'judul' => 'Terjadwal konsol', 'pesan' => 'Isi', 'channel' => 'notifikasi',
+        'target_type' => 'guru', 'status' => 'terjadwal',
+        'dijadwalkan_pada' => now()->subMinute(), 'dibuat_oleh' => $this->admin->id,
+    ]);
+
+    // Simulasi scheduler console: TIDAK ada tenant context aktif.
+    app(TenantContext::class)->clear();
+
+    Artisan::call('broadcast:proses');
+
+    // Pulihkan konteks untuk assertion.
+    app(TenantContext::class)->set($this->school);
+
+    expect(Broadcast::where('judul', 'Terjadwal konsol')->firstOrFail()->status)
+        ->toBe('terkirim');
+});
+
+it('scheduler memproses broadcast terjadwal dari semua sekolah', function (): void {
+    $other = School::create([
+        'nama' => 'Sekolah Lain B', 'slug' => 'lainb-'.uniqid(), 'jenjang' => 'SMA',
+        'status' => 'aktif', 'status_langganan' => 'active',
+    ]);
+
+    Broadcast::create([
+        'judul' => 'BC Sekolah A', 'pesan' => 'Isi', 'channel' => 'notifikasi',
+        'target_type' => 'guru', 'status' => 'terjadwal',
+        'dijadwalkan_pada' => now()->subMinute(), 'dibuat_oleh' => $this->admin->id,
+    ]);
+
+    app(TenantContext::class)->set($other);
+    Employee::create([
+        'nama' => 'Guru B', 'jenis' => 'guru_mapel', 'status_kepegawaian' => 'honorer',
+        'phone' => '628120000009',
+    ]);
+    Broadcast::create([
+        'judul' => 'BC Sekolah B', 'pesan' => 'Isi', 'channel' => 'notifikasi',
+        'target_type' => 'guru', 'status' => 'terjadwal',
+        'dijadwalkan_pada' => now()->subMinute(), 'dibuat_oleh' => $this->admin->id,
+    ]);
+
+    app(TenantContext::class)->clear();
+
+    Artisan::call('broadcast:proses');
+
+    app(TenantContext::class)->set($this->school);
+    expect(Broadcast::where('judul', 'BC Sekolah A')->firstOrFail()->status)->toBe('terkirim');
+
+    app(TenantContext::class)->set($other);
+    expect(Broadcast::where('judul', 'BC Sekolah B')->firstOrFail()->status)->toBe('terkirim');
+});
+
 it('broadcast terisolasi per sekolah', function (): void {
     Broadcast::create([
         'judul' => 'BC A', 'pesan' => 'Isi', 'channel' => 'notifikasi',

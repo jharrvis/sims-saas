@@ -55,6 +55,7 @@ Format mengikuti [Keep a Changelog](https://keepachangelog.com/id/1.1.0/).
 - NIK wali terenkripsi di database
 
 ### Diperbaiki
+- Scheduler `broadcast:proses` gagal tiap menit di produksi (`TenantContextMissing`) karena meng-query model tenant-scoped dari konteks console: `BroadcastService::prosesTerjadwal()` kini iterasi tiap sekolah, memasang `TenantContext` sementara, lalu memulihkan konteks semula — aman dijalankan tanpa konteks tenant dan tetap memproses broadcast lintas tenant
 - Unique constraint `class_student`: diubah menjadi partial unique index (`status='aktif'`) agar riwayat pindah kelas tersimpan — Dok 02 §3.11 diperbarui
 
 ## [0.1.0] - 2026-10-10
