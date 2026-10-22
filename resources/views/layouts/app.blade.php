@@ -105,7 +105,13 @@
                 <x-nav-link href="{{ route('erapor.index') }}" icon="file-text" label="E-Rapor" :active="request()->routeIs('erapor.*')" />
             @endcan
             @can('sekolah.view')
-                <x-nav-link href="{{ route('pengaturan.profil') }}" icon="settings" label="Pengaturan" :active="request()->routeIs('pengaturan.*')" />
+                <x-nav-link href="{{ route('pengaturan.profil') }}" icon="settings" label="Pengaturan" :active="request()->routeIs('pengaturan.*') && ! request()->routeIs('pengaturan.pengguna*', 'pengaturan.peran*')" />
+            @endcan
+            @can('pengguna.view')
+                <x-nav-link href="{{ route('pengaturan.pengguna') }}" icon="user-cog" label="Kelola Pengguna" :active="request()->routeIs('pengaturan.pengguna*')" />
+            @endcan
+            @can('peran.view')
+                <x-nav-link href="{{ route('pengaturan.peran') }}" icon="shield" label="Peran & Akses" :active="request()->routeIs('pengaturan.peran*')" />
             @endcan
             <x-nav-link href="{{ route('pengaturan.keamanan') }}" icon="shield-check" label="Keamanan Akun" :active="request()->routeIs('pengaturan.keamanan')" />
             @can('langganan.view')

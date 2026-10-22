@@ -76,6 +76,10 @@ use App\Livewire\Pengaturan\HolidayIndex;
 use App\Livewire\Pengaturan\ImportHistory;
 use App\Livewire\Pengaturan\Keamanan;
 use App\Livewire\Pengaturan\ModuleIndex;
+use App\Livewire\Pengaturan\PenggunaForm;
+use App\Livewire\Pengaturan\PenggunaIndex;
+use App\Livewire\Pengaturan\PeranForm;
+use App\Livewire\Pengaturan\PeranIndex;
 use App\Livewire\Pengaturan\SchoolProfile;
 use App\Livewire\Pengaturan\WebhookIndex;
 use App\Livewire\Pengumuman\AnnouncementForm;
@@ -310,6 +314,13 @@ Route::middleware(['auth', 'mfa'])->group(function (): void {
             Route::get('/impor', ImportHistory::class)->name('impor')->middleware('permission:impor.riwayat');
         }
         Route::get('/modul', ModuleIndex::class)->name('modul')->middleware('permission:sekolah.view');
+        // Kelola pengguna & peran sekolah (Dok 05 §4.3).
+        Route::get('/pengguna', PenggunaIndex::class)->name('pengguna')->middleware('permission:pengguna.view');
+        Route::get('/pengguna/tambah', PenggunaForm::class)->name('pengguna.create')->middleware('permission:pengguna.create');
+        Route::get('/pengguna/{user}/ubah', PenggunaForm::class)->name('pengguna.edit')->middleware('permission:pengguna.update');
+        Route::get('/peran', PeranIndex::class)->name('peran')->middleware('permission:peran.view');
+        Route::get('/peran/tambah', PeranForm::class)->name('peran.create')->middleware('permission:peran.create');
+        Route::get('/peran/{role}/ubah', PeranForm::class)->name('peran.edit')->middleware('permission:peran.update');
         if (class_exists(DsarIndex::class)) {
             Route::get('/dsar', DsarIndex::class)->name('dsar')->middleware('permission:dsar.view');
         }

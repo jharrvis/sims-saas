@@ -35,6 +35,8 @@ SIMS memakai **login via WhatsApp** — tanpa password yang perlu dihafal.
 
 > **Tips:** Pastikan nomor WhatsApp yang dipakai sama dengan yang terdaftar di sekolah. Jika belum terdaftar, hubungi admin sekolah.
 
+**Cadangan:** bila WhatsApp bermasalah, gunakan tab **Username + Password** di halaman login. Atur password Anda di **Pengaturan → Keamanan Akun → Password Akun** (minimal 8 karakter). Setelah 5 kali gagal, login password dikunci sementara selama 15 menit.
+
 Jika Anda sudah **mengaktifkan verifikasi 2 langkah** (opsional), setelah kode WhatsApp Anda diminta memasukkan kode dari aplikasi autentikator (Google Authenticator / Authy). Lihat [bagian 3](#3-mengamankan-akun-dengan-verifikasi-2-langkah).
 
 ---
@@ -61,6 +63,13 @@ Verifikasi 2 langkah (2FA) bersifat **opsional** — Anda bisa mengaktifkan atau
 4. **Simpan 8 kode cadangan** di tempat aman (dicetak / password manager). Kode ini dipakai jika HP hilang — tiap kode hanya bisa dipakai sekali.
 
 Untuk **menonaktifkan**, buka **Pengaturan → Keamanan Akun → Nonaktifkan 2FA**, lalu masukkan kode OTP WhatsApp untuk konfirmasi. Akun operator platform dapat diwajibkan mengaktifkan 2FA oleh kebijakan sistem.
+
+### Password akun (cadangan login)
+
+Di halaman **Pengaturan → Keamanan Akun** bagian **Password Akun**, isi password baru
+(minimal 8 karakter) dua kali lalu klik **Simpan Password**. Status berubah menjadi
+**Sudah diatur**, dan Anda bisa masuk lewat tab **Username + Password**. Lupa
+password? Minta admin sekolah meresetnya dari **Pengaturan → Pengguna**.
 
 ---
 
@@ -204,6 +213,30 @@ Kartu ringkasan di atas halaman menampilkan total tagihan, terkumpul, tunggakan 
 
 ## 13. Peran & Hak Akses
 
+Peran menentukan menu dan tindakan yang boleh dilakukan pengguna. Admin Sekolah
+dan Super Admin dapat mengelola pengguna serta peran dari **Pengaturan → Pengguna**
+dan **Pengaturan → Peran & Akses**.
+
+### Kelola pengguna
+
+1. Buka **Pengaturan → Pengguna** → **Tambah Pengguna**.
+2. Isi nama, username, nomor WhatsApp (format `08xx`/`62xx`), dan kata sandi
+   (opsional, minimal 8 karakter).
+3. Centang minimal satu peran, lalu klik **Buat Pengguna**.
+4. Pengguna masuk dengan OTP WhatsApp ke nomor tersebut — atau username + kata
+   sandi bila login kata sandi diaktifkan di server.
+5. Gunakan ikon **pensil** untuk mengubah data/peran dan ikon **pengguna dicoret**
+   untuk menonaktifkan akses. Status hanya berlaku untuk sekolah ini; identitas
+   akun tetap global.
+
+### Kelola peran
+
+- Klik **Buat Peran** untuk membuat peran kustom, lalu centang hak akses per
+  kelompok menu.
+- Peran bawaan tidak dapat dihapus/di-rename, tetapi hak aksesnya dapat
+  disesuaikan. Peran **Super Admin** selalu penuh (read-only).
+- Peran yang masih dipakai pengguna tidak dapat dihapus.
+
 | Peran | Bisa melakukan |
 |---|---|
 | **Admin Sekolah** | Semua: kelola siswa, guru, kelas, jadwal, absensi, nilai, PPDB, keuangan, pengguna, pengaturan |
@@ -235,11 +268,14 @@ Pengumuman draf hanya terlihat oleh pembuatnya. Untuk menarik kembali, klik **Ta
 
 ## 16. Pengaturan
 
-Menu **Pengaturan** memiliki tiga tab:
+Menu **Pengaturan** memiliki tab berikut:
 
 - **Profil Sekolah**: nama, NPSN, jenjang, alamat, telepon, email.
 - **Tahun Ajaran**: tambah tahun ajaran baru dan klik **Aktifkan** untuk menjadikannya periode berjalan.
 - **Modul Add-on**: aktif/nonaktifkan modul (PPDB, Keuangan, Pengumuman) sesuai paket langganan. Modul nonaktif menampilkan 403 `MODULE_DISABLED`.
+- **Pengguna**: buat akun, atur peran, reset kata sandi, dan aktif/nonaktifkan akses pengguna.
+- **Peran & Akses**: atur hak akses tiap peran dan buat peran kustom.
+- **Keamanan Akun**: aktifkan/nonaktifkan 2FA (opsional).
 
 ## 17. Pusat Bantuan
 

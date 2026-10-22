@@ -9,20 +9,30 @@ use App\Domains\Identity\Services\OtpService;
 use App\Models\AuditLog;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\View\View;
 use Livewire\Component;
 
 /**
- * Login WA OTP — metode utama (Dok 09 §3.1).
- * Langkah 1: nomor WA → kirim OTP. Langkah 2: kode 6 digit → login.
+ * Login — dua metode (D-3):
+ * - Tab "WhatsApp": WA OTP (metode utama, Dok 09 §3.1).
+ * - Tab "Password": username + password (fallback bila WA bermasalah).
+ * Kebijakan FR-903: min. 8 karakter, kunci 5x gagal per username+IP.
  */
 class Login extends Component
 {
+    public string $tab = 'wa';
+
     public string $phone = '';
 
     public string $code = '';
 
     public int $step = 1;
+
+    public string $username = '';
+
+    public string $password = '';
 
     public ?string $error = null;
 
@@ -72,9 +82,8 @@ class Login extends Component
             return;
         }
 
-        // 2FA opt-in: bila user sudah mengaktifkan 2FA → minta verifikasi TOTP
-        // (semua peran, termasuk platform yang mengaktifkannya sendiri).
-        if ($user->hasMfaEnabled()) {
+        // 2FA opt-in: minta verifikasi TOTP bila user mengaktifkannya.
+        if ($user->mfaSecret?->isConfirmed()) {
             session(['mfa_pending_user_id' => $user->id]);
 
             $this->redirect(route('mfa.verify'), navigate: true);
@@ -83,6 +92,7 @@ class Login extends Component
         }
 
         Auth::login($user, remember: true);
+        session(['pintu_login' => 'sekolah']);
         AuditLog::create([
             'user_id' => $user->id, 'aksi' => 'login', 'model_type' => User::class,
             'model_id' => (string) $user->id, 'after' => ['via' => 'wa_otp'],
@@ -100,6 +110,62 @@ class Login extends Component
         $this->code = '';
         $this->error = null;
         $this->info = null;
+    }
+
+    /**
+     * Login username + password (D-3, fallback bila WA bermasalah).
+     * FR-903: kunci 5x gagal per username+IP selama 15 menit.
+     */
+    public function loginPassword(): void
+    {
+        $this->validate([
+            'username' => ['required', 'string', 'max:50'],
+            'password' => ['required', 'string'],
+        ]);
+        $this->error = null;
+
+        $key = 'login-password:'.strtolower($this->username).':'.request()->ip();
+
+        if (RateLimiter::tooManyAttempts($key, 5)) {
+            $detik = RateLimiter::availableIn($key);
+            $this->error = "Terlalu banyak percobaan gagal. Coba lagi dalam {$detik} detik.";
+
+            return;
+        }
+
+        $user = User::where('username', $this->username)->first();
+
+        if (! $user || ! $user->password || ! Hash::check($this->password, $user->password)) {
+            RateLimiter::hit($key, 900); // 15 menit
+            $this->error = 'Username atau password salah.';
+            AuditLog::create([
+                'user_id' => $user?->id, 'aksi' => 'login_gagal', 'model_type' => User::class,
+                'model_id' => (string) ($user->id ?? 0), 'after' => ['via' => 'password', 'username' => $this->username],
+                'ip_address' => request()->ip(),
+            ]);
+
+            return;
+        }
+
+        RateLimiter::clear($key);
+
+        // 2FA opt-in: minta verifikasi TOTP bila user mengaktifkannya.
+        if ($user->mfaSecret?->isConfirmed()) {
+            session(['mfa_pending_user_id' => $user->id]);
+            $this->redirect(route('mfa.verify'), navigate: true);
+
+            return;
+        }
+
+        Auth::login($user, remember: true);
+        session(['pintu_login' => 'sekolah']);
+        AuditLog::create([
+            'user_id' => $user->id, 'aksi' => 'login', 'model_type' => User::class,
+            'model_id' => (string) $user->id, 'after' => ['via' => 'password'],
+            'ip_address' => request()->ip(),
+        ]);
+
+        $this->redirect(route($user->ruteSetelahLogin()), navigate: true);
     }
 
     private function normalize(string $phone): string

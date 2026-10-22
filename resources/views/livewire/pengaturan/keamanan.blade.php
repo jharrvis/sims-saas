@@ -1,4 +1,4 @@
-<div class="max-w-3xl">
+<div class="max-w-3xl space-y-5">
     @can('sekolah.view')
         @include('livewire.pengaturan._tabs')
     @endcan
@@ -75,4 +75,7 @@
             </div>
         </div>
     </div>
+
+    {{-- Password akun (D-3): cadangan bila login WhatsApp bermasalah. --}}
+    <livewire:pengaturan.password-setup />
 </div>

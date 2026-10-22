@@ -19,57 +19,97 @@
         </div>
     @endif
 
-    @if ($step === 1)
-        <form wire:submit="requestOtp">
-            <div class="space-y-5">
-                <div>
-                    <label for="phone" class="block mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">Nomor WhatsApp</label>
-                    <div class="relative">
-                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
-                            <i data-lucide="smartphone" class="w-5 h-5"></i>
-                        </span>
-                        <input id="phone" type="tel" wire:model="phone" placeholder="08xxxxxxxxxx" required
-                               class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-transparent py-3 pl-12 pr-4 outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all dark:text-white">
+    @if ($tab === 'wa')
+        @if ($step === 1)
+            <form wire:submit="requestOtp">
+                <div class="space-y-5">
+                    <div>
+                        <label for="phone" class="block mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">Nomor WhatsApp</label>
+                        <div class="relative">
+                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
+                                <i data-lucide="smartphone" class="w-5 h-5"></i>
+                            </span>
+                            <input id="phone" type="tel" wire:model="phone" placeholder="08xxxxxxxxxx" required
+                                   class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-transparent py-3 pl-12 pr-4 outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all dark:text-white">
+                        </div>
+                        @error('phone') <p class="mt-1 text-xs text-danger">{{ $message }}</p> @enderror
                     </div>
-                    @error('phone') <p class="mt-1 text-xs text-danger">{{ $message }}</p> @enderror
+                    <button type="submit" wire:loading.attr="disabled"
+                            class="w-full py-3 rounded-lg bg-primary text-white font-medium hover:bg-blue-700 transition-colors shadow-md disabled:opacity-60">
+                        <span wire:loading.remove>Kirim Kode OTP</span>
+                        <span wire:loading>Mengirim…</span>
+                    </button>
+                    <p class="text-xs text-center text-slate-500 dark:text-slate-400">
+                        Kode 6 digit dikirim via WhatsApp dan berlaku 5 menit.
+                    </p>
                 </div>
-                <button type="submit" wire:loading.attr="disabled"
-                        class="w-full py-3 rounded-lg bg-primary text-white font-medium hover:bg-blue-700 transition-colors shadow-md disabled:opacity-60">
-                    <span wire:loading.remove>Kirim Kode OTP</span>
-                    <span wire:loading>Mengirim…</span>
-                </button>
-                <p class="text-xs text-center text-slate-500 dark:text-slate-400">
-                    Kode 6 digit dikirim via WhatsApp dan berlaku 5 menit.
-                </p>
-            </div>
-        </form>
+            </form>
+        @else
+            <form wire:submit="verify">
+                <div class="space-y-5">
+                    <div>
+                        <label for="code" class="block mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
+                            Kode OTP <span class="font-normal text-slate-500">— dikirim ke {{ $phone }}</span>
+                        </label>
+                        <input id="code" type="text" inputmode="numeric" wire:model="code" placeholder="••••••" required maxlength="6"
+                               class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-transparent py-3 px-4 text-center text-2xl tracking-[0.5em] outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all dark:text-white">
+                        @error('code') <p class="mt-1 text-xs text-danger">{{ $message }}</p> @enderror
+                    </div>
+                    <button type="submit" wire:loading.attr="disabled"
+                            class="w-full py-3 rounded-lg bg-primary text-white font-medium hover:bg-blue-700 transition-colors shadow-md disabled:opacity-60">
+                        <span wire:loading.remove>Masuk</span>
+                        <span wire:loading>Memverifikasi…</span>
+                    </button>
+                    <div class="flex items-center justify-between text-sm">
+                        <button type="button" wire:click="back" class="text-slate-500 hover:text-slate-700 dark:hover:text-slate-300">
+                            ← Ganti nomor
+                        </button>
+                        <button type="button" wire:click="requestOtp" class="text-primary hover:underline font-medium">
+                            Kirim ulang kode
+                        </button>
+                    </div>
+                </div>
+            </form>
+        @endif
     @else
-        <form wire:submit="verify">
+        {{-- Tab password (D-3): fallback bila WA bermasalah --}}
+        <form wire:submit="loginPassword">
             <div class="space-y-5">
                 <div>
-                    <label for="code" class="block mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
-                        Kode OTP <span class="font-normal text-slate-500">— dikirim ke {{ $phone }}</span>
-                    </label>
-                    <input id="code" type="text" inputmode="numeric" wire:model="code" placeholder="••••••" required maxlength="6"
-                           class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-transparent py-3 px-4 text-center text-2xl tracking-[0.5em] outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all dark:text-white">
-                    @error('code') <p class="mt-1 text-xs text-danger">{{ $message }}</p> @enderror
+                    <label for="username" class="block mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">Username</label>
+                    <input id="username" type="text" wire:model="username" placeholder="Username Anda" required autocomplete="username"
+                           class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-transparent py-3 px-4 outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all dark:text-white">
+                    @error('username') <p class="mt-1 text-xs text-danger">{{ $message }}</p> @enderror
+                </div>
+                <div>
+                    <label for="password" class="block mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">Password</label>
+                    <input id="password" type="password" wire:model="password" placeholder="••••••••" required autocomplete="current-password"
+                           class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-transparent py-3 px-4 outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all dark:text-white">
+                    @error('password') <p class="mt-1 text-xs text-danger">{{ $message }}</p> @enderror
                 </div>
                 <button type="submit" wire:loading.attr="disabled"
                         class="w-full py-3 rounded-lg bg-primary text-white font-medium hover:bg-blue-700 transition-colors shadow-md disabled:opacity-60">
                     <span wire:loading.remove>Masuk</span>
                     <span wire:loading>Memverifikasi…</span>
                 </button>
-                <div class="flex items-center justify-between text-sm">
-                    <button type="button" wire:click="back" class="text-slate-500 hover:text-slate-700 dark:hover:text-slate-300">
-                        ← Ganti nomor
-                    </button>
-                    <button type="button" wire:click="requestOtp" class="text-primary hover:underline font-medium">
-                        Kirim ulang kode
-                    </button>
-                </div>
+                <p class="text-xs text-center text-slate-500 dark:text-slate-400">
+                    Belum punya password? Atur di <strong>Pengaturan → Keamanan Akun</strong> selagi WhatsApp masih berfungsi.
+                </p>
             </div>
         </form>
     @endif
+
+    <div class="flex rounded-lg bg-slate-100 dark:bg-slate-800 p-1 mt-6 text-sm font-medium">
+        <button type="button" wire:click="$set('tab', 'wa')"
+                class="flex-1 py-2 rounded-md transition-colors {{ $tab === 'wa' ? 'bg-white dark:bg-boxdark shadow text-primary' : 'text-slate-500 dark:text-slate-400' }}">
+            WhatsApp OTP
+        </button>
+        <button type="button" wire:click="$set('tab', 'password')"
+                class="flex-1 py-2 rounded-md transition-colors {{ $tab === 'password' ? 'bg-white dark:bg-boxdark shadow text-primary' : 'text-slate-500 dark:text-slate-400' }}">
+            Username + Password
+        </button>
+    </div>
+
     <p class="text-center text-sm text-slate-500 dark:text-slate-400 mt-6">
         Sekolah baru? <a href="{{ route('daftar') }}" class="text-primary font-semibold hover:underline">Daftar trial gratis 30 hari</a>
     </p>

@@ -4,6 +4,20 @@
 
 2FA bersifat **opsional**: Anda bisa mengaktifkan atau menonaktifkannya sendiri kapan saja dari halaman **Pengaturan → Keamanan Akun**.
 
+## Password akun (cadangan login)
+
+Di halaman yang sama, bagian **Password Akun** memungkinkan Anda mendaftarkan
+password. Password dipakai sebagai cadangan bila login WhatsApp bermasalah:
+masuk lewat tab **Username + Password** di halaman login (minimal 8 karakter).
+
+1. Buka **Pengaturan → Keamanan Akun**.
+2. Pada bagian **Password Akun**, isi **Password baru** dan **Konfirmasi password**.
+3. Klik **Simpan Password**. Status akan berubah menjadi **Sudah diatur**.
+4. Saat login, pilih tab **Username + Password**, lalu masukkan username Anda dan
+   password tersebut.
+
+> Lupa password? Minta admin sekolah meresetnya dari **Pengaturan → Pengguna**.
+
 ## Mengaktifkan 2FA
 
 1. Buka **Pengaturan → Keamanan Akun** (atau langsung ke alamat `/pengaturan/keamanan`).

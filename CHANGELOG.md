@@ -8,6 +8,7 @@ Format mengikuti [Keep a Changelog](https://keepachangelog.com/id/1.1.0/).
 ### Ditambahkan
 - Autentikasi: login WA OTP (rate limit Dok 09 §3.1), MFA TOTP wajib untuk peran platform (FR-904), tenant switcher, API v1 auth
 - RBAC: 54 permission (`{resource}.{aksi}`) + 9 peran tenant sesuai matriks Dok 05 via Spatie teams; middleware `module` → 403 `MODULE_DISABLED` untuk add-on nonaktif
+- RBAC UI: halaman **Pengaturan → Pengguna** (`/pengaturan/pengguna`) untuk membuat akun + membership + peran per sekolah, reset kata sandi, serta aktif/nonaktifkan akses (proteksi akun sendiri & admin terakhir); halaman **Pengaturan → Peran & Akses** (`/pengaturan/peran`) untuk melihat/mengatur hak akses per peran dan membuat peran kustom per tenant (Spatie teams). Peran bawaan tidak dapat dihapus/di-rename dan `superadmin` bersifat read-only. Semua aksi dicatat di audit log. Topik bantuan baru `pengguna.md` + pembaruan `peran.md`/`pengaturan.md` serta `PANDUAN-PENGGUNA.md`
 - Kesiswaan: CRUD siswa + soft delete, NIS unik per sekolah, profil 360° (wali, riwayat kelas, kehadiran, nilai), UI Livewire + API v1
 - Kepegawaian: CRUD guru/pegawai (NIP/NUPTK, jenis, status kepegawaian), UI + API v1
 - Kelas: rombel + wali kelas (FR-303), penempatan siswa dengan riwayat pindah (FR-102, partial unique index)
@@ -48,6 +49,7 @@ Format mengikuti [Keep a Changelog](https://keepachangelog.com/id/1.1.0/).
 
 ### Diubah
 - **2FA kini opsional (opt-in), default nonaktif untuk semua pengguna** — sebelumnya wajib untuk peran platform (FR-904). Halaman baru **Pengaturan → Keamanan Akun** (`/pengaturan/keamanan`) untuk mengaktifkan/menonaktifkan 2FA; penonaktifan diverifikasi ulang via OTP WhatsApp dan dicatat di audit (`mfa.disable`). Middleware `mfa` hanya menantang verifikasi bila user sudah mengaktifkan 2FA sendiri. Kebijakan wajib-2FA untuk operator platform dapat dihidupkan kembali via env `MFA_REQUIRED_FOR_PLATFORM=true` (`config/mfa.php`)
+- Login memiliki dua metode: **WhatsApp OTP** (utama) dan **username + password** (cadangan, D-3) dengan pembatasan 5 percobaan gagal per username+IP selama 15 menit. Halaman **Keamanan Akun** menambah kartu **Password Akun** agar pengguna dapat mengatur/mengganti kata sandi sendiri (min. 8 karakter); login password tetap menghormati kebijakan 2FA opt-in. Topik bantuan `masuk.md` & `keamanan-akun.md` diperbarui
 
 ### Keamanan
 - Isolasi tenant fail-closed: query model tenant tanpa konteks melempar exception (diuji)

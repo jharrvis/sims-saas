@@ -2,7 +2,9 @@
 
 declare(strict_types=1);
 
+use App\Livewire\Auth\Login;
 use App\Livewire\Pengaturan\Keamanan;
+use App\Livewire\Pengaturan\PasswordSetup;
 use App\Models\MfaSecret;
 use App\Models\OtpCode;
 use App\Models\User;
@@ -138,4 +140,91 @@ it('menolak penonaktifan 2FA dengan OTP salah', function (): void {
         ->call('nonaktifkan');
 
     expect($user->fresh()->hasMfaEnabled())->toBeTrue();
+});
+
+it('login username + password berhasil (cadangan D-3)', function (): void {
+    $user = User::create([
+        'username' => 'login-pw-1',
+        'name' => 'Login Password',
+        'phone' => '62899'.random_int(1000000, 9999999),
+        'password' => 'rahasia123',
+        'is_platform' => false,
+    ]);
+
+    Livewire::test(Login::class)
+        ->set('tab', 'password')
+        ->set('username', 'login-pw-1')
+        ->set('password', 'rahasia123')
+        ->call('loginPassword')
+        ->assertHasNoErrors()
+        ->assertRedirect(route('dashboard'));
+
+    $this->assertAuthenticatedAs($user);
+});
+
+it('login password salah ditolak', function (): void {
+    User::create([
+        'username' => 'login-pw-2',
+        'name' => 'Login Password Salah',
+        'phone' => '62899'.random_int(1000000, 9999999),
+        'password' => 'rahasia123',
+        'is_platform' => false,
+    ]);
+
+    Livewire::test(Login::class)
+        ->set('tab', 'password')
+        ->set('username', 'login-pw-2')
+        ->set('password', 'salah-sekali')
+        ->call('loginPassword')
+        ->assertSet('error', 'Username atau password salah.');
+
+    $this->assertGuest();
+});
+
+it('login password menghormati 2FA opt-in', function (): void {
+    $user = User::create([
+        'username' => 'login-pw-3',
+        'name' => 'Login Password 2FA',
+        'phone' => '62899'.random_int(1000000, 9999999),
+        'password' => 'rahasia123',
+        'is_platform' => false,
+    ]);
+    konfirmasiMfa($user);
+
+    Livewire::test(Login::class)
+        ->set('tab', 'password')
+        ->set('username', 'login-pw-3')
+        ->set('password', 'rahasia123')
+        ->call('loginPassword')
+        ->assertRedirect(route('mfa.verify'));
+
+    expect(session('mfa_pending_user_id'))->toBe($user->id);
+    $this->assertGuest();
+});
+
+it('pengguna dapat mengatur password sendiri dari halaman keamanan', function (): void {
+    $user = buatUserKeamanan('pw-sendiri', false);
+
+    Livewire::actingAs($user)
+        ->test(PasswordSetup::class)
+        ->set('password', 'rahasia123')
+        ->set('password_confirmation', 'rahasia123')
+        ->call('simpan')
+        ->assertHasNoErrors()
+        ->assertSee('Password berhasil disimpan');
+
+    expect(Hash::check('rahasia123', (string) $user->fresh()->password))->toBeTrue();
+});
+
+it('password akun baru minimal 8 karakter dan harus dikonfirmasi', function (): void {
+    $user = buatUserKeamanan('pw-pendek', false);
+
+    Livewire::actingAs($user)
+        ->test(PasswordSetup::class)
+        ->set('password', '123')
+        ->set('password_confirmation', '123')
+        ->call('simpan')
+        ->assertHasErrors('password');
+
+    expect($user->fresh()->password)->toBeNull();
 });

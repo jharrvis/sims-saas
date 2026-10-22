@@ -62,7 +62,8 @@ class HelpController extends Controller
             'notifikasi' => ['Notifikasi Push', 'Mengaktifkan & jenis notifikasi PWA', 'bell'],
             'pengaturan' => ['Pengaturan', 'Profil sekolah, tahun ajaran, modul', 'settings'],
             'langganan' => ['Langganan & Pembayaran', 'Paket, tagihan, bayar via Midtrans', 'credit-card'],
-            'peran' => ['Peran & Hak Akses', 'Daftar peran pengguna', 'key-round'],
+            'pengguna' => ['Kelola Pengguna', 'Buat akun, atur peran, aktif/nonaktifkan akses', 'user-cog'],
+            'peran' => ['Peran & Hak Akses', 'Atur peran dan hak akses sekolah', 'key-round'],
             'faq' => ['Pertanyaan Umum', 'Jawaban pertanyaan umum', 'circle-help'],
         ];
     }
