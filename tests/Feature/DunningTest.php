@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Domains\Billing\Services\DunningService;
 use App\Domains\Identity\Contracts\WaSender;
 use App\Domains\Platform\Services\PlatformService;
+use App\Livewire\Langganan\Index;
 use App\Models\AuditLog;
 use App\Models\BillingInvoice;
 use App\Models\DunningLog;
@@ -14,8 +15,10 @@ use App\Models\School;
 use App\Models\Subscription;
 use App\Models\User;
 use App\Scopes\SchoolScope;
+use App\Tenancy\TenantContext;
 use Database\Seeders\PermissionSeeder;
 use Database\Seeders\PlanSeeder;
+use Livewire\Livewire;
 
 class FakeDunningWa implements WaSender
 {
@@ -176,4 +179,19 @@ it('menerbitkan tagihan perpanjangan H-7 tanpa duplikat', function (): void {
 
 it('command subscription:lifecycle berjalan', function (): void {
     $this->artisan('subscription:lifecycle')->assertSuccessful();
+});
+
+it('halaman langganan memakai design system', function (): void {
+    ['school' => $school, 'admin' => $admin] = dunningSetup();
+
+    app(TenantContext::class)->set($school);
+
+    Livewire::actingAs($admin)->test(Index::class)
+        ->assertSee('Langganan Saya')
+        ->assertSee('management-page-header')
+        ->assertSee('Paket Aktif')
+        ->assertSee('Tagihan')
+        ->assertDontSee('<i data-lucide');
+
+    app(TenantContext::class)->clear();
 });

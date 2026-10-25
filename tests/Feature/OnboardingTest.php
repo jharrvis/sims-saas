@@ -178,3 +178,10 @@ it('override kuota tidak berlaku saat trial', function (): void {
 
     app(TenantContext::class)->clear();
 });
+
+it('halaman daftar memakai design system', function (): void {
+    Livewire::test(DaftarSekolah::class)
+        ->assertSee('Daftar Trial Gratis')
+        ->assertSee('Nama Sekolah')
+        ->assertDontSee('<i data-lucide');
+});
