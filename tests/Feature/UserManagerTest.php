@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use App\Livewire\Pengaturan\PenggunaForm;
 use App\Livewire\Pengaturan\PenggunaIndex;
+use App\Livewire\Pengaturan\PeranForm;
+use App\Livewire\Pengaturan\PeranIndex;
 use App\Models\Membership;
 use App\Models\School;
 use App\Models\User;
@@ -221,4 +223,29 @@ it('pencarian dan filter peran pada daftar pengguna bekerja', function (): void 
         ->set('peran', 'guru-mapel')
         ->assertSee($this->guru->name)
         ->assertDontSee($this->admin->name);
+});
+
+it('pengguna, form pengguna, peran, dan form peran memakai design system', function (): void {
+    Livewire::actingAs($this->admin)->test(PenggunaIndex::class)
+        ->assertSee('Pengguna')
+        ->assertSee('management-page-header')
+        ->assertSee('data-table')
+        ->assertDontSee('<i data-lucide');
+
+    Livewire::actingAs($this->admin)->test(PenggunaForm::class)
+        ->assertSee('Tambah Pengguna')
+        ->assertSee('management-form-card')
+        ->assertDontSee('max-w-3xl')
+        ->assertDontSee('<i data-lucide');
+
+    Livewire::actingAs($this->admin)->test(PeranIndex::class)
+        ->assertSee('Peran')
+        ->assertSee('data-table')
+        ->assertDontSee('<i data-lucide');
+
+    Livewire::actingAs($this->admin)->test(PeranForm::class)
+        ->assertSee('Buat Peran')
+        ->assertSee('management-form-card')
+        ->assertDontSee('max-w-3xl')
+        ->assertDontSee('<i data-lucide');
 });

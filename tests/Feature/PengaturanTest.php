@@ -2,6 +2,10 @@
 
 declare(strict_types=1);
 
+use App\Livewire\Pengaturan\AcademicYearIndex;
+use App\Livewire\Pengaturan\Keamanan;
+use App\Livewire\Pengaturan\ModuleIndex;
+use App\Livewire\Pengaturan\SchoolProfile;
 use App\Models\AcademicYear;
 use App\Models\Membership;
 use App\Models\Module;
@@ -12,6 +16,7 @@ use App\Tenancy\TenantContext;
 use Database\Seeders\ModuleSeeder;
 use Database\Seeders\PermissionSeeder;
 use Database\Seeders\RoleSeeder;
+use Livewire\Livewire;
 use Spatie\Permission\PermissionRegistrar;
 
 beforeEach(function (): void {
@@ -95,4 +100,26 @@ it('profil sekolah terisolasi per tenant', function (): void {
         ->assertOk()
         // ResolveTenant mengembalikan tenant milik user (sekolah asal), bukan $other
         ->assertJsonPath('nama', 'Sekolah Atur');
+});
+
+it('profil, tahun ajaran, modul, dan keamanan memakai design system', function (): void {
+    Livewire::actingAs($this->admin)->test(SchoolProfile::class)
+        ->assertSee('Profil Sekolah')
+        ->assertSee('management-form-card')
+        ->assertDontSee('max-w-3xl')
+        ->assertDontSee('<i data-lucide');
+
+    Livewire::actingAs($this->admin)->test(AcademicYearIndex::class)
+        ->assertSee('Tahun Ajaran')
+        ->assertSee('data-table')
+        ->assertDontSee('<i data-lucide');
+
+    Livewire::actingAs($this->admin)->test(ModuleIndex::class)
+        ->assertSee('Modul Add-on')
+        ->assertDontSee('<i data-lucide');
+
+    Livewire::actingAs($this->admin)->test(Keamanan::class)
+        ->assertSee('Keamanan Akun')
+        ->assertSee('Password Akun')
+        ->assertDontSee('<i data-lucide');
 });

@@ -1,22 +1,32 @@
-<div class="max-w-3xl space-y-5">
+<div class="page-stack">
+    <div class="page-header management-page-header">
+        <div>
+            <span class="eyebrow">Pengaturan</span>
+            <h2 class="management-page-title">Keamanan Akun</h2>
+            <p>Autentikasi dua faktor dan password cadangan untuk akun Anda.</p>
+        </div>
+    </div>
+
     @can('sekolah.view')
         @include('livewire.pengaturan._tabs')
     @endcan
 
     @if ($info)
-        <div class="mb-4 rounded-lg bg-success/10 text-success px-4 py-2.5 text-sm" role="status">{{ $info }}</div>
+        <div class="management-alert management-alert-success" role="status" aria-live="polite">
+            <span>{{ $info }}</span>
+        </div>
     @endif
     @if ($error)
-        <div class="mb-4 rounded-lg bg-danger/10 text-danger px-4 py-2.5 text-sm" role="alert">{{ $error }}</div>
+        <div class="rounded-xl border border-danger/30 bg-red-50 dark:bg-red-900/20 p-4 text-sm text-danger" role="alert">{{ $error }}</div>
     @endif
 
-    <div class="rounded-xl border border-slate-200 bg-white dark:bg-boxdark dark:border-slate-700 p-5 sm:p-6">
+    <section class="card" aria-labelledby="keamanan-2fa-title">
         <div class="flex items-start gap-4">
             <div class="w-12 h-12 shrink-0 rounded-2xl {{ $enabled ? 'bg-success/10 text-success' : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400' }} flex items-center justify-center">
                 <x-icon name="shield-check" class="w-6 h-6" />
             </div>
             <div class="flex-1 min-w-0">
-                <h2 class="text-base font-bold text-slate-800 dark:text-white">Autentikasi Dua Faktor (2FA)</h2>
+                <h2 id="keamanan-2fa-title" class="text-base font-bold">Autentikasi Dua Faktor (2FA)</h2>
                 <p class="text-xs text-slate-500 mt-0.5">
                     Status:
                     @if ($enabled)
@@ -51,11 +61,10 @@
                                     Masukkan kode OTP yang dikirim ke WhatsApp Anda untuk menonaktifkan 2FA.
                                 </p>
                                 <input type="text" inputmode="numeric" maxlength="6" wire:model="otpCode" placeholder="••••••"
-                                       class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 py-2.5 px-3.5 text-center text-lg tracking-[0.4em] outline-none focus:border-primary dark:text-white">
-                                @error('otpCode') <p class="text-xs text-danger">{{ $message }}</p> @enderror
+                                       class="field text-center text-lg tracking-[0.4em]">
+                                @error('otpCode') <p class="management-field-error" role="alert">{{ $message }}</p> @enderror
                                 <div class="flex gap-2">
-                                    <button type="button" wire:click="batalNonaktifkan"
-                                            class="flex-1 rounded-lg border border-slate-200 dark:border-slate-700 px-4 py-2.5 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                                    <button type="button" wire:click="batalNonaktifkan" class="btn btn-outline flex-1">
                                         Batal
                                     </button>
                                     <button type="button" wire:click="nonaktifkan" wire:loading.attr="disabled"
@@ -66,16 +75,15 @@
                             </div>
                         @endif
                     @else
-                        <a href="{{ route('2fa.setup') }}"
-                           class="inline-flex items-center gap-2 rounded-lg bg-primary text-white px-4 py-2.5 text-sm font-semibold hover:bg-blue-700 transition-colors">
+                        <a href="{{ route('2fa.setup') }}" class="btn btn-primary">
                             <x-icon name="shield" class="w-4 h-4" /> Aktifkan 2FA
                         </a>
                     @endif
                 </div>
             </div>
         </div>
-    </div>
+    </section>
 
-    {{-- Password akun (D-3): cadangan bila login WhatsApp bermasalah. --}}
+    {{-- Password akun: cadangan bila login WhatsApp bermasalah. --}}
     <livewire:pengaturan.password-setup />
 </div>
