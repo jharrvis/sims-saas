@@ -9,6 +9,7 @@ use App\Models\MfaSecret;
 use App\Models\School;
 use App\Models\User;
 use Database\Seeders\PermissionSeeder;
+use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Str;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Permission;
@@ -145,4 +146,38 @@ it('stop tanpa sesi impersonate ditolak', function (): void {
     $this->actingAs($operator)
         ->post(route('platform.impersonate.stop'))
         ->assertForbidden();
+});
+
+it('operator tanpa membership impersonate admin meski ada member non-admin ber-id lebih kecil', function (): void {
+    $operator = opImpersonate();
+    expect($operator->memberships()->count())->toBe(0);
+
+    $school = School::create([
+        'nama' => 'SDN Gap Target', 'slug' => 'sdn-gap-target-'.uniqid(),
+        'jenjang' => 'SD', 'status' => 'aktif', 'status_langganan' => 'trialing',
+    ]);
+
+    $staf = User::create([
+        'username' => 'staf'.random_int(1000, 9999), 'name' => 'Staf Biasa',
+        'phone' => '62895'.random_int(1000000, 9999999),
+    ]);
+    Membership::create(['user_id' => $staf->id, 'school_id' => $school->id, 'status' => 'aktif']);
+
+    $admin = User::create([
+        'username' => 'adm'.random_int(1000, 9999), 'name' => 'Admin Sekolah',
+        'phone' => '62896'.random_int(1000000, 9999999),
+    ]);
+    Membership::create(['user_id' => $admin->id, 'school_id' => $school->id, 'status' => 'aktif']);
+
+    RoleSeeder::seedForSchool($school->id);
+    app(PermissionRegistrar::class)->setPermissionsTeamId($school->id);
+    $admin->assignRole('superadmin');
+    app(PermissionRegistrar::class)->setPermissionsTeamId(0);
+
+    Livewire::actingAs($operator)
+        ->test(TenantShow::class, ['schoolId' => $school->id])
+        ->call('impersonate')
+        ->assertRedirect(route('dashboard'));
+
+    expect(auth()->id())->toBe($admin->id);
 });

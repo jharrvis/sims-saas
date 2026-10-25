@@ -17,6 +17,7 @@ use App\Models\TenantQuotaOverride;
 use App\Models\TenantUsage;
 use App\Models\User;
 use App\Scopes\SchoolScope;
+use App\Support\RoleCatalog;
 use Illuminate\View\View;
 use Livewire\Component;
 
@@ -122,18 +123,26 @@ class TenantShow extends Component
     /**
      * Impersonate: masuk sebagai admin sekolah untuk keperluan dukungan.
      * Dicatat di audit; target hanya akun non-platform; keluar via stop route.
+     *
+     * Operator TIDAK perlu menjadi member sekolah (tidak perlu peran ganda):
+     * cukup izin platform.tenant.impersonate. Target diutamakan pemegang
+     * peran admin (superadmin, lalu admin-sekolah) agar tombol
+     * "Masuk sebagai Admin" benar-benar masuk sebagai admin, bukan member
+     * pertama ber-id terkecil; bila tak ada pemegang peran admin, fallback
+     * ke member aktif pertama (sekolah yang adminnya belum punya peran).
      */
     public function impersonate(): void
     {
         $operator = $this->ensurePlatformPermission('platform.tenant.impersonate');
 
-        $target = User::whereHas('memberships', fn ($q) => $q->where('school_id', $this->school->id)->aktif())
-            // Utamakan admin non-platform; operator sendiri boleh bila memang
-            // anggota sekolah (kasus peran ganda). Operator platform lain dikecualikan.
-            ->where(fn ($q) => $q->where('is_platform', false)->orWhere('id', $operator->id))
-            ->orderByRaw('is_platform asc')
-            ->orderBy('id')
-            ->first();
+        $target = null;
+        foreach (RoleCatalog::ADMIN_ROLES as $role) {
+            $target = $this->cariTargetImpersonate($operator, $role);
+            if ($target) {
+                break;
+            }
+        }
+        $target ??= $this->cariTargetImpersonate($operator, null);
 
         abort_if(! $target, 404, 'Sekolah ini belum memiliki admin.');
 
@@ -156,6 +165,40 @@ class TenantShow extends Component
         auth()->login($target);
 
         $this->redirect(route('dashboard'), navigate: true);
+    }
+
+    /**
+     * Cari kandidat target impersonate di sekolah ini.
+     *
+     * Bila $role diisi, hanya member pemegang peran itu (guard web, tim
+     * sekolah ini) yang dicari. Kueri langsung ke pivot model_has_roles
+     * karena relasi roles() Spatie selalu terskop tim aktif saat ini —
+     * di panel platform tim = 0, sehingga peran tim sekolah tak terlihat
+     * lewat whereHas('roles'). Bila $role null, kandidatnya member aktif
+     * pertama (fallback untuk sekolah yang adminnya belum punya peran).
+     * Operator sendiri boleh menjadi kandidat bila memang anggota sekolah
+     * (kasus peran ganda); operator platform lain dikecualikan.
+     */
+    private function cariTargetImpersonate(User $operator, ?string $role): ?User
+    {
+        $query = User::whereHas('memberships', fn ($q) => $q->where('school_id', $this->school->id)->aktif())
+            ->where(fn ($q) => $q->where('is_platform', false)->orWhere('id', $operator->id))
+            ->orderByRaw('is_platform asc')
+            ->orderBy('id');
+
+        if ($role !== null) {
+            $query->whereIn('users.id', function ($sub) use ($role) {
+                $sub->select('model_has_roles.model_id')
+                    ->from('model_has_roles')
+                    ->join('roles', 'roles.id', '=', 'model_has_roles.role_id')
+                    ->where('model_has_roles.model_type', (new User)->getMorphClass())
+                    ->where('model_has_roles.team_id', $this->school->id)
+                    ->where('roles.guard_name', 'web')
+                    ->where('roles.name', $role);
+            });
+        }
+
+        return $query->first();
     }
 
     public function render(PlatformService $platform): View
