@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use App\Livewire\Bk\CounselingForm;
+use App\Livewire\Bk\CounselingIndex;
 use App\Models\CounselingSession;
 use App\Models\Membership;
 use App\Models\Module;
@@ -13,6 +15,7 @@ use App\Tenancy\TenantContext;
 use Database\Seeders\ModuleSeeder;
 use Database\Seeders\PermissionSeeder;
 use Database\Seeders\RoleSeeder;
+use Livewire\Livewire;
 use Spatie\Permission\PermissionRegistrar;
 
 beforeEach(function (): void {
@@ -102,4 +105,18 @@ it('guru bk memiliki akses penuh sedangkan wali kelas hanya lihat', function ():
 
     expect($wk->can('bk.view'))->toBeTrue();
     expect($wk->can('bk.create'))->toBeFalse();
+});
+
+it('sesi konseling dan form konseling memakai design system', function (): void {
+    Livewire::actingAs($this->admin)->test(CounselingIndex::class)
+        ->assertSee('Konseling')
+        ->assertSee('management-page-header')
+        ->assertSee('rahasia')
+        ->assertDontSee('<i data-lucide');
+
+    Livewire::actingAs($this->admin)->test(CounselingForm::class)
+        ->assertSee('Jadwalkan Konseling')
+        ->assertSee('management-form-card')
+        ->assertDontSee('max-w-3xl')
+        ->assertDontSee('<i data-lucide');
 });

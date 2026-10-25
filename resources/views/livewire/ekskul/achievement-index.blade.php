@@ -1,128 +1,151 @@
-<div>
-    @if (session('ok'))
-        <div class="mb-4 rounded-lg bg-success/10 text-success px-4 py-2.5 text-sm">{{ session('ok') }}</div>
-    @endif
-
-    <div class="mb-5">
-        <a href="{{ route('ekskul.index') }}" class="text-sm text-slate-500 hover:text-primary">← Ekstrakurikuler</a>
+<div class="page-stack">
+    <div class="page-header management-page-header">
+        <div>
+            <span class="eyebrow">Kesiswaan / Ekstrakurikuler</span>
+            <h2 class="management-page-title">Prestasi</h2>
+            <p>Prestasi siswa beserta kategori, tingkat, dan tanggalnya.</p>
+        </div>
+        <div class="page-actions">
+            <a href="{{ route('ekskul.index') }}" class="back-link">← Ekstrakurikuler</a>
+            @can('prestasi.create')
+                <button wire:click="$set('showForm', true)" class="btn btn-primary">
+                    <x-icon name="plus" class="h-4 w-4" /> Catat Prestasi
+                </button>
+            @endcan
+        </div>
     </div>
 
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
-        <div class="flex items-center gap-2">
-            <div class="relative">
-                <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
-                <input type="search" wire:model.live.debounce.300ms="search" placeholder="Cari prestasi…"
-                       aria-label="Cari prestasi"
-                       class="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-boxdark py-2.5 pl-10 pr-4 text-sm outline-none focus:border-primary dark:text-white">
-            </div>
-            <select wire:model.live="tingkat" aria-label="Filter tingkat"
-                    class="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-boxdark py-2.5 px-3 text-sm outline-none focus:border-primary dark:text-white">
-                <option value="">Semua tingkat</option>
-                @foreach (\App\Models\Achievement::TINGKAT as $key => $label)
-                    <option value="{{ $key }}">{{ $label }}</option>
-                @endforeach
-            </select>
+    @if (session('ok'))
+        <div class="management-alert management-alert-success" role="status" aria-live="polite">
+            <span>{{ session('ok') }}</span>
         </div>
-        @can('prestasi.create')
-            <button wire:click="$set('showForm', true)" class="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary/90">
-                <i data-lucide="plus" class="w-4 h-4"></i> Catat Prestasi
-            </button>
-        @endcan
+    @endif
+
+    <div class="table-toolbar management-toolbar">
+        <div class="toolbar-left management-filter-group">
+            <label class="field-search management-search-field" for="prestasi-search">
+                <x-icon name="search" class="h-4 w-4" /><span class="sr-only">Cari prestasi</span>
+                <input id="prestasi-search" type="search" wire:model.live.debounce.300ms="search" placeholder="Cari prestasi…" autocomplete="off">
+                <span wire:loading wire:target="search" class="management-inline-spinner" aria-hidden="true"></span>
+            </label>
+            <label class="management-filter-field" for="prestasi-tingkat"><span class="sr-only">Filter tingkat</span>
+                <select id="prestasi-tingkat" wire:model.live="tingkat" class="select-field">
+                    <option value="">Semua tingkat</option>
+                    @foreach (\App\Models\Achievement::TINGKAT as $key => $label)
+                        <option value="{{ $key }}">{{ $label }}</option>
+                    @endforeach
+                </select>
+            </label>
+        </div>
     </div>
 
     @if ($showForm)
         @can('prestasi.create')
-            <form wire:submit="save" class="rounded-xl border border-slate-200 bg-white dark:bg-boxdark dark:border-slate-700 p-5 mb-5 grid sm:grid-cols-2 gap-4">
-                <div>
-                    <label for="siswa" class="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1.5">Siswa <span class="text-danger">*</span></label>
-                    <input id="siswa" type="search" wire:model.live.debounce.300ms="searchSiswa" placeholder="Cari nama…"
-                           class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 py-2.5 px-3.5 text-sm outline-none focus:border-primary dark:text-white">
-                    <select wire:model="student_id" aria-label="Pilih siswa"
-                            class="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 py-2.5 px-3 text-sm dark:text-white">
-                        <option value="">— Pilih siswa —</option>
-                        @foreach ($siswaList as $s)
-                            <option value="{{ $s->id }}">{{ $s->nama }} · {{ $s->nis }}</option>
-                        @endforeach
-                    </select>
-                    @error('student_id') <p class="text-xs text-danger mt-1">{{ $message }}</p> @enderror
+            <section class="card management-form-card" aria-labelledby="prestasi-form-title">
+                <div class="card-head">
+                    <div class="card-title">
+                        <span class="mini-icon blue"><x-icon name="trophy" class="h-[19px] w-[19px]" /></span>
+                        <div>
+                            <h3 id="prestasi-form-title">Catat Prestasi</h3>
+                            <p>Prestasi tampil di daftar setelah disimpan.</p>
+                        </div>
+                    </div>
                 </div>
-                <div>
-                    <label for="nama" class="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1.5">Nama Prestasi <span class="text-danger">*</span></label>
-                    <input id="nama" type="text" wire:model="nama" maxlength="200" placeholder="Juara 1 Olimpiade Matematika"
-                           class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 py-2.5 px-3.5 text-sm outline-none focus:border-primary dark:text-white">
-                    @error('nama') <p class="text-xs text-danger mt-1">{{ $message }}</p> @enderror
-                </div>
-                <div>
-                    <label for="kategori" class="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1.5">Kategori</label>
-                    <select id="kategori" wire:model="kategori"
-                            class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 py-2.5 px-3 text-sm dark:text-white">
-                        @foreach (\App\Models\Achievement::KATEGORI as $key => $label)
-                            <option value="{{ $key }}">{{ $label }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div>
-                    <label for="tingkat" class="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1.5">Tingkat</label>
-                    <select id="tingkat" wire:model="tingkat"
-                            class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 py-2.5 px-3 text-sm dark:text-white">
-                        @foreach (\App\Models\Achievement::TINGKAT as $key => $label)
-                            <option value="{{ $key }}">{{ $label }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div>
-                    <label for="tanggal" class="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1.5">Tanggal</label>
-                    <input id="tanggal" type="date" wire:model="tanggal"
-                           class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 py-2.5 px-3.5 text-sm outline-none focus:border-primary dark:text-white">
-                </div>
-                <div>
-                    <label for="keterangan" class="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1.5">Keterangan</label>
-                    <input id="keterangan" type="text" wire:model="keterangan" maxlength="2000"
-                           class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 py-2.5 px-3.5 text-sm outline-none focus:border-primary dark:text-white">
-                </div>
-                <div class="sm:col-span-2 flex items-center gap-3">
-                    <button type="submit" class="rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary/90">Simpan</button>
-                    <button type="button" wire:click="$set('showForm', false)" class="text-sm text-slate-500 hover:text-primary">Batal</button>
-                </div>
-            </form>
+
+                <form wire:submit="save" class="form-grid management-form-grid">
+                    <div class="form-group">
+                        <label for="siswa">Siswa <span class="required">*</span></label>
+                        <input id="siswa" type="search" wire:model.live.debounce.300ms="searchSiswa" placeholder="Cari nama…" class="field">
+                        <select wire:model="student_id" aria-label="Pilih siswa" class="select-field mt-1">
+                            <option value="">— Pilih siswa —</option>
+                            @foreach ($siswaList as $s)
+                                <option value="{{ $s->id }}">{{ $s->nama }} · {{ $s->nis }}</option>
+                            @endforeach
+                        </select>
+                        @error('student_id') <p class="management-field-error" role="alert">{{ $message }}</p> @enderror
+                    </div>
+                    <div class="form-group">
+                        <label for="nama">Nama Prestasi <span class="required">*</span></label>
+                        <input id="nama" type="text" wire:model="nama" maxlength="200" placeholder="Juara 1 Olimpiade Matematika" class="field">
+                        @error('nama') <p class="management-field-error" role="alert">{{ $message }}</p> @enderror
+                    </div>
+                    <div class="form-group">
+                        <label for="kategori">Kategori</label>
+                        <select id="kategori" wire:model="kategori" class="select-field">
+                            @foreach (\App\Models\Achievement::KATEGORI as $key => $label)
+                                <option value="{{ $key }}">{{ $label }}</option>
+                            @endforeach
+                        </select>
+                        @error('kategori') <p class="management-field-error" role="alert">{{ $message }}</p> @enderror
+                    </div>
+                    <div class="form-group">
+                        <label for="tingkat">Tingkat</label>
+                        <select id="tingkat" wire:model="tingkat" class="select-field">
+                            @foreach (\App\Models\Achievement::TINGKAT as $key => $label)
+                                <option value="{{ $key }}">{{ $label }}</option>
+                            @endforeach
+                        </select>
+                        @error('tingkat') <p class="management-field-error" role="alert">{{ $message }}</p> @enderror
+                    </div>
+                    <div class="form-group">
+                        <label for="tanggal">Tanggal</label>
+                        <input id="tanggal" type="date" wire:model="tanggal" class="field">
+                        @error('tanggal') <p class="management-field-error" role="alert">{{ $message }}</p> @enderror
+                    </div>
+                    <div class="form-group">
+                        <label for="keterangan">Keterangan</label>
+                        <input id="keterangan" type="text" wire:model="keterangan" maxlength="2000" class="field">
+                        @error('keterangan') <p class="management-field-error" role="alert">{{ $message }}</p> @enderror
+                    </div>
+                    <div class="form-actions management-field-span">
+                        <button type="submit" class="btn btn-primary" wire:loading.attr="disabled" wire:target="save">
+                            <span wire:loading.remove wire:target="save">Simpan</span>
+                            <span wire:loading wire:target="save">Menyimpan...</span>
+                        </button>
+                        <button type="button" wire:click="$set('showForm', false)" class="btn btn-outline">Batal</button>
+                    </div>
+                </form>
+            </section>
         @endcan
     @endif
 
-    <div class="rounded-xl border border-slate-200 bg-white dark:bg-boxdark dark:border-slate-700 overflow-hidden">
-        <table class="w-full text-sm">
-            <thead>
-                <tr class="bg-slate-50 dark:bg-slate-800 text-left">
-                    <th class="px-4 py-2.5 font-semibold text-slate-600 dark:text-slate-300">Siswa</th>
-                    <th class="px-4 py-2.5 font-semibold text-slate-600 dark:text-slate-300">Prestasi</th>
-                    <th class="px-4 py-2.5 font-semibold text-slate-600 dark:text-slate-300">Tingkat</th>
-                    <th class="px-4 py-2.5 font-semibold text-slate-600 dark:text-slate-300">Tanggal</th>
-                    <th class="px-4 py-2.5"></th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse ($items as $item)
-                    <tr class="border-t border-slate-100 dark:border-slate-700">
-                        <td class="px-4 py-2.5 font-semibold text-slate-800 dark:text-white">{{ $item->student->nama }}</td>
-                        <td class="px-4 py-2.5">
-                            <span class="block font-medium text-slate-700 dark:text-slate-200">{{ $item->nama }}</span>
-                            <span class="text-xs text-slate-400">{{ \App\Models\Achievement::KATEGORI[$item->kategori] }}</span>
-                        </td>
-                        <td class="px-4 py-2.5">
-                            <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-warning/15 text-amber-600">{{ \App\Models\Achievement::TINGKAT[$item->tingkat] }}</span>
-                        </td>
-                        <td class="px-4 py-2.5 text-slate-600 dark:text-slate-300">{{ $item->tanggal?->format('d M Y') ?? '—' }}</td>
-                        <td class="px-4 py-2.5 text-right">
-                            @can('prestasi.delete')
-                                <button wire:click="destroy({{ $item->id }})" wire:confirm="Hapus prestasi ini?"
-                                        class="text-xs font-semibold text-danger hover:underline">Hapus</button>
-                            @endcan
-                        </td>
+    <div class="card">
+        <div class="table-scroll">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th scope="col">Siswa</th>
+                        <th scope="col">Prestasi</th>
+                        <th scope="col">Tingkat</th>
+                        <th scope="col">Tanggal</th>
+                        <th scope="col"></th>
                     </tr>
-                @empty
-                    <tr><td colspan="5" class="px-4 py-8 text-center text-slate-500">Belum ada prestasi.</td></tr>
-                @endforelse
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @forelse ($items as $item)
+                        <tr wire:key="prestasi-{{ $item->id }}">
+                            <td class="font-semibold">{{ $item->student->nama }}</td>
+                            <td>
+                                <span class="block font-medium text-slate-700 dark:text-slate-200">{{ $item->nama }}</span>
+                                <span class="text-xs text-slate-400">{{ \App\Models\Achievement::KATEGORI[$item->kategori] }}</span>
+                            </td>
+                            <td>
+                                <span class="badge badge-orange">{{ \App\Models\Achievement::TINGKAT[$item->tingkat] }}</span>
+                            </td>
+                            <td class="text-slate-600 dark:text-slate-300">{{ $item->tanggal?->format('d M Y') ?? '—' }}</td>
+                            <td class="text-right">
+                                @can('prestasi.delete')
+                                    <button wire:click="destroy({{ $item->id }})" wire:confirm="Hapus prestasi ini?"
+                                            class="text-xs font-semibold text-danger hover:underline">Hapus</button>
+                                @endcan
+                            </td>
+                        </tr>
+                    @empty
+                        <tr><td colspan="5" class="py-8 text-center text-slate-500">Belum ada prestasi.</td></tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <div class="mt-5">{{ $items->links() }}</div>

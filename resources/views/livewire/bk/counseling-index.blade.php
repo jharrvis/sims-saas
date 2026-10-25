@@ -1,48 +1,59 @@
-<div>
-    @if (session('ok'))
-        <div class="mb-4 rounded-lg bg-success/10 text-success px-4 py-2.5 text-sm">{{ session('ok') }}</div>
-    @endif
-
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
-        <div class="flex items-center gap-2">
-            <div class="relative">
-                <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
-                <input type="search" wire:model.live.debounce.300ms="search" placeholder="Cari siswa…"
-                       aria-label="Cari sesi konseling"
-                       class="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-boxdark py-2.5 pl-10 pr-4 text-sm outline-none focus:border-primary dark:text-white">
-            </div>
-            <select wire:model.live="status" aria-label="Filter status"
-                    class="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-boxdark py-2.5 px-3 text-sm outline-none focus:border-primary dark:text-white">
-                <option value="">Semua status</option>
-                @foreach (\App\Models\CounselingSession::STATUS as $key => $label)
-                    <option value="{{ $key }}">{{ $label }}</option>
-                @endforeach
-            </select>
+<div class="page-stack">
+    <div class="page-header management-page-header">
+        <div>
+            <span class="eyebrow">Kesiswaan / BK</span>
+            <h2 class="management-page-title">Konseling</h2>
+            <p>Sesi konseling siswa beserta topik, status, dan tindak lanjutnya.</p>
         </div>
-        @can('bk.create')
-            <a href="{{ route('bk.create') }}"
-               class="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary/90">
-                <i data-lucide="plus" class="w-4 h-4"></i> Jadwalkan Konseling
-            </a>
-        @endcan
+        <div class="page-actions">
+            @can('bk.create')
+                <a href="{{ route('bk.create') }}" class="btn btn-primary">
+                    <x-icon name="plus" class="h-4 w-4" /> Jadwalkan Konseling
+                </a>
+            @endcan
+        </div>
     </div>
 
-    <div class="rounded-xl border border-amber-200 bg-amber-50 dark:bg-amber-900/10 dark:border-amber-800 px-4 py-3 mb-5 text-xs text-amber-700 dark:text-amber-300 flex items-start gap-2">
-        <i data-lucide="lock" class="w-4 h-4 shrink-0 mt-0.5"></i>
+    @if (session('ok'))
+        <div class="management-alert management-alert-success" role="status" aria-live="polite">
+            <span>{{ session('ok') }}</span>
+        </div>
+    @endif
+
+    <div class="table-toolbar management-toolbar">
+        <div class="toolbar-left management-filter-group">
+            <label class="field-search management-search-field" for="konseling-search">
+                <x-icon name="search" class="h-4 w-4" /><span class="sr-only">Cari sesi konseling</span>
+                <input id="konseling-search" type="search" wire:model.live.debounce.300ms="search" placeholder="Cari siswa…" autocomplete="off">
+                <span wire:loading wire:target="search" class="management-inline-spinner" aria-hidden="true"></span>
+            </label>
+            <label class="management-filter-field" for="konseling-status"><span class="sr-only">Filter status</span>
+                <select id="konseling-status" wire:model.live="status" class="select-field">
+                    <option value="">Semua status</option>
+                    @foreach (\App\Models\CounselingSession::STATUS as $key => $label)
+                        <option value="{{ $key }}">{{ $label }}</option>
+                    @endforeach
+                </select>
+            </label>
+        </div>
+    </div>
+
+    <div class="rounded-xl border border-amber-200 bg-amber-50 dark:bg-amber-900/10 dark:border-amber-800 px-4 py-3 text-xs text-amber-700 dark:text-amber-300 flex items-start gap-2">
+        <x-icon name="lock" class="h-4 w-4 shrink-0 mt-0.5" />
         <span>Catatan konseling bersifat <strong>rahasia</strong> — hanya dapat diakses guru BK, admin sekolah, dan kepala sekolah.</span>
     </div>
 
     <div class="space-y-3">
         @forelse ($items as $item)
-            <div class="rounded-xl border border-slate-200 bg-white dark:bg-boxdark dark:border-slate-700 p-4 sm:p-5">
+            <article class="card" wire:key="konseling-{{ $item->id }}">
                 <div class="flex flex-wrap items-start justify-between gap-3">
                     <div class="min-w-0">
                         <div class="flex flex-wrap items-center gap-2">
-                            <h3 class="font-semibold text-slate-800 dark:text-white">{{ $item->topik }}</h3>
-                            <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full {{ $item->status === 'selesai' ? 'bg-success/10 text-success' : ($item->status === 'batal' ? 'bg-slate-100 text-slate-500 dark:bg-slate-800' : 'bg-warning/15 text-amber-600') }}">
+                            <h3 class="font-semibold">{{ $item->topik }}</h3>
+                            <span class="badge {{ $item->status === 'selesai' ? 'badge-green' : ($item->status === 'batal' ? 'badge-gray' : 'badge-orange') }}">
                                 {{ \App\Models\CounselingSession::STATUS[$item->status] }}
                             </span>
-                            <span class="text-[11px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 dark:bg-slate-800">
+                            <span class="badge badge-gray">
                                 {{ \App\Models\CounselingSession::JENIS[$item->jenis] }}
                             </span>
                         </div>
@@ -67,10 +78,10 @@
                         @endcan
                     </div>
                 </div>
-            </div>
+            </article>
         @empty
-            <div class="rounded-xl border border-dashed border-slate-300 dark:border-slate-600 p-10 text-center text-sm text-slate-500">
-                Belum ada sesi konseling terjadwal.
+            <div class="empty-state">
+                <p>Belum ada sesi konseling terjadwal.</p>
             </div>
         @endforelse
     </div>

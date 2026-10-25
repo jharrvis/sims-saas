@@ -1,38 +1,63 @@
-<div class="max-w-3xl">
-    <form wire:submit="save" class="rounded-xl border border-slate-200 bg-white dark:bg-boxdark dark:border-slate-700 p-5 sm:p-6 space-y-5">
-        <div class="grid sm:grid-cols-2 gap-4">
-            <div class="sm:col-span-2">
-                <label for="nama" class="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1.5">Nama <span class="text-danger">*</span></label>
-                <input id="nama" type="text" wire:model="nama" maxlength="150" placeholder="Pramuka, Paskibra, Sepak Bola…"
-                       class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 py-2.5 px-3.5 text-sm outline-none focus:border-primary dark:text-white">
-                @error('nama') <p class="text-xs text-danger mt-1">{{ $message }}</p> @enderror
+<div class="page-stack">
+    <div class="page-header management-page-header">
+        <div>
+            <span class="eyebrow">Kesiswaan / Ekstrakurikuler</span>
+            <h2 class="management-page-title">{{ $isEdit ? 'Ubah Ekstrakurikuler' : 'Tambah Ekstrakurikuler' }}</h2>
+            <p>Ekstrakurikuler beserta jadwal latihan dan pembinanya.</p>
+        </div>
+        <div class="page-actions">
+            <a href="{{ route('ekskul.index') }}" class="back-link">← Ekstrakurikuler</a>
+        </div>
+    </div>
+
+    <section class="card management-form-card" aria-labelledby="ekskul-form-title">
+        <div class="card-head">
+            <div class="card-title">
+                <span class="mini-icon blue"><x-icon name="award" class="h-[19px] w-[19px]" /></span>
+                <div>
+                    <h3 id="ekskul-form-title">Data Ekstrakurikuler</h3>
+                    <p>Anggota diatur dari halaman kelola ekstrakurikuler.</p>
+                </div>
             </div>
-            <div>
-                <label for="jadwal" class="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1.5">Jadwal Latihan</label>
-                <input id="jadwal" type="text" wire:model="jadwal" maxlength="100" placeholder="Senin 15.30–17.00"
-                       class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 py-2.5 px-3.5 text-sm outline-none focus:border-primary dark:text-white">
+        </div>
+
+        <form wire:submit="save" class="form-grid management-form-grid">
+            <div class="form-group management-field-span">
+                <label for="nama">Nama <span class="required">*</span></label>
+                <input id="nama" type="text" wire:model="nama" maxlength="150" placeholder="Pramuka, Paskibra, Sepak Bola…" class="field">
+                @error('nama') <p class="management-field-error" role="alert">{{ $message }}</p> @enderror
             </div>
-            <div>
-                <label for="pembina" class="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1.5">Pembina</label>
-                <select id="pembina" wire:model="pembina_id"
-                        class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 py-2.5 px-3.5 text-sm outline-none focus:border-primary dark:text-white">
+            <div class="form-group">
+                <label for="jadwal">Jadwal Latihan</label>
+                <input id="jadwal" type="text" wire:model="jadwal" maxlength="100" placeholder="Senin 15.30–17.00" class="field">
+                @error('jadwal') <p class="management-field-error" role="alert">{{ $message }}</p> @enderror
+            </div>
+            <div class="form-group">
+                <label for="pembina">Pembina</label>
+                <select id="pembina" wire:model="pembina_id" class="select-field">
                     <option value="">— Pilih pembina —</option>
                     @foreach ($pembinas as $p)
                         <option value="{{ $p->id }}">{{ $p->nama }}</option>
                     @endforeach
                 </select>
+                @error('pembina_id') <p class="management-field-error" role="alert">{{ $message }}</p> @enderror
             </div>
-            <div class="flex items-center gap-2 sm:col-span-2">
-                <input id="aktif" type="checkbox" wire:model="aktif" class="w-4 h-4 accent-primary">
-                <label for="aktif" class="text-sm text-slate-600 dark:text-slate-300">Aktif</label>
+            <div class="form-group management-field-span">
+                <label class="toggle-row">
+                    <input id="aktif" type="checkbox" wire:model="aktif">
+                    <span class="toggle-control" aria-hidden="true"></span>
+                    <span>Aktif</span>
+                </label>
+                @error('aktif') <p class="management-field-error" role="alert">{{ $message }}</p> @enderror
             </div>
-        </div>
 
-        <div class="flex items-center gap-3 pt-2">
-            <button type="submit" class="rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-white hover:bg-primary/90">
-                {{ $isEdit ? 'Simpan Perubahan' : 'Tambah Ekstrakurikuler' }}
-            </button>
-            <a href="{{ route('ekskul.index') }}" class="text-sm text-slate-500 hover:text-primary">Batal</a>
-        </div>
-    </form>
+            <div class="form-actions management-field-span">
+                <button type="submit" class="btn btn-primary" wire:loading.attr="disabled" wire:target="save">
+                    <span wire:loading.remove wire:target="save">{{ $isEdit ? 'Simpan Perubahan' : 'Tambah Ekstrakurikuler' }}</span>
+                    <span wire:loading wire:target="save">Menyimpan...</span>
+                </button>
+                <a href="{{ route('ekskul.index') }}" class="btn btn-outline">Batal</a>
+            </div>
+        </form>
+    </section>
 </div>

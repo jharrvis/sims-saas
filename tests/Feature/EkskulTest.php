@@ -2,6 +2,10 @@
 
 declare(strict_types=1);
 
+use App\Livewire\Ekskul\AchievementIndex;
+use App\Livewire\Ekskul\EkskulForm;
+use App\Livewire\Ekskul\EkskulIndex;
+use App\Livewire\Ekskul\EkskulShow;
 use App\Models\Achievement;
 use App\Models\Extracurricular;
 use App\Models\Membership;
@@ -14,6 +18,7 @@ use App\Tenancy\TenantContext;
 use Database\Seeders\ModuleSeeder;
 use Database\Seeders\PermissionSeeder;
 use Database\Seeders\RoleSeeder;
+use Livewire\Livewire;
 use Spatie\Permission\PermissionRegistrar;
 
 beforeEach(function (): void {
@@ -108,4 +113,30 @@ it('ekstrakurikuler terisolasi per sekolah', function (): void {
 
     expect(Extracurricular::count())->toBe(0)
         ->and(Achievement::count())->toBe(0);
+});
+
+it('ekskul, form ekskul, kelola anggota, dan prestasi memakai design system', function (): void {
+    Livewire::actingAs($this->admin)->test(EkskulIndex::class)
+        ->assertSee('Ekstrakurikuler')
+        ->assertSee('management-page-header')
+        ->assertDontSee('<i data-lucide');
+
+    Livewire::actingAs($this->admin)->test(EkskulForm::class)
+        ->assertSee('Tambah Ekstrakurikuler')
+        ->assertSee('management-form-card')
+        ->assertDontSee('max-w-3xl')
+        ->assertDontSee('<i data-lucide');
+
+    $ekskul = Extracurricular::create(['nama' => 'Pramuka']);
+
+    Livewire::actingAs($this->admin)->test(EkskulShow::class, ['ekskul' => $ekskul])
+        ->assertSee('Pramuka')
+        ->assertSee('Tambah Anggota')
+        ->assertSee('data-table')
+        ->assertDontSee('<i data-lucide');
+
+    Livewire::actingAs($this->admin)->test(AchievementIndex::class)
+        ->assertSee('Prestasi')
+        ->assertSee('data-table')
+        ->assertDontSee('<i data-lucide');
 });

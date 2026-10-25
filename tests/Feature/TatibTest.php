@@ -2,6 +2,9 @@
 
 declare(strict_types=1);
 
+use App\Livewire\Tatib\ViolationForm;
+use App\Livewire\Tatib\ViolationIndex;
+use App\Livewire\Tatib\ViolationTypeIndex;
 use App\Models\Membership;
 use App\Models\Module;
 use App\Models\School;
@@ -14,6 +17,7 @@ use App\Tenancy\TenantContext;
 use Database\Seeders\ModuleSeeder;
 use Database\Seeders\PermissionSeeder;
 use Database\Seeders\RoleSeeder;
+use Livewire\Livewire;
 use Spatie\Permission\PermissionRegistrar;
 
 beforeEach(function (): void {
@@ -102,4 +106,22 @@ it('menghapus catatan pelanggaran', function (): void {
     $this->actingAs($this->admin)->deleteJson("/api/v1/tatib/{$v->id}")->assertNoContent();
 
     expect(Violation::count())->toBe(0);
+});
+
+it('pelanggaran, form pelanggaran, dan jenis pelanggaran memakai design system', function (): void {
+    Livewire::actingAs($this->admin)->test(ViolationIndex::class)
+        ->assertSee('Pelanggaran')
+        ->assertSee('data-table')
+        ->assertDontSee('<i data-lucide');
+
+    Livewire::actingAs($this->admin)->test(ViolationForm::class)
+        ->assertSee('Catat Pelanggaran')
+        ->assertSee('management-form-card')
+        ->assertDontSee('max-w-3xl')
+        ->assertDontSee('<i data-lucide');
+
+    Livewire::actingAs($this->admin)->test(ViolationTypeIndex::class)
+        ->assertSee('Jenis Pelanggaran')
+        ->assertSee('management-form-card')
+        ->assertDontSee('<i data-lucide');
 });
