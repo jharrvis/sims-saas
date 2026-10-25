@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Domains\ERapor\Services\ERaporService;
+use App\Livewire\ERapor\RaporIndex;
 use App\Models\AcademicYear;
 use App\Models\Grade;
 use App\Models\GradeComponent;
@@ -19,6 +20,7 @@ use App\Tenancy\TenantContext;
 use Database\Seeders\ModuleSeeder;
 use Database\Seeders\PermissionSeeder;
 use Database\Seeders\RoleSeeder;
+use Livewire\Livewire;
 use Spatie\Permission\PermissionRegistrar;
 
 beforeEach(function (): void {
@@ -121,4 +123,12 @@ it('konversi predikat mengikuti rentang nilai', function (): void {
     expect($service->predikat(85))->toBe('B');
     expect($service->predikat(75))->toBe('C');
     expect($service->predikat(60))->toBe('D');
+});
+
+it('daftar rapor memakai struktur design system management (Batch 5)', function (): void {
+    Livewire::actingAs($this->admin)->test(RaporIndex::class)
+        ->assertSee('Daftar Rapor')
+        ->assertSeeHtml('management-page-header')
+        ->assertSee('Pilih rombel dan semester untuk menampilkan daftar rapor.')
+        ->assertDontSee('<i data-lucide');
 });

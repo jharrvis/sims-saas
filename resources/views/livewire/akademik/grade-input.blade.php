@@ -1,61 +1,77 @@
-<div>
+<div class="page-stack">
+    <div class="page-header management-page-header">
+        <div>
+            <span class="eyebrow">Akademik / Nilai</span>
+            <h2 class="management-page-title">Input Nilai</h2>
+            <p>Pilih kelas, mata pelajaran, komponen, dan semester, lalu isi nilai tiap siswa.</p>
+        </div>
+    </div>
+
     @if (session('saved'))
-        <div class="mb-4 rounded-lg bg-success/10 text-success px-4 py-2.5 text-sm">{{ session('saved') }}</div>
+        <div class="management-alert management-alert-success" role="status" aria-live="polite">
+            <span>{{ session('saved') }}</span>
+        </div>
     @endif
 
-    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
-        <select wire:model.live="rombelId" aria-label="Pilih kelas"
-                class="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-boxdark py-2.5 px-3 text-sm outline-none focus:border-primary dark:text-white">
-            <option value="">— Kelas —</option>
-            @foreach ($rombels as $r)
-                <option value="{{ $r->id }}">{{ $r->nama }}</option>
-            @endforeach
-        </select>
-        <select wire:model.live="subjectId" aria-label="Pilih mata pelajaran"
-                class="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-boxdark py-2.5 px-3 text-sm outline-none focus:border-primary dark:text-white">
-            <option value="">— Mata pelajaran —</option>
-            @foreach ($subjects as $s)
-                <option value="{{ $s->id }}">{{ $s->nama }}</option>
-            @endforeach
-        </select>
-        <select wire:model.live="componentId" aria-label="Pilih komponen"
-                class="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-boxdark py-2.5 px-3 text-sm outline-none focus:border-primary dark:text-white">
-            <option value="">— Komponen —</option>
-            @foreach ($components as $c)
-                <option value="{{ $c->id }}">{{ $c->nama }} ({{ $c->bobot }}%)</option>
-            @endforeach
-        </select>
-        <select wire:model.live="semesterId" aria-label="Pilih semester"
-                class="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-boxdark py-2.5 px-3 text-sm outline-none focus:border-primary dark:text-white">
-            @foreach ($semesters as $sem)
-                <option value="{{ $sem->id }}">{{ $sem->label() }}</option>
-            @endforeach
-        </select>
+    <div class="table-toolbar management-toolbar">
+        <div class="toolbar-left management-filter-group">
+            <label class="management-filter-field" for="nilai-rombel"><span class="sr-only">Pilih kelas</span>
+                <select id="nilai-rombel" wire:model.live="rombelId" class="select-field">
+                    <option value="">— Kelas —</option>
+                    @foreach ($rombels as $r)
+                        <option value="{{ $r->id }}">{{ $r->nama }}</option>
+                    @endforeach
+                </select>
+            </label>
+            <label class="management-filter-field" for="nilai-mapel"><span class="sr-only">Pilih mata pelajaran</span>
+                <select id="nilai-mapel" wire:model.live="subjectId" class="select-field">
+                    <option value="">— Mata pelajaran —</option>
+                    @foreach ($subjects as $s)
+                        <option value="{{ $s->id }}">{{ $s->nama }}</option>
+                    @endforeach
+                </select>
+            </label>
+            <label class="management-filter-field" for="nilai-komponen"><span class="sr-only">Pilih komponen</span>
+                <select id="nilai-komponen" wire:model.live="componentId" class="select-field">
+                    <option value="">— Komponen —</option>
+                    @foreach ($components as $c)
+                        <option value="{{ $c->id }}">{{ $c->nama }} ({{ $c->bobot }}%)</option>
+                    @endforeach
+                </select>
+            </label>
+            <label class="management-filter-field" for="nilai-semester"><span class="sr-only">Pilih semester</span>
+                <select id="nilai-semester" wire:model.live="semesterId" class="select-field">
+                    @foreach ($semesters as $sem)
+                        <option value="{{ $sem->id }}">{{ $sem->label() }}</option>
+                    @endforeach
+                </select>
+            </label>
+        </div>
     </div>
 
     @if ($rombelId && $subjectId && $componentId && $students->isNotEmpty())
         <form wire:submit="save">
-            <div class="rounded-xl border border-slate-200 bg-white shadow-sm dark:bg-boxdark dark:border-slate-700 overflow-hidden">
-                <div class="overflow-x-auto">
-                    <table class="w-full">
+            <div class="card">
+                <div class="table-scroll">
+                    <table class="data-table">
                         <thead>
-                            <tr class="border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
-                                <th class="py-3 px-5 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Nama</th>
-                                <th class="py-3 px-5 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 w-40">Nilai (0–100)</th>
+                            <tr>
+                                <th scope="col">Nama</th>
+                                <th scope="col" class="w-40">Nilai (0–100)</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach ($students as $s)
-                                <tr class="border-b border-slate-100 dark:border-slate-700/50">
-                                    <td class="py-2.5 px-5">
-                                        <div class="font-medium text-sm text-slate-800 dark:text-white">{{ $s->nama }}</div>
+                                <tr wire:key="nilai-{{ $s->id }}">
+                                    <td>
+                                        <div class="font-medium">{{ $s->nama }}</div>
                                         <div class="text-xs text-slate-500">NIS {{ $s->nis }}</div>
                                     </td>
-                                    <td class="py-2.5 px-5">
+                                    <td>
                                         <input type="number" wire:model="scores.{{ $s->id }}" min="0" max="100" step="0.01"
                                                aria-label="Nilai {{ $s->nama }}" placeholder="—"
-                                               class="w-28 rounded-lg border border-slate-200 dark:border-slate-700 bg-transparent py-1.5 px-3 text-sm outline-none focus:border-primary dark:text-white">
-                                        @error("scores.{$s->id}") <p class="mt-1 text-xs text-danger">{{ $message }}</p> @enderror
+                                               class="field">
+                                        @error("scores.{$s->id}") <p class="management-field-error" role="alert">{{ $message }}</p> @enderror
                                     </td>
                                 </tr>
                             @endforeach
@@ -64,15 +80,16 @@
                 </div>
             </div>
 
-            <div class="flex justify-end mt-4">
-                <button type="submit" wire:loading.attr="disabled" class="px-5 py-2.5 rounded-lg bg-primary text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60">
-                    Simpan Nilai
+            <div class="form-actions">
+                <button type="submit" wire:loading.attr="disabled" class="btn btn-primary" wire:target="save">
+                    <span wire:loading.remove wire:target="save">Simpan Nilai</span>
+                    <span wire:loading wire:target="save">Menyimpan...</span>
                 </button>
             </div>
         </form>
     @elseif ($rombelId && $subjectId)
-        <p class="py-12 text-center text-sm text-slate-500 dark:text-slate-400">
-            Pilih komponen penilaian atau tidak ada siswa aktif di kelas ini.
-        </p>
+        <div class="empty-state">
+            <p>Pilih komponen penilaian atau tidak ada siswa aktif di kelas ini.</p>
+        </div>
     @endif
 </div>

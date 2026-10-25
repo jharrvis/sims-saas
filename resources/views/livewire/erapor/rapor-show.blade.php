@@ -1,18 +1,22 @@
-<div>
+<div class="page-stack">
     @if (session('ok'))
-        <div class="mb-4 rounded-lg bg-success/10 text-success px-4 py-2.5 text-sm print:hidden">{{ session('ok') }}</div>
+        <div class="management-alert management-alert-success print:hidden" role="status" aria-live="polite">
+            <span>{{ session('ok') }}</span>
+        </div>
     @endif
 
-    <div class="flex flex-wrap items-center gap-3 mb-5 print:hidden">
-        <a href="{{ route('erapor.index') }}" class="text-sm text-slate-500 hover:text-primary">← Kembali</a>
+    <div class="flex flex-wrap items-center gap-3 print:hidden">
+        <a href="{{ route('erapor.index') }}" class="management-back-link">
+            <x-icon name="arrow-left" class="h-4 w-4" /> Kembali
+        </a>
         @can('erapor.cetak')
-            <button onclick="window.print()" class="ml-auto inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary/90">
-                <i data-lucide="printer" class="w-4 h-4"></i> Cetak Rapor
+            <button onclick="window.print()" class="btn btn-primary ml-auto">
+                <x-icon name="printer" class="h-4 w-4" /> Cetak Rapor
             </button>
         @endcan
     </div>
 
-    {{-- Kertas rapor --}}
+    {{-- Kertas rapor: dipertahankan persis sebagai dokumen cetak (bukan chrome aplikasi). --}}
     <div id="rapor" class="bg-white text-slate-800 rounded-xl border border-slate-200 p-6 sm:p-10 max-w-4xl mx-auto print:border-0 print:rounded-none print:max-w-none print:p-0">
         {{-- Kop sekolah --}}
         <div class="text-center border-b-4 border-double border-slate-800 pb-4 mb-6">
@@ -97,12 +101,19 @@
 
     {{-- Form catatan wali --}}
     @can('erapor.catatan')
-        <form wire:submit="simpanCatatan" class="mt-6 max-w-4xl mx-auto rounded-xl border border-slate-200 bg-white dark:bg-boxdark dark:border-slate-700 p-5 print:hidden">
-            <label for="catatan" class="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1.5">Catatan Wali Kelas</label>
-            <textarea id="catatan" wire:model="catatan" rows="3" maxlength="2000" placeholder="Tulis catatan untuk rapor siswa ini…"
-                      class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 py-2.5 px-3.5 text-sm outline-none focus:border-primary dark:text-white"></textarea>
-            @error('catatan') <p class="text-xs text-danger mt-1">{{ $message }}</p> @enderror
-            <button type="submit" class="mt-3 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary/90">Simpan Catatan</button>
+        <form wire:submit="simpanCatatan" class="card management-form-card max-w-4xl mx-auto print:hidden">
+            <div class="form-group">
+                <label for="catatan">Catatan Wali Kelas</label>
+                <textarea id="catatan" wire:model="catatan" rows="3" maxlength="2000" placeholder="Tulis catatan untuk rapor siswa ini…"
+                          class="textarea-field"></textarea>
+                @error('catatan') <p class="management-field-error" role="alert">{{ $message }}</p> @enderror
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary" wire:loading.attr="disabled" wire:target="simpanCatatan">
+                    <span wire:loading.remove wire:target="simpanCatatan">Simpan Catatan</span>
+                    <span wire:loading wire:target="simpanCatatan">Menyimpan...</span>
+                </button>
+            </div>
         </form>
     @endcan
 </div>

@@ -2,6 +2,9 @@
 
 declare(strict_types=1);
 
+use App\Livewire\Akademik\AttendanceIndex;
+use App\Livewire\Akademik\GradeInput;
+use App\Livewire\Akademik\GradeLeger;
 use App\Livewire\Akademik\ScheduleForm;
 use App\Livewire\Akademik\ScheduleIndex;
 use App\Livewire\Akademik\SubjectIndex;
@@ -186,5 +189,22 @@ it('jadwal dan mapel memakai struktur design system management (Batch 4)', funct
         ->assertSee('Mata Pelajaran')
         ->assertSeeHtml('management-page-header')
         ->assertSee('Matematika')
+        ->assertDontSee('<i data-lucide');
+});
+
+it('presensi, input nilai, dan leger memakai struktur design system management (Batch 5)', function (): void {
+    Livewire::test(AttendanceIndex::class)
+        ->assertSee('Presensi Harian')
+        ->assertSeeHtml('management-page-header')
+        ->assertDontSee('<i data-lucide');
+
+    Livewire::test(GradeInput::class)
+        ->assertSee('Input Nilai')
+        ->assertSeeHtml('management-page-header')
+        ->assertDontSee('<i data-lucide');
+
+    Livewire::test(GradeLeger::class)
+        ->assertSee('Leger Nilai')
+        ->assertSeeHtml('management-page-header')
         ->assertDontSee('<i data-lucide');
 });
