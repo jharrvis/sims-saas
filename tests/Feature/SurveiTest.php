@@ -2,6 +2,10 @@
 
 declare(strict_types=1);
 
+use App\Livewire\Survei\SurveyFill;
+use App\Livewire\Survei\SurveyForm;
+use App\Livewire\Survei\SurveyIndex;
+use App\Livewire\Survei\SurveyResult;
 use App\Models\Membership;
 use App\Models\Module;
 use App\Models\School;
@@ -12,6 +16,7 @@ use App\Tenancy\TenantContext;
 use Database\Seeders\ModuleSeeder;
 use Database\Seeders\PermissionSeeder;
 use Database\Seeders\RoleSeeder;
+use Livewire\Livewire;
 use Spatie\Permission\PermissionRegistrar;
 
 beforeEach(function (): void {
@@ -117,4 +122,38 @@ it('survei terisolasi per sekolah', function (): void {
     app(TenantContext::class)->set($other);
 
     expect(Survey::count())->toBe(0);
+});
+
+it('survei, form survei, isi survei, dan hasil survei memakai design system', function (): void {
+    Livewire::actingAs($this->admin)->test(SurveyIndex::class)
+        ->assertSee('Survei')
+        ->assertSee('management-page-header')
+        ->assertSee('data-table')
+        ->assertDontSee('<i data-lucide');
+
+    Livewire::actingAs($this->admin)->test(SurveyForm::class)
+        ->assertSee('Buat Survei')
+        ->assertSee('management-form-card')
+        ->assertDontSee('max-w-3xl')
+        ->assertDontSee('<i data-lucide');
+
+    $survey = Survey::create([
+        'judul' => 'Survei Desain', 'status' => 'aktif', 'target_type' => 'siswa',
+        'mulai' => now()->subDay(), 'selesai' => now()->addDay(),
+        'dibuat_oleh' => $this->admin->id,
+    ]);
+    $survey->questions()->create([
+        'pertanyaan' => 'Bagaimana pelayanan?', 'tipe' => 'skala', 'urutan' => 1, 'wajib' => true,
+    ]);
+
+    Livewire::actingAs($this->admin)->test(SurveyFill::class, ['survey' => $survey])
+        ->assertSee('Survei Desain')
+        ->assertSee('Kirim Jawaban')
+        ->assertDontSee('max-w-3xl')
+        ->assertDontSee('<i data-lucide');
+
+    Livewire::actingAs($this->admin)->test(SurveyResult::class, ['survey' => $survey])
+        ->assertSee('Survei Desain')
+        ->assertSee('Total responden')
+        ->assertDontSee('<i data-lucide');
 });

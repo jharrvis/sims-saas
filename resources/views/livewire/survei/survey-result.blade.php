@@ -1,17 +1,19 @@
-<div class="max-w-4xl">
-    <div class="mb-5">
-        <a href="{{ route('survei.index') }}" class="text-sm text-slate-500 hover:text-primary">← Semua Survei</a>
-    </div>
-
-    <div class="rounded-xl border border-slate-200 bg-white dark:bg-boxdark dark:border-slate-700 p-5 mb-5">
-        <h2 class="text-lg font-bold text-slate-800 dark:text-white">{{ $survey->judul }}</h2>
-        <p class="text-sm text-slate-500 mt-1">Total responden: <span class="font-bold">{{ $totalResponden }}</span></p>
+<div class="page-stack">
+    <div class="page-header management-page-header">
+        <div>
+            <span class="eyebrow">Kesiswaan / Survei</span>
+            <h2 class="management-page-title">{{ $survey->judul }}</h2>
+            <p>Total responden: <span class="font-bold">{{ $totalResponden }}</span></p>
+        </div>
+        <div class="page-actions">
+            <a href="{{ route('survei.index') }}" class="back-link">← Semua Survei</a>
+        </div>
     </div>
 
     @forelse ($questions as $q)
         @php $agg = $agregat[$q->id] ?? []; @endphp
-        <div class="rounded-xl border border-slate-200 bg-white dark:bg-boxdark dark:border-slate-700 p-5 mb-4">
-            <p class="font-semibold text-slate-800 dark:text-white text-sm mb-1">{{ $q->pertanyaan }}</p>
+        <div wire:key="survei-hasil-{{ $q->id }}" class="card">
+            <p class="font-semibold text-sm mb-1">{{ $q->pertanyaan }}</p>
             <p class="text-xs text-slate-400 mb-3">{{ \App\Models\SurveyQuestion::TIPE[$q->tipe] }} · {{ $agg['responden'] ?? 0 }} jawaban</p>
 
             @if ($q->tipe === 'skala' && isset($agg['rata_rata']))
@@ -28,7 +30,7 @@
                     <div class="mb-2">
                         <div class="flex justify-between text-sm mb-1">
                             <span class="text-slate-700 dark:text-slate-200">{{ $opsi }}</span>
-                            <span class="font-bold text-slate-800 dark:text-white">{{ $jumlah }}</span>
+                            <span class="font-bold">{{ $jumlah }}</span>
                         </div>
                         <div class="h-2.5 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
                             <div class="h-full bg-primary rounded-full" style="width: {{ $max > 0 ? $jumlah / $max * 100 : 0 }}%"></div>

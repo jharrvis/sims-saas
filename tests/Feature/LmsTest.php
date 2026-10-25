@@ -2,6 +2,9 @@
 
 declare(strict_types=1);
 
+use App\Livewire\Lms\AssignmentForm;
+use App\Livewire\Lms\AssignmentIndex;
+use App\Livewire\Lms\AssignmentShow;
 use App\Models\AcademicYear;
 use App\Models\Assignment;
 use App\Models\AssignmentSubmission;
@@ -17,6 +20,7 @@ use App\Tenancy\TenantContext;
 use Database\Seeders\ModuleSeeder;
 use Database\Seeders\PermissionSeeder;
 use Database\Seeders\RoleSeeder;
+use Livewire\Livewire;
 use Spatie\Permission\PermissionRegistrar;
 
 beforeEach(function (): void {
@@ -147,4 +151,29 @@ it('tugas terisolasi per sekolah', function (): void {
 
     expect(Assignment::count())->toBe(0)
         ->and(AssignmentSubmission::count())->toBe(0);
+});
+
+it('tugas, form tugas, dan detail tugas memakai design system', function (): void {
+    Livewire::actingAs($this->admin)->test(AssignmentIndex::class)
+        ->assertSee('Tugas')
+        ->assertSee('management-page-header')
+        ->assertSee('data-table')
+        ->assertDontSee('<i data-lucide');
+
+    Livewire::actingAs($this->admin)->test(AssignmentForm::class)
+        ->assertSee('Buat Tugas')
+        ->assertSee('management-form-card')
+        ->assertDontSee('max-w-3xl')
+        ->assertDontSee('<i data-lucide');
+
+    $tugas = Assignment::create([
+        'subject_id' => $this->mapel->id, 'rombel_id' => $this->rombel->id,
+        'judul' => 'Tugas Desain', 'deadline' => now()->addDay(),
+        'dibuat_oleh' => $this->admin->id,
+    ]);
+
+    Livewire::actingAs($this->admin)->test(AssignmentShow::class, ['assignment' => $tugas])
+        ->assertSee('Tugas Desain')
+        ->assertSee('Pengumpulan')
+        ->assertDontSee('<i data-lucide');
 });

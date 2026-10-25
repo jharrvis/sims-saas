@@ -1,52 +1,70 @@
-<div class="max-w-3xl">
-    <form wire:submit="save" class="rounded-xl border border-slate-200 bg-white dark:bg-boxdark dark:border-slate-700 p-5 sm:p-6 space-y-5">
-        <div class="grid sm:grid-cols-2 gap-4">
-            <div class="sm:col-span-2">
-                <label for="judul" class="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1.5">Judul <span class="text-danger">*</span></label>
-                <input id="judul" type="text" wire:model="judul" maxlength="200"
-                       class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 py-2.5 px-3.5 text-sm outline-none focus:border-primary dark:text-white">
-                @error('judul') <p class="text-xs text-danger mt-1">{{ $message }}</p> @enderror
+<div class="page-stack">
+    <div class="page-header management-page-header">
+        <div>
+            <span class="eyebrow">Akademik / LMS</span>
+            <h2 class="management-page-title">{{ $isEdit ? 'Ubah Tugas' : 'Buat Tugas' }}</h2>
+            <p>Tugas kelas beserta mapel, deadline, dan instruksinya.</p>
+        </div>
+        <div class="page-actions">
+            <a href="{{ route('lms.index') }}" class="back-link">← Tugas</a>
+        </div>
+    </div>
+
+    <section class="card management-form-card" aria-labelledby="tugas-form-title">
+        <div class="card-head">
+            <div class="card-title">
+                <span class="mini-icon blue"><x-icon name="book-open" class="h-[19px] w-[19px]" /></span>
+                <div>
+                    <h3 id="tugas-form-title">Data Tugas</h3>
+                    <p>Pengumpulan dan penilaian diatur dari halaman detail tugas.</p>
+                </div>
             </div>
-            <div>
-                <label for="mapel" class="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1.5">Mata Pelajaran <span class="text-danger">*</span></label>
-                <select id="mapel" wire:model="subject_id"
-                        class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 py-2.5 px-3 text-sm dark:text-white">
+        </div>
+
+        <form wire:submit="save" class="form-grid management-form-grid">
+            <div class="form-group management-field-span">
+                <label for="judul">Judul <span class="required">*</span></label>
+                <input id="judul" type="text" wire:model="judul" maxlength="200" class="field">
+                @error('judul') <p class="management-field-error" role="alert">{{ $message }}</p> @enderror
+            </div>
+            <div class="form-group">
+                <label for="mapel">Mata Pelajaran <span class="required">*</span></label>
+                <select id="mapel" wire:model="subject_id" class="select-field">
                     <option value="">— Pilih mapel —</option>
                     @foreach ($subjects as $s)
                         <option value="{{ $s->id }}">{{ $s->nama }}</option>
                     @endforeach
                 </select>
-                @error('subject_id') <p class="text-xs text-danger mt-1">{{ $message }}</p> @enderror
+                @error('subject_id') <p class="management-field-error" role="alert">{{ $message }}</p> @enderror
             </div>
-            <div>
-                <label for="rombel" class="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1.5">Kelas <span class="text-danger">*</span></label>
-                <select id="rombel" wire:model="rombel_id"
-                        class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 py-2.5 px-3 text-sm dark:text-white">
+            <div class="form-group">
+                <label for="rombel">Kelas <span class="required">*</span></label>
+                <select id="rombel" wire:model="rombel_id" class="select-field">
                     <option value="">— Pilih kelas —</option>
                     @foreach ($rombels as $r)
                         <option value="{{ $r->id }}">{{ $r->nama }}</option>
                     @endforeach
                 </select>
-                @error('rombel_id') <p class="text-xs text-danger mt-1">{{ $message }}</p> @enderror
+                @error('rombel_id') <p class="management-field-error" role="alert">{{ $message }}</p> @enderror
             </div>
-            <div>
-                <label for="deadline" class="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1.5">Deadline <span class="text-danger">*</span></label>
-                <input id="deadline" type="datetime-local" wire:model="deadline"
-                       class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 py-2.5 px-3.5 text-sm outline-none focus:border-primary dark:text-white">
-                @error('deadline') <p class="text-xs text-danger mt-1">{{ $message }}</p> @enderror
+            <div class="form-group">
+                <label for="deadline">Deadline <span class="required">*</span></label>
+                <input id="deadline" type="datetime-local" wire:model="deadline" class="field">
+                @error('deadline') <p class="management-field-error" role="alert">{{ $message }}</p> @enderror
             </div>
-            <div class="sm:col-span-2">
-                <label for="deskripsi" class="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1.5">Deskripsi / Instruksi</label>
-                <textarea id="deskripsi" wire:model="deskripsi" rows="5"
-                          class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 py-2.5 px-3.5 text-sm outline-none focus:border-primary dark:text-white"></textarea>
+            <div class="form-group management-field-span">
+                <label for="deskripsi">Deskripsi / Instruksi</label>
+                <textarea id="deskripsi" wire:model="deskripsi" rows="5" class="field"></textarea>
+                @error('deskripsi') <p class="management-field-error" role="alert">{{ $message }}</p> @enderror
             </div>
-        </div>
 
-        <div class="flex items-center gap-3 pt-2">
-            <button type="submit" class="rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-white hover:bg-primary/90">
-                {{ $isEdit ? 'Simpan Perubahan' : 'Buat Tugas' }}
-            </button>
-            <a href="{{ route('lms.index') }}" class="text-sm text-slate-500 hover:text-primary">Batal</a>
-        </div>
-    </form>
+            <div class="form-actions management-field-span">
+                <button type="submit" class="btn btn-primary" wire:loading.attr="disabled" wire:target="save">
+                    <span wire:loading.remove wire:target="save">{{ $isEdit ? 'Simpan Perubahan' : 'Buat Tugas' }}</span>
+                    <span wire:loading wire:target="save">Menyimpan...</span>
+                </button>
+                <a href="{{ route('lms.index') }}" class="btn btn-outline">Batal</a>
+            </div>
+        </form>
+    </section>
 </div>
