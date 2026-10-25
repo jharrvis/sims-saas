@@ -1,62 +1,99 @@
-<div class="max-w-4xl mx-auto space-y-5">
-    <div class="rounded-xl border border-slate-200 bg-white dark:bg-boxdark dark:border-slate-700 p-6">
-        <div class="flex items-start justify-between gap-4">
-            <div class="flex items-center gap-4">
-                <span class="w-16 h-16 shrink-0 overflow-hidden rounded-full bg-primary/10 text-primary flex items-center justify-center text-2xl font-bold">
-                    @if ($student->fotoUrl())
-                        <img src="{{ $student->fotoUrl() }}" alt="Foto {{ $student->nama }}" class="h-full w-full object-cover">
-                    @else
-                        {{ strtoupper(substr($student->nama, 0, 1)) }}
-                    @endif
-                </span>
-                <div>
-                    <h1 class="text-xl font-bold text-slate-800 dark:text-white">{{ $student->nama }}</h1>
-                    <p class="text-sm text-slate-500">NIS {{ $student->nis }}@if($student->nisn) · NISN {{ $student->nisn }}@endif</p>
-                    <span class="inline-flex mt-1 px-2.5 py-0.5 rounded-full text-xs font-medium
-                        {{ $student->status === 'aktif' ? 'bg-success/10 text-success' : 'bg-slate-500/10 text-slate-500' }}">
-                        {{ ucfirst($student->status) }}
-                    </span>
-                </div>
+<div class="page-stack">
+    @php
+        $badgeStatus = $student->status === 'aktif' ? 'badge-green' : 'badge-gray';
+        $labelStatus = ucfirst($student->status);
+    @endphp
+
+    <div class="page-header management-page-header">
+        <div class="management-detail-identity">
+            @if ($student->fotoUrl())
+                <img src="{{ $student->fotoUrl() }}" alt="Foto {{ $student->nama }}" class="management-detail-photo">
+            @else
+                <span class="management-detail-photo-fallback" aria-hidden="true">{{ strtoupper(substr($student->nama, 0, 1)) }}</span>
+            @endif
+            <div>
+                <a href="{{ route('siswa.index') }}" class="management-back-link">
+                    <x-icon name="arrow-left" class="h-4 w-4" /> Kembali ke Data Siswa
+                </a>
+                <span class="eyebrow">Kesiswaan / Data Siswa</span>
+                <h2 class="management-page-title">{{ $student->nama }}</h2>
+                <p>
+                    NIS {{ $student->nis }}@if ($student->nisn) · NISN {{ $student->nisn }}@endif
+                    <span class="badge {{ $badgeStatus }}">{{ $labelStatus }}</span>
+                </p>
             </div>
+        </div>
+        <div class="page-actions">
             @can('siswa.view')
-                <a href="{{ route('siswa.kartu', $student) }}" class="inline-flex items-center gap-2 rounded-lg border border-slate-200 dark:border-slate-700 px-4 py-2 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-800">
-                    <i data-lucide="credit-card" class="w-4 h-4"></i> Kartu Pelajar
+                <a href="{{ route('siswa.kartu', $student) }}" class="btn btn-outline">
+                    <x-icon name="credit-card" class="h-4 w-4" /> Kartu Pelajar
                 </a>
             @endcan
             @can('siswa.update')
-                <a href="{{ route('siswa.edit', $student) }}" class="inline-flex items-center gap-2 rounded-lg border border-slate-200 dark:border-slate-700 px-4 py-2 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-800">
-                    <i data-lucide="pencil" class="w-4 h-4"></i> Ubah
+                <a href="{{ route('siswa.edit', $student) }}" class="btn btn-outline">
+                    <x-icon name="pencil" class="h-4 w-4" /> Ubah
                 </a>
             @endcan
         </div>
-
-        <dl class="mt-6 grid sm:grid-cols-2 gap-x-8 gap-y-4 text-sm">
-            <div><dt class="text-slate-500 dark:text-slate-400">Jenis Kelamin</dt><dd class="font-medium text-slate-800 dark:text-white">{{ $student->jk === 'L' ? 'Laki-laki' : 'Perempuan' }}</dd></div>
-            <div><dt class="text-slate-500 dark:text-slate-400">Tempat, Tanggal Lahir</dt><dd class="font-medium text-slate-800 dark:text-white">{{ $student->tempat_lahir ?? '—' }}, {{ $student->tgl_lahir?->format('d M Y') ?? '—' }}</dd></div>
-            <div><dt class="text-slate-500 dark:text-slate-400">Agama</dt><dd class="font-medium text-slate-800 dark:text-white">{{ $student->agama ?? '—' }}</dd></div>
-            <div><dt class="text-slate-500 dark:text-slate-400">No. HP</dt><dd class="font-medium text-slate-800 dark:text-white">{{ $student->phone ?? '—' }}</dd></div>
-            <div class="sm:col-span-2"><dt class="text-slate-500 dark:text-slate-400">Alamat</dt><dd class="font-medium text-slate-800 dark:text-white">{{ $student->alamat ?? '—' }}</dd></div>
-        </dl>
     </div>
 
-    <div class="rounded-xl border border-slate-200 bg-white dark:bg-boxdark dark:border-slate-700 p-6">
-        <h2 class="font-semibold text-slate-800 dark:text-white mb-4">Wali Murid</h2>
+    <section class="card" aria-labelledby="student-identity-title">
+        <div class="card-head">
+            <div class="card-title">
+                <span class="mini-icon blue"><x-icon name="contact-round" class="h-[19px] w-[19px]" /></span>
+                <div>
+                    <h3 id="student-identity-title">Biodata</h3>
+                    <p>Data utama dan nomor yang dapat dihubungi.</p>
+                </div>
+            </div>
+        </div>
+
+        <dl class="management-definition-list">
+            <div><dt>Jenis Kelamin</dt><dd>{{ $student->jk === 'L' ? 'Laki-laki' : 'Perempuan' }}</dd></div>
+            <div><dt>Tempat, Tanggal Lahir</dt><dd>{{ $student->tempat_lahir ?? '—' }}, {{ $student->tgl_lahir?->format('d M Y') ?? '—' }}</dd></div>
+            <div><dt>Agama</dt><dd>{{ $student->agama ?? '—' }}</dd></div>
+            <div><dt>No. HP</dt><dd>{{ $student->phone ?? '—' }}</dd></div>
+            <div><dt>Alamat</dt><dd>{{ $student->alamat ?? '—' }}</dd></div>
+            <div><dt>Status</dt><dd>{{ $labelStatus }}</dd></div>
+        </dl>
+    </section>
+
+    <section class="card" aria-labelledby="student-wali-title">
+        <div class="card-head">
+            <div class="card-title">
+                <span class="mini-icon orange"><x-icon name="users" class="h-[19px] w-[19px]" /></span>
+                <div>
+                    <h3 id="student-wali-title">Wali Murid</h3>
+                    <p>Daftar wali yang tertaut, hanya tampil (read-only).</p>
+                </div>
+            </div>
+        </div>
 
         @if ($student->guardians->isEmpty())
-            <p class="text-sm text-slate-500">Belum ada data wali.</p>
+            <div class="empty-state">
+                <p>Belum ada data wali.</p>
+            </div>
         @else
-            <ul class="divide-y divide-slate-100 dark:divide-slate-700/50">
-                @foreach ($student->guardians as $wali)
-                    <li class="py-3">
-                        <p class="font-medium text-slate-800 dark:text-white">{{ $wali->nama }}</p>
-                        <p class="text-xs text-slate-500">{{ ucfirst($wali->pivot->hubungan) }} · {{ $wali->no_wa }}</p>
-                    </li>
-                @endforeach
-            </ul>
+            <div class="table-scroll">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Nama</th>
+                            <th scope="col">Hubungan</th>
+                            <th scope="col">No. WA</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($student->guardians as $wali)
+                            <tr wire:key="student-guardian-{{ $wali->id }}">
+                                <td><strong>{{ $wali->nama }}</strong></td>
+                                <td>{{ ucfirst($wali->pivot->hubungan) }}</td>
+                                <td>{{ $wali->no_wa }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
         @endif
-    </div>
-
-    <a href="{{ route('siswa.index') }}" class="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-slate-700 dark:hover:text-slate-300">
-        ← Kembali ke daftar siswa
-    </a>
+    </section>
 </div>

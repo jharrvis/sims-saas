@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Livewire\Kesiswaan\StudentShow;
 use App\Models\Guardian;
 use App\Models\Membership;
 use App\Models\School;
@@ -10,6 +11,7 @@ use App\Models\User;
 use App\Tenancy\TenantContext;
 use Database\Seeders\PermissionSeeder;
 use Database\Seeders\RoleSeeder;
+use Livewire\Livewire;
 use Spatie\Permission\PermissionRegistrar;
 
 beforeEach(function (): void {
@@ -61,6 +63,19 @@ it('wali yang sudah tertaut tetap tampil pada detail siswa', function (): void {
         ->assertSee('Wali Profil')
         ->assertSee('Ibu')
         ->assertSee('628555000009');
+});
+
+it('detail siswa memakai struktur design system management', function (): void {
+    // Diuji pada HTML komponen (bukan halaman penuh) karena shell aplikasi
+    // masih memakai <i data-lucide> lewat nav-link — itu di luar Batch 3.
+    // Catatan: <x-icon> yang dirender memang mengandung atribut data-lucide
+    // pada tag <svg>; yang menandai pola lama adalah tag <i data-lucide>.
+    Livewire::test(StudentShow::class, ['student' => $this->siswa])
+        ->assertSee('management-page-header')
+        ->assertSee('management-definition-list')
+        ->assertSee('Wali Murid')
+        ->assertDontSee('<i data-lucide')
+        ->assertDontSee('max-w-4xl');
 });
 
 it('render tidak memuat referensi attach/detach/consent-panel yang menggantung', function (): void {

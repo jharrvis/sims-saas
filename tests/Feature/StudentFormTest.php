@@ -34,6 +34,15 @@ it('form siswa menampilkan area drag and drop foto', function (): void {
         ->assertSeeHtml('dataTransfer');
 });
 
+it('form siswa memakai struktur design system management', function (): void {
+    Livewire::test(StudentForm::class)
+        ->assertSee('Kembali ke Data Siswa')
+        ->assertSeeHtml('management-form-card')
+        ->assertSeeHtml('management-form-grid')
+        ->assertDontSee('max-w-3xl')
+        ->assertDontSee('bg-boxdark');
+});
+
 it('dropdown agama berisi 6 agama resmi Indonesia', function (): void {
     Livewire::test(StudentForm::class)
         ->assertSee('— Pilih Agama —')
