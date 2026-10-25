@@ -2,6 +2,9 @@
 
 declare(strict_types=1);
 
+use App\Livewire\Akademik\ScheduleForm;
+use App\Livewire\Akademik\ScheduleIndex;
+use App\Livewire\Akademik\SubjectIndex;
 use App\Models\AcademicYear;
 use App\Models\Attendance;
 use App\Models\Employee;
@@ -15,6 +18,7 @@ use App\Tenancy\TenantContext;
 use Database\Seeders\PermissionSeeder;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Collection;
+use Livewire\Livewire;
 use Spatie\Permission\PermissionRegistrar;
 
 beforeEach(function (): void {
@@ -165,4 +169,22 @@ it('rekap absensi menghitung H/I/S/A per siswa', function (): void {
         ->and((int) $row1['S'])->toBe(1)
         ->and((int) $row1['A'])->toBe(1)
         ->and((int) $row1['I'])->toBe(0);
+});
+
+it('jadwal dan mapel memakai struktur design system management (Batch 4)', function (): void {
+    Livewire::test(ScheduleIndex::class)
+        ->assertSee('Jadwal Pelajaran')
+        ->assertSeeHtml('management-page-header')
+        ->assertDontSee('<i data-lucide');
+
+    Livewire::test(ScheduleForm::class)
+        ->assertSee('Tambah Jadwal')
+        ->assertSeeHtml('management-form-card')
+        ->assertDontSee('max-w-3xl');
+
+    Livewire::test(SubjectIndex::class)
+        ->assertSee('Mata Pelajaran')
+        ->assertSeeHtml('management-page-header')
+        ->assertSee('Matematika')
+        ->assertDontSee('<i data-lucide');
 });
