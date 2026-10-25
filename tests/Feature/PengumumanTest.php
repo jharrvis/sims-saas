@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use App\Livewire\Pengumuman\AnnouncementForm;
+use App\Livewire\Pengumuman\AnnouncementIndex;
 use App\Models\Announcement;
 use App\Models\Membership;
 use App\Models\Module;
@@ -13,6 +15,7 @@ use App\Tenancy\TenantContext;
 use Database\Seeders\ModuleSeeder;
 use Database\Seeders\PermissionSeeder;
 use Database\Seeders\RoleSeeder;
+use Livewire\Livewire;
 use Spatie\Permission\PermissionRegistrar;
 
 beforeEach(function (): void {
@@ -127,4 +130,16 @@ it('pusat bantuan me-render markdown menjadi HTML', function (): void {
     $this->actingAs($this->admin)->get('/bantuan')->assertOk()->assertSee('Pusat Bantuan');
     $this->actingAs($this->admin)->get('/bantuan/absensi')->assertOk()->assertSee('Absensi', false);
     $this->actingAs($this->admin)->get('/bantuan/topik-tidak-ada')->assertNotFound();
+});
+
+it('pengumuman memakai struktur design system management (Batch 7)', function (): void {
+    Livewire::actingAs($this->admin)->test(AnnouncementIndex::class)
+        ->assertSee('Pengumuman')
+        ->assertSeeHtml('management-page-header')
+        ->assertDontSee('<i data-lucide');
+
+    Livewire::actingAs($this->admin)->test(AnnouncementForm::class)
+        ->assertSee('Buat Pengumuman')
+        ->assertSeeHtml('management-form-card')
+        ->assertDontSee('max-w-3xl');
 });

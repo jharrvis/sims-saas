@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use App\Livewire\Broadcast\BroadcastForm;
+use App\Livewire\Broadcast\BroadcastIndex;
 use App\Models\Broadcast;
 use App\Models\Employee;
 use App\Models\Membership;
@@ -15,6 +17,7 @@ use Database\Seeders\ModuleSeeder;
 use Database\Seeders\PermissionSeeder;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Facades\Artisan;
+use Livewire\Livewire;
 use Spatie\Permission\PermissionRegistrar;
 
 beforeEach(function (): void {
@@ -165,4 +168,16 @@ it('broadcast terisolasi per sekolah', function (): void {
     app(TenantContext::class)->set($other);
 
     expect(Broadcast::count())->toBe(0);
+});
+
+it('broadcast memakai struktur design system management (Batch 7)', function (): void {
+    Livewire::actingAs($this->admin)->test(BroadcastIndex::class)
+        ->assertSee('Broadcast')
+        ->assertSeeHtml('management-page-header')
+        ->assertDontSee('<i data-lucide');
+
+    Livewire::actingAs($this->admin)->test(BroadcastForm::class)
+        ->assertSee('Buat Broadcast')
+        ->assertSeeHtml('management-form-card')
+        ->assertDontSee('max-w-3xl');
 });

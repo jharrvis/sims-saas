@@ -1,43 +1,54 @@
-<div>
-    @if (session('ok'))
-        <div class="mb-4 rounded-lg bg-success/10 text-success px-4 py-2.5 text-sm">{{ session('ok') }}</div>
-    @endif
-
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
-        <div class="flex items-center gap-2">
-            <div class="relative">
-                <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
-                <input type="search" wire:model.live.debounce.300ms="search" placeholder="Cari judul…"
-                       aria-label="Cari pengumuman"
-                       class="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-boxdark py-2.5 pl-10 pr-4 text-sm outline-none focus:border-primary dark:text-white">
-            </div>
-            <select wire:model.live="status" aria-label="Filter status"
-                    class="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-boxdark py-2.5 px-3 text-sm outline-none focus:border-primary dark:text-white">
-                <option value="">Semua status</option>
-                @foreach (\App\Models\Announcement::STATUS as $key => $label)
-                    <option value="{{ $key }}">{{ $label }}</option>
-                @endforeach
-            </select>
+<div class="page-stack">
+    <div class="page-header management-page-header">
+        <div>
+            <span class="eyebrow">Informasi &amp; Sistem / Pengumuman</span>
+            <h2 class="management-page-title">Pengumuman</h2>
+            <p>Pengumuman untuk siswa, orang tua, dan staf — draf, tayang, atau ditarik kembali.</p>
         </div>
-        @can('pengumuman.create')
-            <a href="{{ route('pengumuman.create') }}"
-               class="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary/90">
-                <i data-lucide="plus" class="w-4 h-4"></i> Buat Pengumuman
-            </a>
-        @endcan
+        <div class="page-actions">
+            @can('pengumuman.create')
+                <a href="{{ route('pengumuman.create') }}" class="btn btn-primary">
+                    <x-icon name="plus" class="h-4 w-4" /> Buat Pengumuman
+                </a>
+            @endcan
+        </div>
     </div>
 
-    <div class="space-y-3">
+    @if (session('ok'))
+        <div class="management-alert management-alert-success" role="status" aria-live="polite">
+            <span>{{ session('ok') }}</span>
+        </div>
+    @endif
+
+    <div class="table-toolbar management-toolbar">
+        <div class="toolbar-left management-filter-group">
+            <label class="field-search management-search-field" for="pengumuman-search">
+                <x-icon name="search" class="h-4 w-4" /><span class="sr-only">Cari pengumuman</span>
+                <input id="pengumuman-search" type="search" wire:model.live.debounce.300ms="search" placeholder="Cari judul…" autocomplete="off">
+                <span wire:loading wire:target="search" class="management-inline-spinner" aria-hidden="true"></span>
+            </label>
+            <label class="management-filter-field" for="pengumuman-status"><span class="sr-only">Filter status</span>
+                <select id="pengumuman-status" wire:model.live="status" class="select-field">
+                    <option value="">Semua status</option>
+                    @foreach (\App\Models\Announcement::STATUS as $key => $label)
+                        <option value="{{ $key }}">{{ $label }}</option>
+                    @endforeach
+                </select>
+            </label>
+        </div>
+    </div>
+
+    <div class="page-stack">
         @forelse ($items as $item)
-            <div class="rounded-xl border border-slate-200 bg-white dark:bg-boxdark dark:border-slate-700 p-4 sm:p-5">
+            <article class="card" wire:key="pengumuman-{{ $item->id }}">
                 <div class="flex items-start justify-between gap-3">
                     <div class="min-w-0">
                         <div class="flex flex-wrap items-center gap-2">
-                            <h3 class="font-semibold text-slate-800 dark:text-white">{{ $item->judul }}</h3>
+                            <h3 class="font-semibold">{{ $item->judul }}</h3>
                             @if ($item->penting)
-                                <span class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-danger/10 text-danger">PENTING</span>
+                                <span class="badge badge-red">PENTING</span>
                             @endif
-                            <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full {{ $item->status === 'tayang' ? 'bg-success/10 text-success' : 'bg-slate-100 text-slate-500 dark:bg-slate-800' }}">
+                            <span class="badge {{ $item->status === 'tayang' ? 'badge-green' : 'badge-gray' }}">
                                 {{ \App\Models\Announcement::STATUS[$item->status] }}
                             </span>
                         </div>
@@ -64,13 +75,13 @@
                         <button wire:click="destroy({{ $item->id }})" wire:confirm="Hapus pengumuman ini?" class="text-xs font-semibold text-danger hover:underline">Hapus</button>
                     @endcan
                     <a href="{{ route('bantuan.show', 'pengumuman') }}" class="ml-auto text-xs text-slate-400 hover:text-primary inline-flex items-center gap-1">
-                        <i data-lucide="circle-help" class="w-3.5 h-3.5"></i> Bantuan
+                        <x-icon name="circle-help" class="h-4 w-4" /> Bantuan
                     </a>
                 </div>
-            </div>
+            </article>
         @empty
-            <div class="rounded-xl border border-dashed border-slate-300 dark:border-slate-600 p-10 text-center text-sm text-slate-500">
-                Belum ada pengumuman. <a href="{{ route('bantuan.show', 'pengumuman') }}" class="text-primary hover:underline">Pelajari cara membuat pengumuman</a>.
+            <div class="empty-state">
+                <p>Belum ada pengumuman. <a href="{{ route('bantuan.show', 'pengumuman') }}" class="text-primary hover:underline">Pelajari cara membuat pengumuman</a>.</p>
             </div>
         @endforelse
     </div>
