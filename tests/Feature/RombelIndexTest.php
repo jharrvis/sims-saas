@@ -93,17 +93,80 @@ it('daftar default menampilkan rombel tahun ajaran aktif beserta statistik', fun
         ->assertSee('Kelas mencapai kapasitas');
 });
 
-it('statistik dihitung di query layer: total, siswa, tanpa wali, penuh', function (): void {
-    $stats = Livewire::actingAs($this->admin)
-        ->test(RombelIndex::class)
-        ->viewData('stats');
+it('statistik dihitung di query layer untuk tahun ajaran aktif: total, siswa, tanpa wali, penuh', function (): void {
+    $component = Livewire::actingAs($this->admin)
+        ->test(RombelIndex::class);
 
-    expect($stats)->toBe([
-        'total' => 3,
+    expect($component->viewData('stats'))->toBe([
+        'total' => 2,
+        'siswa' => 3,
+        'tanpaWali' => 1,
+        'penuh' => 1,
+    ])->and($component->viewData('statsScope'))->toBe('Tahun ajaran 2026/2027');
+});
+
+it('statistik tahun aktif tidak menghitung siswa dua tahun dan kelas lama tanpa wali', function (): void {
+    $kelasLamaTanpaWali = Rombel::create([
+        'academic_year_id' => $this->taLama->id, 'tingkat' => '8', 'nama' => 'VIII D',
+        'kapasitas' => 36,
+    ]);
+    Student::where('nis', 'A1')->first()->rombels()->attach($kelasLamaTanpaWali->id, [
+        'academic_year_id' => $this->taLama->id, 'status' => 'aktif',
+    ]);
+
+    $component = Livewire::actingAs($this->admin)
+        ->test(RombelIndex::class);
+
+    // Default = tahun aktif: kelas lama (dengan/tanpa wali) tidak masuk,
+    // siswa A1 yang juga aktif di tahun lama tetap dihitung sekali.
+    expect($component->viewData('stats'))->toBe([
+        'total' => 2,
         'siswa' => 3,
         'tanpaWali' => 1,
         'penuh' => 1,
     ]);
+});
+
+it('statistik mengikuti filter tahun ajaran yang dipilih', function (): void {
+    $kelasLamaTanpaWali = Rombel::create([
+        'academic_year_id' => $this->taLama->id, 'tingkat' => '8', 'nama' => 'VIII D',
+        'kapasitas' => 36,
+    ]);
+    Student::where('nis', 'A1')->first()->rombels()->attach($kelasLamaTanpaWali->id, [
+        'academic_year_id' => $this->taLama->id, 'status' => 'aktif',
+    ]);
+
+    $component = Livewire::actingAs($this->admin)
+        ->test(RombelIndex::class)
+        ->set('academicYearId', $this->taLama->id);
+
+    expect($component->viewData('stats'))->toBe([
+        'total' => 2,
+        'siswa' => 1,
+        'tanpaWali' => 1,
+        'penuh' => 0,
+    ])->and($component->viewData('statsScope'))->toBe('Tahun ajaran 2025/2026');
+});
+
+it('statistik semua tahun menghitung siswa distinct, bukan penempatan', function (): void {
+    $kelasLamaTanpaWali = Rombel::create([
+        'academic_year_id' => $this->taLama->id, 'tingkat' => '8', 'nama' => 'VIII D',
+        'kapasitas' => 36,
+    ]);
+    Student::where('nis', 'A1')->first()->rombels()->attach($kelasLamaTanpaWali->id, [
+        'academic_year_id' => $this->taLama->id, 'status' => 'aktif',
+    ]);
+
+    $component = Livewire::actingAs($this->admin)
+        ->test(RombelIndex::class)
+        ->set('academicYearId', null);
+
+    expect($component->viewData('stats'))->toBe([
+        'total' => 4,
+        'siswa' => 3,
+        'tanpaWali' => 2,
+        'penuh' => 1,
+    ])->and($component->viewData('statsScope'))->toBe('Seluruh tahun ajaran');
 });
 
 it('filter tingkat, tahun ajaran, dan pencarian membatasi daftar', function (): void {

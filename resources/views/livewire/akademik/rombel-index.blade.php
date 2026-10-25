@@ -31,13 +31,13 @@
             <div class="stat-top"><span class="mini-icon blue"><x-icon name="school" class="h-5 w-5" /></span><span class="badge badge-blue">Terdaftar</span></div>
             <div class="stat-value">{{ number_format($stats['total'], 0, ',', '.') }}</div>
             <div class="stat-caption">Total kelas</div>
-            <div class="stat-footer"><span class="stat-note">Seluruh tahun ajaran</span></div>
+            <div class="stat-footer"><span class="stat-note">{{ $statsScope }}</span></div>
         </article>
         <article class="card stat-card">
             <div class="stat-top"><span class="mini-icon green"><x-icon name="users" class="h-5 w-5" /></span><span class="badge badge-green">Siswa</span></div>
             <div class="stat-value">{{ number_format($stats['siswa'], 0, ',', '.') }}</div>
             <div class="stat-caption">Siswa aktif di kelas</div>
-            <div class="stat-footer"><span class="stat-note">Penempatan aktif</span></div>
+            <div class="stat-footer"><span class="stat-note">Siswa unik, penempatan aktif</span></div>
         </article>
         <article class="card stat-card">
             <div class="stat-top"><span class="mini-icon orange"><x-icon name="user-x" class="h-5 w-5" /></span><span class="badge badge-orange">Tanpa wali</span></div>

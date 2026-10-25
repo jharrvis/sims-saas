@@ -70,6 +70,24 @@ afterEach(function (): void {
     app(PermissionRegistrar::class)->setPermissionsTeamId(null);
 });
 
+it('form rombel memakai struktur design system management', function (): void {
+    Livewire::actingAs($this->admin)
+        ->test(RombelForm::class)
+        ->assertSee('Tambah Kelas')
+        ->assertSee('Kembali ke Data Kelas')
+        ->assertSeeHtml('management-form-card')
+        ->assertSeeHtml('management-form-grid')
+        ->assertDontSee('bg-boxdark')
+        ->set('nama', '')
+        ->call('save')
+        ->assertHasErrors(['nama'])
+        ->assertSeeHtml('management-field-error');
+
+    Livewire::actingAs($this->admin)
+        ->test(RombelForm::class, ['rombel' => $this->rombel])
+        ->assertSee('Ubah Kelas');
+});
+
 it('simpan form rombel menolak pengguna tanpa kelas.create dan kelas.update', function (): void {
     Livewire::actingAs($this->viewer)
         ->test(RombelForm::class)

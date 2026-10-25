@@ -14,7 +14,12 @@ use Livewire\WithPagination;
  * Daftar rombel per tahun ajaran (FR-401), port Batch 2 ke shared design
  * system: page-stack, management-page-header, summary stats, toolbar,
  * table card, pagination, empty/loading state (pola EmployeeIndex).
- * Statistik dihitung di PHP/query layer, bukan di Blade, tanpa N+1.
+ * Statistik dihitung di query layer (agregasi skalar database), bukan di
+ * Blade, tanpa N+1, dan mengikuti filter tahun ajaran yang sedang aktif:
+ * siswa dihitung distinct agar penempatan aktif di dua tahun tidak
+ * terhitung ganda, dan rombel tahun lama tidak masuk ringkasan tahun
+ * berjalan. Penempatan hanya dihitung bila tahun pivot sama dengan tahun
+ * rombelnya, agar pivot lintas tahun yang usang tidak bocor ke hitungan.
  */
 class RombelIndex extends Component
 {
@@ -60,7 +65,8 @@ class RombelIndex extends Component
     {
         $rombels = Rombel::query()
             ->with(['waliKelas:id,nama', 'academicYear:id,nama'])
-            ->withCount(['students as siswa_count' => fn ($q) => $q->where('class_student.status', 'aktif')])
+            ->withCount(['students as siswa_count' => fn ($q) => $q->where('class_student.status', 'aktif')
+                ->whereColumn('class_student.academic_year_id', 'rombels.academic_year_id')])
             ->when($this->academicYearId, fn ($q) => $q->where('academic_year_id', $this->academicYearId))
             ->when($this->tingkat !== '', fn ($q) => $q->where('tingkat', $this->tingkat))
             ->when($this->search !== '', fn ($q) => $q->where('nama', 'like', '%'.$this->search.'%'))
@@ -68,25 +74,39 @@ class RombelIndex extends Component
             ->orderBy('nama')
             ->paginate(15);
 
-        // Satu query agregat (tenant-scoped via SchoolScope, withCount sebagai
-        // subquery — bukan N+1) untuk ringkasan, independen dari filter list.
-        $semua = Rombel::query()
-            ->withCount(['students as siswa_count' => fn ($q) => $q->where('class_student.status', 'aktif')])
-            ->get();
+        // Statistik mengikuti filter tahun ajaran yang sedang aktif (null =
+        // semua tahun). Empat agregasi skalar, tenant-scoped via SchoolScope;
+        // tidak ada model rombel yang dimuat ke memori.
+        $tahun = $this->academicYearId;
+        $rombelScope = fn () => Rombel::query()
+            ->when($tahun, fn ($q) => $q->where('academic_year_id', $tahun));
 
         $stats = [
-            'total' => $semua->count(),
-            'siswa' => (int) $semua->sum('siswa_count'),
-            'tanpaWali' => $semua->whereNull('wali_kelas_id')->count(),
-            'penuh' => $semua->filter(fn (Rombel $r) => $r->siswa_count >= $r->kapasitas)->count(),
+            'total' => $rombelScope()->count(),
+            'siswa' => Rombel::query()
+                ->join('class_student', 'class_student.rombel_id', '=', 'rombels.id')
+                ->where('class_student.status', 'aktif')
+                ->whereColumn('class_student.academic_year_id', 'rombels.academic_year_id')
+                ->when($tahun, fn ($q) => $q->where('rombels.academic_year_id', $tahun))
+                ->distinct()
+                ->count('class_student.student_id'),
+            'tanpaWali' => $rombelScope()->whereNull('wali_kelas_id')->count(),
+            'penuh' => $rombelScope()->whereRaw(
+                '(select count(*) from class_student where class_student.rombel_id = rombels.id and class_student.status = ? and class_student.academic_year_id = rombels.academic_year_id) >= rombels.kapasitas',
+                ['aktif']
+            )->count(),
         ];
+
+        $tahunAjaran = AcademicYear::orderByDesc('tgl_mulai')->get();
+        $tahunDipilih = $tahunAjaran->firstWhere('id', $tahun);
 
         return view('livewire.akademik.rombel-index', [
             'rombels' => $rombels,
-            'tahunAjaran' => AcademicYear::orderByDesc('tgl_mulai')->get(),
+            'tahunAjaran' => $tahunAjaran,
             'tahunAktifId' => AcademicYear::where('aktif', true)->value('id'),
             'tingkatList' => Rombel::query()->distinct()->orderBy('tingkat')->pluck('tingkat'),
             'stats' => $stats,
+            'statsScope' => $tahunDipilih ? 'Tahun ajaran '.$tahunDipilih->nama : 'Seluruh tahun ajaran',
         ])->layout('layouts.app', ['title' => 'Data Kelas']);
     }
 }
