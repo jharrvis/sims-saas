@@ -72,6 +72,22 @@ it('operator tanpa izin tambah ditolak', function (): void {
         ->assertForbidden();
 });
 
+it('aksi provisioning langsung tetap ditolak tanpa izin tambah tenant', function (): void {
+    $admin = opPlatformBaru(['platform.tenant.create']);
+
+    Livewire::actingAs($admin)
+        ->test(TenantCreate::class)
+        ->set('nama', 'SDN Tanpa Izin')
+        ->set('jenjang', 'SD')
+        ->set('admin_nama', 'Admin Ditolak')
+        ->set('admin_phone', '628121110000')
+        ->set('plan_slug', 'basic')
+        ->call('simpan')
+        ->assertForbidden();
+
+    expect(School::withoutGlobalScope(SchoolScope::class)->where('nama', 'SDN Tanpa Izin')->exists())->toBeFalse();
+});
+
 it('membuat tenant lengkap: sekolah, trial, admin, modul inti', function (): void {
     $admin = opPlatformBaru();
 

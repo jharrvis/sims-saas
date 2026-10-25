@@ -1,0 +1,59 @@
+<?php
+namespace App\Http\Controllers;
+
+use App\Models\Student;
+use Illuminate\Http\Request;
+use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Gate;
+
+// Contoh API (perlu model, migrasi, policies, dan deployment sesuai aplikasi Anda)
+class StudentController extends Controller
+{
+    public function index(Request $request)
+    {
+        Gate::authorize('viewAny', Student::class);
+        return Student::query()
+            ->when($request->filled('q'), fn ($q) => $q->where('name', 'like', '%'.addcslashes($request->string('q'), '%_').'%'))
+            ->latest('id')
+            ->paginate(15);
+    }
+
+    public function store(Request $request)
+    {
+        Gate::authorize('create', Student::class);
+        $data = $request->validate([
+            'nis' => 'required|string|max:30|unique:students,nis',
+            'name' => 'required|string|max:255',
+            'class' => 'required|string|max:20',
+            'gender' => 'required|in:Laki-laki,Perempuan',
+            'guardian' => 'nullable|string|max:255',
+            'status' => 'required|in:Aktif,Nonaktif,Pindah',
+        ]);
+        return response()->json(Student::create($data), 201);
+    }
+
+    public function show(Student $student)
+    {
+        Gate::authorize('view', $student);
+        return $student;
+    }
+
+    public function update(Request $request, Student $student)
+    {
+        Gate::authorize('update', $student);
+        $data = $request->validate([
+            'name' => 'sometimes|required|string|max:255',
+            'class' => 'sometimes|required|string|max:20',
+            'status' => 'sometimes|required|in:Aktif,Nonaktif,Pindah',
+        ]);
+        $student->update($data);
+        return $student->fresh();
+    }
+
+    public function destroy(Student $student)
+    {
+        Gate::authorize('delete', $student);
+        $student->delete();
+        return response()->noContent();
+    }
+}

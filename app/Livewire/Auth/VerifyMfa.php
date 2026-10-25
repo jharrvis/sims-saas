@@ -33,7 +33,7 @@ class VerifyMfa extends Component
 
         // 2FA tidak aktif → tidak perlu verifikasi.
         if (! $user->hasMfaEnabled()) {
-            $this->redirect(route('dashboard'), navigate: true);
+            $this->redirect(route(session('pwa_login_pending') ? 'pwa.home' : 'dashboard'), navigate: true);
         }
     }
 
@@ -82,7 +82,10 @@ class VerifyMfa extends Component
 
         Auth::login($user, remember: true);
 
-        $this->redirect(route($user->ruteSetelahLogin()), navigate: true);
+        $target = session('pwa_login_pending') ? 'pwa.home' : $user->ruteSetelahLogin();
+        session()->forget('pwa_login_pending');
+
+        $this->redirect(route($target), navigate: true);
     }
 
     public function render(): View

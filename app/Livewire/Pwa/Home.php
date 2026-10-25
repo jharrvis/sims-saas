@@ -33,7 +33,12 @@ class Home extends Component
                 ->get()
             : collect();
 
-        $pengumuman = Announcement::tayang()->orderByDesc('penting')->orderByDesc('tayang_dari')->limit(3)->get();
+        $pengumuman = Announcement::tayang()
+            ->visibleToPwa($role, $rombel ? [$rombel->id] : [])
+            ->orderByDesc('penting')
+            ->orderByDesc('tayang_dari')
+            ->limit(3)
+            ->get();
 
         $awalBulan = now()->startOfMonth()->toDateString();
         $rekapAbsensi = $student

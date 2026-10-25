@@ -23,7 +23,7 @@ class Jadwal extends Component
         $items = $rombel
             ? Schedule::with(['subject:id,nama,kode', 'employee:id,nama'])
                 ->where('rombel_id', $rombel->id)
-                ->orderByRaw("FIELD(hari, 'senin','selasa','rabu','kamis','jumat','sabtu')")
+                ->orderByRaw("CASE hari WHEN 'senin' THEN 1 WHEN 'selasa' THEN 2 WHEN 'rabu' THEN 3 WHEN 'kamis' THEN 4 WHEN 'jumat' THEN 5 WHEN 'sabtu' THEN 6 ELSE 7 END")
                 ->orderBy('jam_ke')
                 ->get()
                 ->groupBy('hari')

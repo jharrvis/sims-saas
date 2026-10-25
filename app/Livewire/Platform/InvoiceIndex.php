@@ -8,6 +8,7 @@ use App\Domains\Platform\Services\PlatformService;
 use App\Models\BillingInvoice;
 use App\Models\School;
 use App\Models\Subscription;
+use App\Models\User;
 use App\Scopes\SchoolScope;
 use Illuminate\View\View;
 use Livewire\Component;
@@ -23,8 +24,15 @@ class InvoiceIndex extends Component
 
     public string $diskon = '0';
 
+    public function updatingStatus(): void
+    {
+        $this->resetPage();
+    }
+
     public function issue(PlatformService $platform): void
     {
+        $operator = $this->ensurePlatformPermission('platform.plan.manage');
+
         $this->validate([
             'subscription_id' => ['required', 'integer', 'exists:subscriptions,id'],
             'diskon' => ['nullable', 'integer', 'min:0'],
@@ -33,7 +41,7 @@ class InvoiceIndex extends Component
         $sub = Subscription::withoutGlobalScope(SchoolScope::class)
             ->findOrFail($this->subscription_id);
 
-        $platform->issueInvoice($sub, auth()->user(), (int) $this->diskon);
+        $platform->issueInvoice($sub, $operator, (int) $this->diskon);
 
         $this->reset(['subscription_id', 'diskon']);
         session()->flash('ok', 'Tagihan diterbitkan.');
@@ -41,8 +49,9 @@ class InvoiceIndex extends Component
 
     public function markPaid(int $id, PlatformService $platform): void
     {
+        $operator = $this->ensurePlatformPermission('platform.plan.manage');
         $invoice = BillingInvoice::withoutGlobalScope(SchoolScope::class)->findOrFail($id);
-        $platform->markInvoicePaid($invoice, auth()->user());
+        $platform->markInvoicePaid($invoice, $operator);
         session()->flash('ok', "Tagihan {$invoice->nomor} ditandai lunas.");
     }
 
@@ -69,5 +78,19 @@ class InvoiceIndex extends Component
             'subs' => $subs,
             'names' => $names,
         ])->layout('layouts.platform', ['title' => 'Tagihan Langganan']);
+    }
+
+    private function ensurePlatformPermission(string $permission): User
+    {
+        $operator = auth()->user();
+
+        abort_unless(
+            $operator instanceof User
+                && $operator->is_platform
+                && $operator->hasPermissionTo($permission, 'platform'),
+            403,
+        );
+
+        return $operator;
     }
 }

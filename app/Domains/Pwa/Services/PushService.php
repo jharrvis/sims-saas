@@ -290,7 +290,7 @@ class PushService
         $payload = [
             'title' => $title,
             'body' => $body,
-            'icon' => '/pwa/icons/icon-192.png',
+            'icon' => '/pwa-assets/icons/icon-192.png',
             'url' => $url ?? route('pwa.home'),
         ];
 

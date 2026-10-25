@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#4f46e5">
+  <meta name="description" content="SIMS Mobile untuk siswa, guru, dan pegawai sekolah">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+  <title>SIMS Mobile</title>
+</head>
+<body>
+  <a class="skip-link" href="#main">Lewati ke konten utama</a>
+  <div class="phone-shell">
+    <header class="app-header">
+      <a class="brand" href="#home" aria-label="SIMS Mobile beranda">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="m2 9 10-5 10 5-10 5L2 9Z"/><path d="M6 11v5c4 3 8 3 12 0v-5"/></svg>
+        </span>
+        <span><strong>SIMS</strong><small>Mobile School</small></span>
+      </a>
+      <div class="header-actions">
+        <span id="network-badge" class="network-badge" role="status">Online</span>
+        <button id="install-button" class="icon-button" type="button" hidden aria-label="Instal aplikasi SIMS">
+          <svg viewBox="0 0 24 24"><path d="M12 3v12m-5-5 5 5 5-5M5 21h14"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <main id="main">
+      <section id="login-screen" class="screen auth-screen" aria-labelledby="login-title">
+        <div class="auth-intro">
+          <div class="auth-hero">
+            <span class="eyebrow">AKSES SEKOLAH DALAM GENGGAMAN</span>
+            <h1 id="login-title">Masuk ke SIMS Mobile</h1>
+            <p>Satu akun untuk seluruh layanan sekolah. Sistem akan mengenali akses Anda secara otomatis.</p>
+          </div>
+
+          <div class="identity-note">
+            <span class="identity-note__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-4"/></svg></span>
+            <span><strong>Akses otomatis sesuai akun</strong><small>Siswa, guru, dan pegawai tidak perlu memilih peran.</small></span>
+          </div>
+
+          <p class="security-note"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-4"/></svg><span>Jangan pernah membagikan OTP atau kata sandi kepada siapa pun.</span></p>
+        </div>
+
+        <div class="auth-panel">
+          <div class="method-tabs" role="tablist" aria-label="Metode masuk">
+            <button class="method-tab active" type="button" role="tab" data-method="otp" aria-selected="true">WA OTP</button>
+            <button class="method-tab" type="button" role="tab" data-method="scan" aria-selected="false">Scan QR</button>
+            <button class="method-tab" type="button" role="tab" data-method="password" aria-selected="false">Password</button>
+          </div>
+
+          <div class="auth-card">
+          <form id="otp-form" class="auth-method" data-panel="otp">
+            <div class="field-group">
+              <label for="phone">Nomor WhatsApp</label>
+              <div class="phone-field"><span>+62</span><input id="phone" name="phone" inputmode="tel" autocomplete="tel" placeholder="812 3456 7890" required></div>
+              <small>Nomor akan dicocokkan dengan data induk sekolah sebelum OTP dikirim.</small>
+            </div>
+            <button id="send-otp" class="button button-primary" type="submit">Kirim kode OTP</button>
+            <div id="otp-verification" class="otp-verification" hidden>
+              <label for="otp-code">Masukkan 6 digit kode</label>
+              <input id="otp-code" class="otp-input" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]{6}" placeholder="000000">
+              <div class="form-row"><small id="otp-timer">Kode berlaku 02:00</small><button id="resend-otp" class="text-button" type="button" disabled>Kirim ulang</button></div>
+              <button id="verify-otp" class="button button-primary" type="button">Verifikasi dan masuk</button>
+            </div>
+          </form>
+
+          <section class="auth-method" data-panel="scan" hidden>
+            <div class="scanner-frame">
+              <video id="scanner-video" playsinline muted aria-label="Pratinjau kamera pemindai kode"></video>
+              <div class="scanner-guide" aria-hidden="true"></div>
+              <div id="scanner-placeholder" class="scanner-placeholder">
+                <svg viewBox="0 0 24 24"><path d="M3 8V5a2 2 0 0 1 2-2h3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M7 8h2v2H7zm8 0h2v2h-2zM7 15h2v2H7zm5-3h5v5h-5z"/></svg>
+                <strong>Scan kartu identitas sekolah</strong>
+                <span>Arahkan QR atau barcode ke kamera.</span>
+              </div>
+            </div>
+            <button id="start-scan" class="button button-primary" type="button">Aktifkan kamera</button>
+            <div class="divider"><span>atau gunakan kode manual</span></div>
+            <label for="manual-code">Kode kartu</label>
+            <input id="manual-code" class="field" autocomplete="off" placeholder="Contoh: SIMS-2026-001">
+            <button id="manual-login" class="button button-secondary" type="button">Masuk dengan kode</button>
+          </section>
+
+          <form id="password-form" class="auth-method" data-panel="password" hidden>
+            <div class="field-group"><label for="username">Username, NIS, atau NIP</label><input id="username" class="field" autocomplete="username" placeholder="Masukkan identitas akun" required></div>
+            <div class="field-group"><label for="password">Kata sandi</label><div class="password-field"><input id="password" class="field" type="password" autocomplete="current-password" required><button id="toggle-password" type="button" aria-label="Tampilkan kata sandi">Lihat</button></div></div>
+            <div class="form-row"><label class="check-row"><input type="checkbox" name="remember"> Ingat perangkat ini</label><button class="text-button" type="button" data-demo="reset">Lupa password?</button></div>
+            <button class="button button-primary" type="submit">Masuk</button>
+          </form>
+          </div>
+
+          <details class="demo-access">
+            <summary>Akun simulasi</summary>
+            <div><span>Siswa</span><code>nadia / siswa123</code></div>
+            <div><span>Guru</span><code>rina / guru123</code></div>
+            <div><span>Pegawai</span><code>operator / admin123</code></div>
+            <small>OTP demo untuk semua nomor: <strong>123456</strong></small>
+          </details>
+        </div>
+      </section>
+
+      <section id="app-screen" class="screen app-screen" hidden>
+        <div id="page-content" tabindex="-1"></div>
+      </section>
+    </main>
+
+    <nav id="bottom-nav" class="bottom-nav" aria-label="Navigasi utama" hidden>
+      <a href="#home" data-route="home"><svg viewBox="0 0 24 24"><path d="m3 11 9-8 9 8v10H3z"/><path d="M9 21v-6h6v6"/></svg><span>Beranda</span></a>
+      <a href="#academics" data-route="academics"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V4H6.5A2.5 2.5 0 0 0 4 6.5z"/><path d="M8 8h8M8 12h6"/></svg><span>Akademik</span></a>
+      <a href="#finance" data-route="finance"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="15" rx="2"/><path d="M16 13h5M3 9h18"/></svg><span>Keuangan</span></a>
+      <a href="#profile" data-route="profile"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M5 21a7 7 0 0 1 14 0"/></svg><span>Profil</span></a>
+    </nav>
+
+    <div id="loading" class="loading-overlay" hidden role="status" aria-live="polite" aria-busy="true">
+      <div class="process-card">
+        <div class="database-loader" aria-hidden="true"><span></span><span></span><span></span></div>
+        <strong id="loading-text">Memproses data...</strong>
+        <small id="loading-detail">Menghubungkan ke server sekolah</small>
+        <div class="process-track"><span id="loading-progress"></span></div>
+      </div>
+    </div>
+    <div id="toast" class="toast" hidden role="status" aria-live="polite"></div>
+  </div>
+  <script src="app.js" defer></script>
+</body>
+</html>

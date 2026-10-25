@@ -6,7 +6,9 @@ use App\Domains\Identity\Contracts\WaSender;
 use App\Domains\Pwa\Services\PwaContext;
 use App\Domains\Pwa\Services\PwaIdentityService;
 use App\Livewire\Pwa\Login as PwaLogin;
+use App\Livewire\Pwa\Profil as PwaProfil;
 use App\Models\AcademicYear;
+use App\Models\Announcement;
 use App\Models\GradeRelease;
 use App\Models\Guardian;
 use App\Models\Membership;
@@ -22,10 +24,27 @@ use Database\Seeders\RoleSeeder;
 use Livewire\Livewire;
 use Spatie\Permission\PermissionRegistrar;
 
+class PwaFakeWaSender implements WaSender
+{
+    public static ?string $lastCode = null;
+
+    public function sendOtp(string $phone, string $code, string $schoolName): bool
+    {
+        self::$lastCode = $code;
+
+        return true;
+    }
+
+    public function sendText(string $phone, string $message): bool
+    {
+        return true;
+    }
+}
+
 beforeEach(function (): void {
     $this->withoutVite();
-    $this->app->bind(WaSender::class, FakeWaSender::class);
-    FakeWaSender::$lastCode = null;
+    $this->app->bind(WaSender::class, PwaFakeWaSender::class);
+    PwaFakeWaSender::$lastCode = null;
 
     $this->school = School::create([
         'nama' => 'Sekolah PWA', 'slug' => 'pwa-'.uniqid(), 'jenjang' => 'SMA',
@@ -104,7 +123,7 @@ it('login OTP PWA membuat akun dan menautkan otomatis', function (): void {
         ->set('phone', '08222000001')
         ->call('requestOtp')
         ->assertSet('step', 2)
-        ->set('code', FakeWaSender::$lastCode)
+        ->set('code', PwaFakeWaSender::$lastCode)
         ->call('verify')
         ->assertRedirect(route('pwa.home'));
 
@@ -116,6 +135,29 @@ it('login OTP PWA membuat akun dan menautkan otomatis', function (): void {
 
 it('tamu diarahkan ke login PWA', function (): void {
     $this->get('/pwa')->assertRedirect(route('pwa.login'));
+});
+
+it('menyajikan service worker dari route tanpa men-cache navigasi privat', function (): void {
+    $response = $this->get(route('pwa.service-worker'))
+        ->assertOk()
+        ->assertHeader('Service-Worker-Allowed', '/pwa');
+
+    expect($response->headers->get('Cache-Control'))
+        ->toContain('private')
+        ->toContain('no-store')
+        ->not->toContain('public');
+
+    expect(file_get_contents(public_path('pwa-assets/sw.js')))
+        ->toContain("const isNavigation = request.mode === 'navigate';")
+        ->toContain('fetch(request).catch(() => caches.match(OFFLINE_URL))')
+        ->toContain("event.data?.type === 'SKIP_WAITING'");
+});
+
+it('login PWA menjelaskan identitas otomatis dan urutan metode masuk', function (): void {
+    $this->get(route('pwa.login'))
+        ->assertOk()
+        ->assertSee('Akses otomatis sesuai akun')
+        ->assertSeeInOrder(['OTP', 'Pindai QR', 'Password']);
 });
 
 it('akun tak terhubung diarahkan ke halaman belum-terhubung', function (): void {
@@ -131,7 +173,9 @@ it('orang tua melihat beranda dengan nama anak', function (): void {
 
     $this->actingAs($user)->get('/pwa')
         ->assertOk()
-        ->assertSee('Siswa PWA');
+        ->assertSee('Siswa PWA')
+        ->assertSee('Kehadiran bulan ini')
+        ->assertSee('Jadwal Hari Ini');
 });
 
 it('nilai disembunyikan sebelum dirilis (FR-707) dan tampil setelah dirilis', function (): void {
@@ -155,6 +199,114 @@ it('nilai disembunyikan sebelum dirilis (FR-707) dan tampil setelah dirilis', fu
         ->assertOk()
         ->assertSee('Rata-rata')
         ->assertDontSee('Nilai belum dirilis');
+});
+
+it('jadwal PWA menampilkan state kosong yang terarah', function (): void {
+    $user = buatAkunPwa('628111000001');
+    app(PwaIdentityService::class)->linkByPhone($user);
+
+    $this->actingAs($user)->get(route('pwa.jadwal'))
+        ->assertOk()
+        ->assertSee('JADWAL MINGGUAN')
+        ->assertSee('Belum ada jadwal');
+});
+
+it('absensi PWA menampilkan ringkasan dan state kosong', function (): void {
+    $user = buatAkunPwa('628111000001');
+    app(PwaIdentityService::class)->linkByPhone($user);
+
+    $this->actingAs($user)->get(route('pwa.absensi'))
+        ->assertOk()
+        ->assertSee('REKAP BULANAN')
+        ->assertSee('Belum ada data absensi');
+});
+
+it('tagihan PWA menampilkan ringkasan backend dan state kosong', function (): void {
+    $user = buatAkunPwa('628111000001');
+    app(PwaIdentityService::class)->linkByPhone($user);
+
+    $this->actingAs($user)->get(route('pwa.tagihan'))
+        ->assertOk()
+        ->assertSee('Ringkasan keuangan')
+        ->assertSee('Rp0')
+        ->assertSee('Belum ada tagihan');
+});
+
+it('pengumuman PWA hanya menampilkan target siswa dan kelas aktif', function (): void {
+    $user = buatAkunPwa('628111000001');
+    app(PwaIdentityService::class)->linkByPhone($user);
+
+    Announcement::create([
+        'judul' => 'Informasi Umum', 'isi' => 'Untuk semua pengguna.', 'status' => 'tayang',
+        'target_type' => 'semua', 'tayang_dari' => now()->toDateString(),
+    ]);
+    Announcement::create([
+        'judul' => 'Khusus Siswa', 'isi' => 'Untuk peran siswa.', 'status' => 'tayang',
+        'target_type' => 'peran', 'target_data' => ['roles' => ['siswa']], 'tayang_dari' => now()->toDateString(),
+    ]);
+    $guru = Announcement::create([
+        'judul' => 'Rapat Guru', 'isi' => 'Tidak untuk siswa.', 'status' => 'tayang',
+        'target_type' => 'peran', 'target_data' => ['roles' => ['guru-mapel']], 'tayang_dari' => now()->toDateString(),
+    ]);
+    Announcement::create([
+        'judul' => 'Khusus X-1', 'isi' => 'Untuk kelas aktif.', 'status' => 'tayang',
+        'target_type' => 'kelas', 'target_data' => ['rombel_ids' => [$this->rombel->id]], 'tayang_dari' => now()->toDateString(),
+    ]);
+    Announcement::create([
+        'judul' => 'Khusus Kelas Lain', 'isi' => 'Tidak untuk kelas aktif.', 'status' => 'tayang',
+        'target_type' => 'kelas', 'target_data' => ['rombel_ids' => [999999]], 'tayang_dari' => now()->toDateString(),
+    ]);
+
+    $this->actingAs($user)->get(route('pwa.pengumuman'))
+        ->assertOk()
+        ->assertSee('Informasi Umum')
+        ->assertSee('Khusus Siswa')
+        ->assertSee('Khusus X-1')
+        ->assertDontSee('Rapat Guru')
+        ->assertDontSee('Khusus Kelas Lain');
+
+    $this->actingAs($user)->get(route('pwa.pengumuman.show', $guru))->assertNotFound();
+});
+
+it('pengumuman PWA meng-escape isi yang berasal dari sekolah', function (): void {
+    $user = buatAkunPwa('628111000001');
+    app(PwaIdentityService::class)->linkByPhone($user);
+    $announcement = Announcement::create([
+        'judul' => 'Pengumuman Aman',
+        'isi' => '<script>alert("xss")</script>',
+        'status' => 'tayang',
+        'target_type' => 'semua',
+        'tayang_dari' => now()->toDateString(),
+    ]);
+
+    app(TenantContext::class)->clear();
+
+    $this->actingAs($user)->get(route('pwa.pengumuman.show', $announcement))
+        ->assertOk()
+        ->assertSee('&lt;script&gt;', false)
+        ->assertDontSee('<script>', false);
+});
+
+it('profil PWA hanya dapat mencabut token milik akun sendiri', function (): void {
+    $user = buatAkunPwa('628111000001');
+    app(PwaIdentityService::class)->linkByPhone($user);
+    $ownToken = $user->createToken('Ponsel pribadi')->accessToken;
+
+    $otherUser = buatAkunPwa('628999000009');
+    $otherToken = $otherUser->createToken('Perangkat lain')->accessToken;
+
+    $this->actingAs($user);
+    app(PwaContext::class)->setUser($user);
+
+    Livewire::test(PwaProfil::class)
+        ->assertSee('Ponsel pribadi')
+        ->assertSeeHtml('data-pwa-push')
+        ->assertSeeHtml('data-pwa-install')
+        ->call('revokeToken', $otherToken->id)
+        ->call('revokeToken', $ownToken->id);
+
+    $this->assertDatabaseMissing('personal_access_tokens', ['id' => $ownToken->id]);
+    $this->assertDatabaseHas('personal_access_tokens', ['id' => $otherToken->id]);
 });
 
 it('orang tua bisa ganti anak; anak orang lain ditolak', function (): void {
@@ -204,7 +356,7 @@ it('OTP PWA ditolak untuk nomor yang tidak terdaftar (tanpa WA terkirim)', funct
         ->assertSet('step', 1)
         ->assertSet('error', 'Nomor WhatsApp tidak terdaftar di sekolah manapun. Hubungi sekolah untuk mendaftarkan nomor Anda.');
 
-    expect(FakeWaSender::$lastCode)->toBeNull()
+    expect(PwaFakeWaSender::$lastCode)->toBeNull()
         ->and(OtpCode::count())->toBe(0);
 });
 
@@ -215,6 +367,6 @@ it('OTP PWA dikirim untuk nomor siswa yang terdaftar', function (): void {
         ->assertSet('step', 2)
         ->assertSet('error', null);
 
-    expect(FakeWaSender::$lastCode)->not->toBeNull()
+    expect(PwaFakeWaSender::$lastCode)->not->toBeNull()
         ->and(OtpCode::count())->toBe(1);
 });

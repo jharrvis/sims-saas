@@ -1,116 +1,119 @@
-<div class="w-full max-w-lg rounded-2xl bg-white dark:bg-boxdark shadow-2xl p-8 sm:p-10 border border-slate-100 dark:border-slate-800">
-    <div class="text-center mb-8">
-        <div class="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4">
-            <i data-lucide="graduation-cap" class="w-8 h-8 text-primary"></i>
-        </div>
-        <h2 class="text-2xl font-bold text-slate-800 dark:text-white">SIMS</h2>
-        <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">Masuk ke sistem manajemen sekolah</p>
-    </div>
+<div>
+    <span class="eyebrow">Portal Sekolah</span>
+    <h1>Masuk ke SIMS</h1>
+    <p>Gunakan WhatsApp OTP atau akun username + password Anda.</p>
 
     @if ($error)
-        <div class="mb-5 rounded-lg bg-danger/10 border border-danger/20 px-4 py-3 text-sm text-danger" role="alert">
-            {{ $error }}
-        </div>
+        <div class="auth-alert auth-alert-error" role="alert">{{ $error }}</div>
     @endif
 
     @if ($info)
-        <div class="mb-5 rounded-lg bg-success/10 border border-success/20 px-4 py-3 text-sm text-success" role="status">
-            {{ $info }}
-        </div>
+        <div class="auth-alert auth-alert-info" role="status">{{ $info }}</div>
     @endif
 
-    @if ($tab === 'wa')
-        @if ($step === 1)
-            <form wire:submit="requestOtp">
-                <div class="space-y-5">
-                    <div>
-                        <label for="phone" class="block mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">Nomor WhatsApp</label>
-                        <div class="relative">
-                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
-                                <i data-lucide="smartphone" class="w-5 h-5"></i>
-                            </span>
-                            <input id="phone" type="tel" wire:model="phone" placeholder="08xxxxxxxxxx" required
-                                   class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-transparent py-3 pl-12 pr-4 outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all dark:text-white">
-                        </div>
-                        @error('phone') <p class="mt-1 text-xs text-danger">{{ $message }}</p> @enderror
-                    </div>
-                    <button type="submit" wire:loading.attr="disabled"
-                            class="w-full py-3 rounded-lg bg-primary text-white font-medium hover:bg-blue-700 transition-colors shadow-md disabled:opacity-60">
-                        <span wire:loading.remove>Kirim Kode OTP</span>
-                        <span wire:loading>Mengirim…</span>
-                    </button>
-                    <p class="text-xs text-center text-slate-500 dark:text-slate-400">
-                        Kode 6 digit dikirim via WhatsApp dan berlaku 5 menit.
-                    </p>
-                </div>
-            </form>
-        @else
-            <form wire:submit="verify">
-                <div class="space-y-5">
-                    <div>
-                        <label for="code" class="block mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
-                            Kode OTP <span class="font-normal text-slate-500">— dikirim ke {{ $phone }}</span>
-                        </label>
-                        <input id="code" type="text" inputmode="numeric" wire:model="code" placeholder="••••••" required maxlength="6"
-                               class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-transparent py-3 px-4 text-center text-2xl tracking-[0.5em] outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all dark:text-white">
-                        @error('code') <p class="mt-1 text-xs text-danger">{{ $message }}</p> @enderror
-                    </div>
-                    <button type="submit" wire:loading.attr="disabled"
-                            class="w-full py-3 rounded-lg bg-primary text-white font-medium hover:bg-blue-700 transition-colors shadow-md disabled:opacity-60">
-                        <span wire:loading.remove>Masuk</span>
-                        <span wire:loading>Memverifikasi…</span>
-                    </button>
-                    <div class="flex items-center justify-between text-sm">
-                        <button type="button" wire:click="back" class="text-slate-500 hover:text-slate-700 dark:hover:text-slate-300">
-                            ← Ganti nomor
-                        </button>
-                        <button type="button" wire:click="requestOtp" class="text-primary hover:underline font-medium">
-                            Kirim ulang kode
-                        </button>
-                    </div>
-                </div>
-            </form>
-        @endif
-    @else
-        {{-- Tab password (D-3): fallback bila WA bermasalah --}}
-        <form wire:submit="loginPassword">
-            <div class="space-y-5">
-                <div>
-                    <label for="username" class="block mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">Username</label>
-                    <input id="username" type="text" wire:model="username" placeholder="Username Anda" required autocomplete="username"
-                           class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-transparent py-3 px-4 outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all dark:text-white">
-                    @error('username') <p class="mt-1 text-xs text-danger">{{ $message }}</p> @enderror
-                </div>
-                <div>
-                    <label for="password" class="block mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">Password</label>
-                    <input id="password" type="password" wire:model="password" placeholder="••••••••" required autocomplete="current-password"
-                           class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-transparent py-3 px-4 outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all dark:text-white">
-                    @error('password') <p class="mt-1 text-xs text-danger">{{ $message }}</p> @enderror
-                </div>
-                <button type="submit" wire:loading.attr="disabled"
-                        class="w-full py-3 rounded-lg bg-primary text-white font-medium hover:bg-blue-700 transition-colors shadow-md disabled:opacity-60">
-                    <span wire:loading.remove>Masuk</span>
-                    <span wire:loading>Memverifikasi…</span>
-                </button>
-                <p class="text-xs text-center text-slate-500 dark:text-slate-400">
-                    Belum punya password? Atur di <strong>Pengaturan → Keamanan Akun</strong> selagi WhatsApp masih berfungsi.
-                </p>
-            </div>
-        </form>
-    @endif
-
-    <div class="flex rounded-lg bg-slate-100 dark:bg-slate-800 p-1 mt-6 text-sm font-medium">
-        <button type="button" wire:click="$set('tab', 'wa')"
-                class="flex-1 py-2 rounded-md transition-colors {{ $tab === 'wa' ? 'bg-white dark:bg-boxdark shadow text-primary' : 'text-slate-500 dark:text-slate-400' }}">
+    <div class="method-tabs auth-tabs two" role="tablist" aria-label="Metode masuk">
+        <button type="button" class="method-tab {{ $tab === 'wa' ? 'active' : '' }}" role="tab"
+                aria-selected="{{ $tab === 'wa' ? 'true' : 'false' }}" wire:click="$set('tab', 'wa')">
             WhatsApp OTP
         </button>
-        <button type="button" wire:click="$set('tab', 'password')"
-                class="flex-1 py-2 rounded-md transition-colors {{ $tab === 'password' ? 'bg-white dark:bg-boxdark shadow text-primary' : 'text-slate-500 dark:text-slate-400' }}">
+        <button type="button" class="method-tab {{ $tab === 'password' ? 'active' : '' }}" role="tab"
+                aria-selected="{{ $tab === 'password' ? 'true' : 'false' }}" wire:click="$set('tab', 'password')">
             Username + Password
         </button>
     </div>
 
-    <p class="text-center text-sm text-slate-500 dark:text-slate-400 mt-6">
-        Sekolah baru? <a href="{{ route('daftar') }}" class="text-primary font-semibold hover:underline">Daftar trial gratis 30 hari</a>
-    </p>
+    <div class="auth-card">
+        @if ($tab === 'wa')
+            @if ($step === 1)
+                <form wire:submit="requestOtp" class="space-y-4">
+                    <div class="field-group">
+                        <label for="phone">Nomor WhatsApp</label>
+                        <div class="phone-field">
+                            <span>+62</span>
+                            <input id="phone" type="tel" wire:model="phone" placeholder="812 3456 7890"
+                                   inputmode="tel" autocomplete="tel" required>
+                        </div>
+                        @error('phone') <small class="sims-error">{{ $message }}</small> @enderror
+                        <small>Kode 6 digit dikirim melalui WhatsApp dan berlaku 5 menit.</small>
+                    </div>
+
+                    <button type="submit" class="sims-btn sims-btn-primary sims-btn-lg w-full" wire:loading.attr="disabled">
+                        <span wire:loading.remove>Kirim Kode OTP</span>
+                        <span wire:loading>Mengirim...</span>
+                    </button>
+                </form>
+            @else
+                <form wire:submit="verify" class="space-y-4">
+                    <div class="field-group">
+                        <label for="code">Kode OTP <span class="font-normal text-slate-400">— dikirim ke {{ $phone }}</span></label>
+                        <input id="code" type="text" wire:model="code" placeholder="000000" inputmode="numeric"
+                               autocomplete="one-time-code" maxlength="6" required class="field auth-otp">
+                        @error('code') <small class="sims-error">{{ $message }}</small> @enderror
+                    </div>
+
+                    <button type="submit" class="sims-btn sims-btn-primary sims-btn-lg w-full" wire:loading.attr="disabled">
+                        <span wire:loading.remove>Masuk</span>
+                        <span wire:loading>Memverifikasi...</span>
+                    </button>
+
+                    <div class="flex items-center justify-between gap-3 text-xs">
+                        <button type="button" wire:click="back" class="font-bold text-slate-500 hover:text-slate-700">Ganti nomor</button>
+                        <button type="button" wire:click="requestOtp" class="font-bold text-primary">Kirim ulang kode</button>
+                    </div>
+                </form>
+            @endif
+        @else
+            <form wire:submit="loginPassword" class="space-y-4" x-data="{ show: false }">
+                <div class="field-group">
+                    <label for="username">Username</label>
+                    <input id="username" type="text" wire:model="username" placeholder="Username Anda"
+                           autocomplete="username" required class="field">
+                    @error('username') <small class="sims-error">{{ $message }}</small> @enderror
+                </div>
+
+                <div class="field-group">
+                    <label for="password">Password</label>
+                    <div class="password-field">
+                        <input id="password" :type="show ? 'text' : 'password'" wire:model="password"
+                               placeholder="Masukkan password" autocomplete="current-password" required>
+                        <button type="button" @click="show = !show" :aria-label="show ? 'Sembunyikan password' : 'Tampilkan password'">
+                            <x-icon name="eye" class="h-4 w-4" x-show="!show" />
+                            <x-icon name="eye-off" class="h-4 w-4" x-show="show" x-cloak />
+                        </button>
+                    </div>
+                    @error('password') <small class="sims-error">{{ $message }}</small> @enderror
+                </div>
+
+                <button type="submit" class="sims-btn sims-btn-primary sims-btn-lg w-full" wire:loading.attr="disabled">
+                    <span wire:loading.remove>Masuk</span>
+                    <span wire:loading>Memverifikasi...</span>
+                </button>
+
+                <p class="text-center text-xs leading-5 text-slate-500">
+                    Belum punya password? Atur di <strong>Pengaturan → Keamanan Akun</strong> selagi WhatsApp masih berfungsi.
+                </p>
+            </form>
+        @endif
+    </div>
+
+    <div class="auth-trust">
+        <span class="sims-icon-box"><x-icon name="shield-check" class="h-4 w-4" /></span>
+        <div>
+            <strong>Akses aman & tercatat</strong>
+            <small>Setiap aktivitas login penting dicatat untuk keamanan sekolah Anda.</small>
+        </div>
+    </div>
+
+    <div class="auth-footer-link">
+        Sekolah baru? <a href="{{ route('daftar') }}">Daftar trial gratis 30 hari</a>
+        @if (\Illuminate\Support\Facades\Route::has('platform.login'))
+            <span class="auth-footer-sep">·</span>
+            <a href="{{ route('platform.login') }}">Operator platform</a>
+        @endif
+    </div>
+
+    <div class="auth-note">
+        <x-icon name="lock" class="h-4 w-4" />
+        <span>Jangan bagikan kode OTP atau password kepada siapa pun, termasuk pihak yang mengaku dari sekolah.</span>
+    </div>
 </div>

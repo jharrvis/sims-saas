@@ -1,71 +1,145 @@
-<div>
+<div class="page-stack">
     @if (session('ok'))
-        <div class="mb-4 rounded-lg bg-success/10 text-success px-4 py-2.5 text-sm">{{ session('ok') }}</div>
+        <div class="platform-alert platform-alert-success" role="status" aria-live="polite">
+            <x-icon name="check-circle" class="h-5 w-5" />
+            <span>{{ session('ok') }}</span>
+        </div>
     @endif
 
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
-        <h1 class="text-2xl font-extrabold">Tenant</h1>
-        <div class="flex flex-wrap items-center gap-2">
-            @if (auth()->user()?->hasPermissionTo('platform.tenant.create', 'platform'))
-                <a href="{{ route('platform.tenants.create') }}"
-                   class="rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:opacity-90">+ Tambah Tenant</a>
-            @endif
-            <input type="search" wire:model.live.debounce.300ms="search" placeholder="Cari nama / NPSN…"
-                   aria-label="Cari tenant"
-                   class="rounded-lg border border-slate-200 bg-white py-2.5 px-4 text-sm outline-none focus:border-primary">
-            <select wire:model.live="status" aria-label="Filter status"
-                    class="rounded-lg border border-slate-200 bg-white py-2.5 px-3 text-sm outline-none focus:border-primary">
-                <option value="">Semua status</option>
-                @foreach (['trialing', 'active', 'past_due', 'suspended', 'cancelled'] as $st)
-                    <option value="{{ $st }}">{{ ucfirst(str_replace('_', ' ', $st)) }}</option>
-                @endforeach
-            </select>
+    <div class="page-header">
+        <div>
+            <span class="eyebrow">Platform / Manajemen Tenant</span>
+            <h2 class="platform-page-title">Daftar Sekolah</h2>
+            <p>Kelola status layanan, paket aktif, dan akses setiap tenant dari satu workspace platform.</p>
         </div>
+        @if (auth()->user()?->hasPermissionTo('platform.tenant.create', 'platform'))
+            <div class="page-actions">
+                <a href="{{ route('platform.tenants.create') }}" class="btn btn-primary">
+                    <x-icon name="plus" class="h-4 w-4" /> Tambah Tenant
+                </a>
+            </div>
+        @endif
     </div>
 
-    <div class="rounded-xl bg-white shadow-sm overflow-hidden">
-        <table class="w-full text-sm">
-            <thead>
-                <tr class="bg-slate-50 text-left">
-                    <th class="px-4 py-2.5 font-semibold text-slate-600">Sekolah</th>
-                    <th class="px-4 py-2.5 font-semibold text-slate-600">Paket</th>
-                    <th class="px-4 py-2.5 font-semibold text-slate-600">Status</th>
-                    <th class="px-4 py-2.5"></th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse ($tenants as $t)
-                    <tr class="border-t border-slate-100">
-                        <td class="px-4 py-2.5">
-                            <a href="{{ route('platform.tenants.show', $t->id) }}" class="font-semibold text-primary hover:underline">{{ $t->nama }}</a>
-                            <span class="block text-xs text-slate-400">{{ $t->jenjang }}@if($t->npsn) · NPSN {{ $t->npsn }}@endif</span>
-                        </td>
-                        <td class="px-4 py-2.5 text-xs">{{ $t->subscription?->plan?->nama ?? '—' }}</td>
-                        <td class="px-4 py-2.5">
-                            <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full
-                                {{ $t->status_langganan === 'active' ? 'bg-success/10 text-success' : '' }}
-                                {{ $t->status_langganan === 'trialing' ? 'bg-amber-100 text-amber-700' : '' }}
-                                {{ in_array($t->status_langganan, ['suspended', 'past_due']) ? 'bg-danger/10 text-danger' : '' }}
-                                {{ in_array($t->status_langganan, ['cancelled']) ? 'bg-slate-100 text-slate-500' : '' }}">
-                                {{ str_replace('_', ' ', $t->status_langganan) }}
-                            </span>
-                        </td>
-                        <td class="px-4 py-2.5 text-right whitespace-nowrap">
-                            @if ($t->status_langganan !== 'suspended')
-                                <button wire:click="suspend({{ $t->id }})" wire:confirm="Suspend tenant {{ $t->nama }}? Akses tulis mereka akan diblokir."
-                                        class="text-xs font-semibold text-danger hover:underline">Suspend</button>
-                            @else
-                                <button wire:click="activate({{ $t->id }})" wire:confirm="Aktifkan kembali {{ $t->nama }}?"
-                                        class="text-xs font-semibold text-success hover:underline">Aktifkan</button>
-                            @endif
-                        </td>
+    <section class="card platform-table-card" aria-labelledby="tenant-list-title">
+        <div class="card-head platform-table-heading">
+            <div class="card-title">
+                <span class="mini-icon orange"><x-icon name="school" class="h-[19px] w-[19px]" /></span>
+                <div>
+                    <h3 id="tenant-list-title">Direktori Tenant</h3>
+                    <p>{{ number_format($tenants->total(), 0, ',', '.') }} sekolah ditemukan</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-toolbar platform-tenant-toolbar">
+            <label class="field-search platform-search-field" for="tenant-search">
+                <x-icon name="search" class="h-4 w-4" />
+                <span class="sr-only">Cari tenant</span>
+                <input id="tenant-search" type="search" wire:model.live.debounce.300ms="search"
+                    placeholder="Cari nama sekolah atau NPSN..." autocomplete="off">
+                <span wire:loading wire:target="search" class="platform-inline-spinner" aria-hidden="true"></span>
+            </label>
+
+            <label class="platform-filter-field" for="tenant-status">
+                <span class="sr-only">Filter status langganan</span>
+                <select id="tenant-status" wire:model.live="status" class="select-field">
+                    <option value="">Semua status</option>
+                    @foreach (['trialing', 'active', 'past_due', 'suspended', 'cancelled'] as $statusOption)
+                        <option value="{{ $statusOption }}">{{ ucfirst(str_replace('_', ' ', $statusOption)) }}</option>
+                    @endforeach
+                </select>
+            </label>
+        </div>
+
+        <div class="table-scroll" wire:loading.class="platform-content-loading" wire:target="search,status">
+            <table class="data-table platform-tenant-table">
+                <thead>
+                    <tr>
+                        <th scope="col">Sekolah</th>
+                        <th scope="col">NPSN</th>
+                        <th scope="col">Paket</th>
+                        <th scope="col">Status</th>
+                        <th scope="col" class="platform-table-actions-heading">Aksi</th>
                     </tr>
-                @empty
-                    <tr><td colspan="4" class="px-4 py-8 text-center text-slate-500">Tidak ada tenant.</td></tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
+                </thead>
+                <tbody>
+                    @forelse ($tenants as $tenant)
+                        @php
+                            $statusClass = match ($tenant->status_langganan) {
+                                'active' => 'badge-green',
+                                'trialing' => 'badge-orange',
+                                'past_due', 'suspended' => 'badge-red',
+                                default => 'badge-gray',
+                            };
+                            $statusLabel = match ($tenant->status_langganan) {
+                                'active' => 'Aktif',
+                                'trialing' => 'Trial',
+                                'past_due' => 'Lewat tempo',
+                                'suspended' => 'Ditangguhkan',
+                                'cancelled' => 'Dibatalkan',
+                                default => ucfirst(str_replace('_', ' ', $tenant->status_langganan)),
+                            };
+                        @endphp
+                        <tr wire:key="platform-tenant-{{ $tenant->id }}">
+                            <td>
+                                <div class="person-cell">
+                                    <span class="table-avatar">{{ \Illuminate\Support\Str::upper(\Illuminate\Support\Str::substr($tenant->nama, 0, 2)) }}</span>
+                                    <span>
+                                        <a href="{{ route('platform.tenants.show', $tenant->id) }}" class="platform-tenant-name">{{ $tenant->nama }}</a>
+                                        <small>{{ $tenant->jenjang }} · Workspace sekolah</small>
+                                    </span>
+                                </div>
+                            </td>
+                            <td class="platform-tabular">{{ $tenant->npsn ?: '—' }}</td>
+                            <td>{{ $tenant->subscription?->plan?->nama ?? 'Belum ada paket' }}</td>
+                            <td><span class="badge {{ $statusClass }}">{{ $statusLabel }}</span></td>
+                            <td>
+                                <div class="row-actions platform-row-actions">
+                                    <a href="{{ route('platform.tenants.show', $tenant->id) }}" class="table-action"
+                                        aria-label="Lihat detail {{ $tenant->nama }}" title="Lihat detail">
+                                        <x-icon name="arrow-right" class="h-4 w-4" />
+                                    </a>
+                                    @if (auth()->user()?->hasPermissionTo('platform.tenant.suspend', 'platform'))
+                                        @if ($tenant->status_langganan !== 'suspended')
+                                            <button type="button" wire:click="suspend({{ $tenant->id }})"
+                                                wire:confirm="Suspend tenant {{ $tenant->nama }}? Akses tulis mereka akan diblokir."
+                                                wire:loading.attr="disabled" wire:target="suspend({{ $tenant->id }})"
+                                                class="table-action danger" aria-label="Suspend {{ $tenant->nama }}" title="Suspend tenant">
+                                                <x-icon name="shield-alert" class="h-4 w-4" />
+                                            </button>
+                                        @else
+                                            <button type="button" wire:click="activate({{ $tenant->id }})"
+                                                wire:confirm="Aktifkan kembali {{ $tenant->nama }}?"
+                                                wire:loading.attr="disabled" wire:target="activate({{ $tenant->id }})"
+                                                class="table-action platform-action-success" aria-label="Aktifkan {{ $tenant->nama }}" title="Aktifkan tenant">
+                                                <x-icon name="check-circle" class="h-4 w-4" />
+                                            </button>
+                                        @endif
+                                    @endif
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="5">
+                                <div class="empty-state">
+                                    <div class="empty-symbol"><x-icon name="school" class="h-7 w-7" /></div>
+                                    <h3>Tidak ada tenant yang cocok</h3>
+                                    <p>Ubah kata kunci atau filter status untuk melihat sekolah lainnya.</p>
+                                    @if ($search !== '' || $status !== '')
+                                        <button type="button" class="btn btn-soft btn-sm" wire:click="resetFilters">Reset filter</button>
+                                    @endif
+                                </div>
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
 
-    <div class="mt-5">{{ $tenants->links() }}</div>
+        @if ($tenants->hasPages())
+            <div class="platform-pagination">{{ $tenants->links() }}</div>
+        @endif
+    </section>
 </div>

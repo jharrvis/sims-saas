@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="SIMS">
+  <rect width="512" height="512" rx="112" fill="#3157d5"/>
+  <path d="M82 206 256 112l174 94-174 94L82 206Z" fill="#fff"/>
+  <path d="M146 258v82c69 55 151 55 220 0v-82l-110 60-110-60Z" fill="#cbd7ff"/>
+  <path d="M420 214v116" stroke="#fff" stroke-width="24" stroke-linecap="round"/>
+</svg>

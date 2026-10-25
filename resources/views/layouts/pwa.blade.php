@@ -1,126 +1,145 @@
+@php
+    $title = $title ?? 'SIMS';
+    $hideHeader = $hideHeader ?? false;
+    $hideNav = $hideNav ?? false;
+    $schoolName = $schoolName ?? null;
+    $children = $children ?? collect();
+    $activeStudentId = $activeStudentId ?? null;
+    $showChildSwitcher = $showChildSwitcher ?? false;
+    $isHome = request()->routeIs('pwa.home');
+@endphp
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta name="theme-color" content="#3c50e0">
+    <meta name="theme-color" content="#4f46e5">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="SIMS">
-    <title>{{ $title ?? 'SIMS' }} — SIMS</title>
-    <link rel="manifest" href="/pwa/manifest.webmanifest">
-    <link rel="icon" type="image/png" sizes="192x192" href="/pwa/icons/icon-192.png">
-    <link rel="apple-touch-icon" href="/pwa/icons/icon-192.png">
-    @vite(['resources/css/pwa.css', 'resources/js/app.js'])
+    <title>{{ $title }} — SIMS</title>
+    <link rel="manifest" href="/pwa-assets/manifest.webmanifest">
+    <link rel="icon" type="image/png" sizes="192x192" href="/pwa-assets/icons/icon-192.png">
+    <link rel="apple-touch-icon" href="/pwa-assets/icons/icon-192.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    @vite(['resources/css/pwa.css', 'resources/js/app.js', 'resources/js/pwa.js'])
     @livewireStyles
-    <style>
-        body { -webkit-tap-highlight-color: transparent; }
-    </style>
 </head>
-<body class="bg-[#f8fafc] text-slate-800 font-sans antialiased">
-<div id="offline-banner" class="offline-banner fixed top-0 left-0 right-0 z-[100] bg-slate-800 text-white text-center py-2 text-xs font-semibold">
-    Mode Offline — Data terakhir tersimpan
+<body class="pwa-body" data-pwa-shell data-service-worker-url="{{ route('pwa.service-worker') }}">
+<div class="offline-banner" data-pwa-offline role="status" hidden>
+    <x-icon name="wifi-off" class="h-4 w-4" />
+    <span>Anda sedang offline. Data baru dan perubahan memerlukan koneksi internet.</span>
 </div>
 
-<div class="app-shell flex flex-col">
-    {{-- Header halaman dalam (design). Beranda PWA me-render hero header sendiri di view-nya. --}}
-    @if (! ($hideHeader ?? false) && ! request()->routeIs('pwa.home'))
-        <header class="bg-[#3c50e0] px-5 pt-12 {{ request()->routeIs('pwa.profil') ? 'pb-16 relative overflow-hidden' : 'pb-6' }}">
-            @if (request()->routeIs('pwa.profil'))
-                <div class="absolute top-0 right-0 w-40 h-40 rounded-full bg-white/5 -mr-10 -mt-10"></div>
-            @endif
-            <div class="flex items-start justify-between gap-3 relative z-10">
-                <div class="min-w-0">
-                    <h1 class="text-white text-xl font-extrabold leading-tight">{{ $title ?? 'SIMS' }}</h1>
-                    @if (! empty($schoolName))
-                        <p class="text-blue-100 text-sm mt-1 truncate">{{ $schoolName }}</p>
-                    @endif
+<div class="phone-shell pwa-shell">
+    @if (! $hideHeader)
+        <header class="app-header">
+            @if ($isHome)
+                <a href="{{ route('pwa.home') }}" class="brand">
+                    <span class="brand-mark"><x-icon name="graduation-cap" class="h-6 w-6" /></span>
+                    <span>
+                        <strong>SIMS</strong>
+                        <small>{{ $schoolName ?: 'Portal sekolah' }}</small>
+                    </span>
+                </a>
+            @else
+                <div class="flex min-w-0 items-center gap-3">
+                    <a href="{{ route('pwa.home') }}" class="sims-icon-btn" aria-label="Kembali ke beranda">
+                        <x-icon name="arrow-left" class="h-5 w-5" />
+                    </a>
+                    <div class="min-w-0">
+                        <h1 class="truncate text-base font-extrabold tracking-tight text-slate-800">{{ $title }}</h1>
+                        @if ($schoolName)
+                            <p class="truncate text-[10px] font-medium text-slate-400">{{ $schoolName }}</p>
+                        @endif
+                    </div>
                 </div>
-                @if (! empty($showChildSwitcher) && count($children ?? []) > 1)
-                    <form method="POST" action="{{ route('pwa.switch-child') }}" class="shrink-0">
-                        @csrf
-                        <select name="student_id" onchange="this.form.submit()" aria-label="Pilih anak"
-                                class="rounded-lg bg-white/15 border border-white/25 text-white text-sm font-semibold px-2 py-1.5 outline-none">
-                            @foreach ($children as $child)
-                                <option value="{{ $child->id }}" @selected($child->id === ($activeStudentId ?? null)) class="text-slate-800">
-                                    {{ $child->nama }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </form>
-                @endif
+            @endif
+
+            <div class="header-actions">
+                <span class="network-badge" data-network-status>Online</span>
+                <button type="button" class="sims-icon-btn pwa-install-button" data-pwa-install hidden aria-label="Instal aplikasi SIMS">
+                    <x-icon name="download" class="h-5 w-5" />
+                </button>
+                <a href="{{ route('pwa.profil') }}" class="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-xs font-extrabold text-primary" aria-label="Buka profil">
+                    {{ mb_substr(auth()->user()?->name ?? 'S', 0, 1) }}
+                </a>
             </div>
         </header>
     @endif
 
-    <main class="flex-1">
+    <main class="pwa-main">
         {{ $slot }}
     </main>
 
-    @if (! ($hideNav ?? false))
-        <nav class="sticky bottom-0 z-50 bg-white border-t border-slate-200 bottom-nav">
-            <div class="flex justify-around items-center pt-2 pb-1">
-                @if (! empty($showChildSwitcher))
-                    {{-- Navigasi orang tua (design ortu): Beranda, Anak, Keuangan, Pesan, Profil --}}
-                    <a href="{{ route('pwa.home') }}" class="flex flex-col items-center gap-0.5 px-4 {{ request()->routeIs('pwa.home') ? 'text-[#3c50e0]' : 'text-slate-400' }}">
-                        <x-icon name="house" class="w-6 h-6" />
-                        <span class="text-[10px] font-medium">Beranda</span>
-                    </a>
-                    <a href="{{ route('pwa.home') }}#anak" class="flex flex-col items-center gap-0.5 px-4 text-slate-400">
-                        <x-icon name="users" class="w-6 h-6" />
-                        <span class="text-[10px] font-medium">Anak</span>
-                    </a>
-                    <a href="{{ route('pwa.tagihan') }}" class="flex flex-col items-center gap-0.5 px-4 {{ request()->routeIs('pwa.tagihan') ? 'text-[#3c50e0]' : 'text-slate-400' }}">
-                        <x-icon name="wallet" class="w-6 h-6" />
-                        <span class="text-[10px] font-medium">Keuangan</span>
-                    </a>
-                    <a href="{{ route('pwa.pengumuman') }}" class="flex flex-col items-center gap-0.5 px-4 {{ request()->routeIs('pwa.pengumuman*') ? 'text-[#3c50e0]' : 'text-slate-400' }}">
-                        <x-icon name="message-square" class="w-6 h-6" />
-                        <span class="text-[10px] font-medium">Pesan</span>
-                    </a>
-                    <a href="{{ route('pwa.profil') }}" class="flex flex-col items-center gap-0.5 px-4 {{ request()->routeIs('pwa.profil') ? 'text-[#3c50e0]' : 'text-slate-400' }}">
-                        <x-icon name="user" class="w-6 h-6" />
-                        <span class="text-[10px] font-medium">Profil</span>
-                    </a>
-                @else
-                    {{-- Navigasi siswa (design siswa): Beranda, Jadwal, Absensi, Nilai, Profil --}}
-                    <a href="{{ route('pwa.home') }}" class="flex flex-col items-center gap-0.5 px-4 {{ request()->routeIs('pwa.home') ? 'text-[#3c50e0]' : 'text-slate-400' }}">
-                        <x-icon name="house" class="w-6 h-6" />
-                        <span class="text-[10px] font-medium">Beranda</span>
-                    </a>
-                    <a href="{{ route('pwa.jadwal') }}" class="flex flex-col items-center gap-0.5 px-4 {{ request()->routeIs('pwa.jadwal') ? 'text-[#3c50e0]' : 'text-slate-400' }}">
-                        <x-icon name="calendar-days" class="w-6 h-6" />
-                        <span class="text-[10px] font-medium">Jadwal</span>
-                    </a>
-                    <a href="{{ route('pwa.absensi') }}" class="flex flex-col items-center gap-0.5 px-4 {{ request()->routeIs('pwa.absensi') ? 'text-[#3c50e0]' : 'text-slate-400' }}">
-                        <x-icon name="square-check-big" class="w-6 h-6" />
-                        <span class="text-[10px] font-medium">Absensi</span>
-                    </a>
-                    <a href="{{ route('pwa.nilai') }}" class="flex flex-col items-center gap-0.5 px-4 {{ request()->routeIs('pwa.nilai') ? 'text-[#3c50e0]' : 'text-slate-400' }}">
-                        <x-icon name="chart-column" class="w-6 h-6" />
-                        <span class="text-[10px] font-medium">Nilai</span>
-                    </a>
-                    <a href="{{ route('pwa.profil') }}" class="flex flex-col items-center gap-0.5 px-4 {{ request()->routeIs('pwa.profil') ? 'text-[#3c50e0]' : 'text-slate-400' }}">
-                        <x-icon name="user" class="w-6 h-6" />
-                        <span class="text-[10px] font-medium">Profil</span>
-                    </a>
-                @endif
-            </div>
+    @if (! $hideNav)
+        <nav class="bottom-nav five" aria-label="Navigasi utama PWA">
+            @if ($showChildSwitcher)
+                <a href="{{ route('pwa.home') }}" class="{{ request()->routeIs('pwa.home') ? 'active' : '' }}" @if(request()->routeIs('pwa.home')) aria-current="page" @endif>
+                    <x-icon name="house" class="h-5 w-5" />
+                    <span>Beranda</span>
+                </a>
+                <a href="{{ route('pwa.home') }}#anak" class="{{ request()->routeIs('pwa.home') ? '' : '' }}">
+                    <x-icon name="users" class="h-5 w-5" />
+                    <span>Anak</span>
+                </a>
+                <a href="{{ route('pwa.tagihan') }}" class="{{ request()->routeIs('pwa.tagihan') ? 'active' : '' }}" @if(request()->routeIs('pwa.tagihan')) aria-current="page" @endif>
+                    <x-icon name="wallet" class="h-5 w-5" />
+                    <span>Keuangan</span>
+                </a>
+                <a href="{{ route('pwa.pengumuman') }}" class="{{ request()->routeIs('pwa.pengumuman*') ? 'active' : '' }}" @if(request()->routeIs('pwa.pengumuman*')) aria-current="page" @endif>
+                    <x-icon name="message-square" class="h-5 w-5" />
+                    <span>Pesan</span>
+                </a>
+                <a href="{{ route('pwa.profil') }}" class="{{ request()->routeIs('pwa.profil') ? 'active' : '' }}" @if(request()->routeIs('pwa.profil')) aria-current="page" @endif>
+                    <x-icon name="user" class="h-5 w-5" />
+                    <span>Profil</span>
+                </a>
+            @else
+                <a href="{{ route('pwa.home') }}" class="{{ request()->routeIs('pwa.home') ? 'active' : '' }}" @if(request()->routeIs('pwa.home')) aria-current="page" @endif>
+                    <x-icon name="house" class="h-5 w-5" />
+                    <span>Beranda</span>
+                </a>
+                <a href="{{ route('pwa.jadwal') }}" class="{{ request()->routeIs('pwa.jadwal') ? 'active' : '' }}" @if(request()->routeIs('pwa.jadwal')) aria-current="page" @endif>
+                    <x-icon name="calendar-days" class="h-5 w-5" />
+                    <span>Jadwal</span>
+                </a>
+                <a href="{{ route('pwa.nilai') }}" class="{{ request()->routeIs('pwa.nilai') ? 'active' : '' }}" @if(request()->routeIs('pwa.nilai')) aria-current="page" @endif>
+                    <x-icon name="chart-column" class="h-5 w-5" />
+                    <span>Nilai</span>
+                </a>
+                <a href="{{ route('pwa.tagihan') }}" class="{{ request()->routeIs('pwa.tagihan') ? 'active' : '' }}" @if(request()->routeIs('pwa.tagihan')) aria-current="page" @endif>
+                    <x-icon name="wallet" class="h-5 w-5" />
+                    <span>Keuangan</span>
+                </a>
+                <a href="{{ route('pwa.profil') }}" class="{{ request()->routeIs('pwa.profil') ? 'active' : '' }}" @if(request()->routeIs('pwa.profil')) aria-current="page" @endif>
+                    <x-icon name="user" class="h-5 w-5" />
+                    <span>Profil</span>
+                </a>
+            @endif
         </nav>
     @endif
 </div>
 
+<aside class="pwa-update-banner" data-pwa-update role="status" hidden>
+    <span class="row-icon blue"><x-icon name="refresh-cw" class="h-5 w-5" /></span>
+    <span>
+        <strong>Pembaruan SIMS tersedia</strong>
+        <small>Perbarui sekarang untuk menggunakan versi terbaru.</small>
+    </span>
+    <div class="pwa-update-actions">
+        <button type="button" data-pwa-update-dismiss>Nanti</button>
+        <button type="button" class="primary" data-pwa-update-action>Perbarui</button>
+    </div>
+</aside>
+
+<div class="sims-toast-tray" data-sims-toasts aria-live="polite"></div>
+
 @livewireScripts
-<script>
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('/pwa/sw.js').catch(() => {});
-        });
-    }
-    window.addEventListener('offline', () => { document.getElementById('offline-banner').style.display = 'block'; });
-    window.addEventListener('online', () => { document.getElementById('offline-banner').style.display = 'none'; });
-</script>
 </body>
 </html>

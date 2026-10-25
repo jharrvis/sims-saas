@@ -133,7 +133,8 @@ it('form guru menampilkan dropdown agama, pendidikan, golongan, dan sertifikasi'
 });
 
 it('form guru menolak agama, pendidikan, golongan, dan sertifikasi yang tidak valid', function (): void {
-    Livewire::test(EmployeeForm::class)
+    Livewire::actingAs($this->admin)
+        ->test(EmployeeForm::class)
         ->set('nama', 'Guru Validasi')
         ->set('agama', 'Atheis')
         ->set('pendidikan_terakhir', 'd8')
@@ -144,7 +145,8 @@ it('form guru menolak agama, pendidikan, golongan, dan sertifikasi yang tidak va
 });
 
 it('form guru menyimpan data identitas, pendidikan, dan kepegawaian', function (): void {
-    Livewire::test(EmployeeForm::class)
+    Livewire::actingAs($this->admin)
+        ->test(EmployeeForm::class)
         ->set('nama', 'Guru Lengkap')
         ->set('nik', '3201010101800002')
         ->set('jk', 'P')

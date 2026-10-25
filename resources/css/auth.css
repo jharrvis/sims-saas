@@ -1,0 +1,542 @@
+/*
+ * Authentication surfaces.
+ *
+ * PWA keeps the verified contract: one column below 900px, two columns from
+ * 900px, a 380-440px form column, and a maximum 1120px content width.
+ *
+ * Desktop uses the dark art direction from source/login.html while preserving
+ * the same form width and responsive rules.
+ */
+@import './app.css';
+@import './pwa-reference.css';
+
+html,
+.auth-page {
+    min-height: 100dvh;
+    overflow-x: hidden;
+    overflow-x: clip;
+}
+
+.auth-page {
+    background: #eef1f7;
+}
+
+.auth-guest-shell {
+    width: min(100%, 1120px);
+    min-height: 100dvh;
+    margin: 0 auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.auth-guest-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 12px 4px 24px;
+}
+
+.auth-guest-main {
+    flex: 1;
+    display: grid;
+    place-items: center;
+    padding: 20px 0 32px;
+}
+
+.auth-guest-footer {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 18px 4px 4px;
+    color: var(--sims-muted);
+    font-size: 11px;
+}
+
+@media (max-width: 640px) {
+    .auth-guest-shell {
+        padding: 14px;
+    }
+
+    .auth-guest-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .auth-guest-footer {
+        flex-direction: column;
+        gap: 3px;
+    }
+}
+
+.auth-desktop {
+    width: min(100%, 1120px);
+    min-height: 100dvh;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr;
+    background: #fff;
+}
+
+.auth-mobile-brand {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 18px 20px;
+    border-bottom: 1px solid var(--sims-line);
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(18px);
+}
+
+.auth-brand {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    color: inherit;
+    text-decoration: none;
+}
+
+.auth-brand-mark {
+    width: 42px;
+    height: 42px;
+    display: grid;
+    place-items: center;
+    border-radius: 13px;
+    color: #fff;
+    background: linear-gradient(145deg, #6d67f7, #3f37c9);
+    box-shadow: 0 7px 16px rgba(79, 70, 229, 0.25);
+}
+
+.auth-brand strong,
+.auth-brand small {
+    display: block;
+}
+
+.auth-brand strong {
+    font-family: var(--font-heading);
+    font-size: 18px;
+    line-height: 1.1;
+    letter-spacing: -0.4px;
+}
+
+.auth-brand small {
+    color: var(--sims-muted);
+    font-size: 10px;
+    letter-spacing: 0.2px;
+}
+
+.auth-art {
+    display: none;
+    position: relative;
+    overflow: hidden;
+    padding: 48px;
+    color: #fff;
+    background:
+        radial-gradient(circle at 85% 15%, rgba(64, 94, 203, 0.42), transparent 38%),
+        linear-gradient(135deg, #101d39, #0c1529);
+}
+
+.auth-art::after {
+    content: '';
+    position: absolute;
+    right: -300px;
+    bottom: -300px;
+    width: 550px;
+    height: 550px;
+    border: 70px solid rgba(71, 101, 216, 0.14);
+    border-radius: 50%;
+}
+
+.auth-art-inner {
+    position: relative;
+    z-index: 1;
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 36px;
+}
+
+.auth-art .auth-brand strong {
+    color: #fff;
+}
+
+.auth-art .auth-brand small {
+    color: #8ca2c8;
+}
+
+.auth-art-mark {
+    background: #4968ee;
+    box-shadow: 0 9px 24px rgba(73, 104, 238, 0.35);
+}
+
+.auth-story {
+    max-width: 510px;
+}
+
+.auth-story .eyebrow {
+    color: #b9c8ff;
+}
+
+.auth-story h1 {
+    margin: 18px 0 22px;
+    color: #fff;
+    font-family: var(--font-heading);
+    font-size: clamp(34px, 4.2vw, 56px);
+    font-weight: 800;
+    line-height: 1.08;
+    letter-spacing: -2px;
+}
+
+.auth-story h1 span {
+    color: #8ca2ff;
+}
+
+.auth-story p {
+    max-width: 500px;
+    color: #a9b9d4;
+    font-size: 15px;
+    line-height: 1.8;
+}
+
+.auth-illustration {
+    width: min(100%, 430px);
+    margin-top: 30px;
+    padding: 22px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.auth-illustration strong {
+    display: block;
+    font-size: 16px;
+}
+
+.auth-illustration p {
+    margin: 4px 0 0;
+    color: #b3c4e3;
+    font-size: 11px;
+    line-height: 1.5;
+}
+
+.auth-illustration-bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.auth-illustration-bars span {
+    display: block;
+    width: 22px;
+    height: 40px;
+    border-radius: 7px;
+    background: #7e9af5;
+}
+
+.auth-illustration-bars span:nth-child(2) {
+    height: 58px;
+    background: #2dbfa1;
+}
+
+.auth-illustration-bars span:nth-child(3) {
+    height: 48px;
+    background: #f59c30;
+}
+
+.auth-art-footer {
+    color: #8092b6;
+    font-size: 12px;
+}
+
+.auth-form-side {
+    display: grid;
+    place-items: center;
+    padding: 32px 20px 44px;
+}
+
+.auth-form-wrap {
+    width: min(100%, 390px);
+}
+
+.auth-form-wrap > .eyebrow {
+    color: var(--sims-primary);
+}
+
+.auth-form-wrap h1,
+.auth-form-wrap h2 {
+    margin: 10px 0 8px;
+    color: var(--sims-ink);
+    font-family: var(--font-heading);
+    font-size: 29px;
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -0.9px;
+}
+
+.auth-form-wrap > p {
+    margin: 0 0 24px;
+    color: var(--sims-muted);
+    font-size: 13px;
+    line-height: 1.7;
+}
+
+.auth-form-wrap .auth-card {
+    padding: 22px;
+    box-shadow: var(--sims-shadow-md);
+}
+
+.auth-form-wrap .field {
+    min-height: 48px;
+    border-radius: 12px;
+}
+
+.auth-tabs {
+    margin-bottom: 14px;
+}
+
+.auth-tabs.two {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.auth-tabs.three {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.auth-alert {
+    margin-bottom: 14px;
+    padding: 11px 13px;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.55;
+}
+
+.auth-alert-error {
+    color: var(--sims-danger);
+    border-color: rgba(209, 67, 67, 0.2);
+    background: var(--sims-danger-soft);
+}
+
+.auth-alert-info {
+    color: var(--sims-success);
+    border-color: rgba(22, 128, 91, 0.2);
+    background: var(--sims-success-soft);
+}
+
+.auth-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+    margin-top: 14px;
+    color: var(--sims-muted);
+    font-size: 11px;
+    line-height: 1.55;
+}
+
+.auth-note svg {
+    width: 16px;
+    height: 16px;
+    margin-top: 1px;
+    color: var(--sims-success);
+    flex-shrink: 0;
+}
+
+/* Platform operator login keeps the shared auth shell with the platform accent. */
+.auth-platform .eyebrow {
+    color: #b45309;
+}
+
+.auth-platform .sims-btn-primary {
+    background: linear-gradient(135deg, #f2a12a, #d97706);
+    box-shadow: 0 9px 20px rgba(217, 119, 6, 0.24);
+}
+
+.auth-platform .sims-btn-primary:hover {
+    background: linear-gradient(135deg, #e69318, #b45309);
+    box-shadow: 0 11px 24px rgba(217, 119, 6, 0.3);
+}
+
+.auth-platform .method-tab.active {
+    color: #b45309;
+}
+
+.auth-platform .auth-trust {
+    border-color: #fde3b8;
+    background: #fff9ef;
+}
+
+.auth-platform .auth-trust .sims-icon-box {
+    color: #b45309;
+    background: #fff0d6;
+}
+
+.auth-platform .auth-footer-link a {
+    color: #b45309;
+}
+
+.auth-trust {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 18px 0 14px;
+    padding: 12px 14px;
+    border: 1px solid #dfe3ff;
+    border-radius: 14px;
+    background: #f5f7ff;
+}
+
+.auth-trust .sims-icon-box {
+    width: 36px;
+    height: 36px;
+    border-radius: 11px;
+    flex-shrink: 0;
+}
+
+.auth-trust strong {
+    display: block;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.auth-trust small {
+    display: block;
+    margin-top: 2px;
+    color: var(--sims-muted);
+    font-size: 10px;
+    line-height: 1.45;
+}
+
+.auth-footer-link {
+    margin-top: 18px;
+    color: var(--sims-muted);
+    font-size: 12px;
+    text-align: center;
+}
+
+.auth-footer-link a {
+    color: var(--sims-primary);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.auth-password-wrap {
+    position: relative;
+}
+
+.auth-password-wrap .field {
+    padding-right: 52px;
+}
+
+.auth-password-toggle {
+    position: absolute;
+    top: 50%;
+    right: 6px;
+    width: 40px;
+    height: 40px;
+    display: grid;
+    place-items: center;
+    border: 0;
+    border-radius: 9px;
+    color: var(--sims-muted);
+    background: transparent;
+    transform: translateY(-50%);
+}
+
+.auth-password-toggle:hover {
+    color: var(--sims-primary);
+    background: var(--sims-primary-soft);
+}
+
+.auth-otp {
+    text-align: center;
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: 0.5em;
+}
+
+.auth-online {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 9px;
+    border-radius: 999px;
+    color: var(--sims-success);
+    background: var(--sims-success-soft);
+    font-size: 10px;
+    font-weight: 800;
+}
+
+.auth-online::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.auth-online.is-offline {
+    color: var(--sims-warning);
+    background: var(--sims-warning-soft);
+}
+
+@media (min-width: 600px) {
+    .auth-form-side {
+        padding: 44px 32px;
+    }
+}
+
+@media (min-width: 900px) {
+    .auth-desktop {
+        grid-template-columns: minmax(0, 1fr) minmax(380px, 440px);
+        padding: 20px;
+        gap: 20px;
+    }
+
+    .auth-mobile-brand {
+        display: none;
+    }
+
+    .auth-art {
+        display: flex;
+        border-radius: 24px;
+    }
+
+    .auth-form-side {
+        padding: 32px 24px;
+    }
+
+    .auth-form-wrap {
+        width: 100%;
+    }
+}
+
+@media (min-width: 1180px) {
+    .auth-desktop {
+        padding: 24px;
+        gap: 24px;
+    }
+}
+
+@media (max-width: 899px) {
+    .auth-desktop {
+        min-height: auto;
+    }
+
+    .auth-form-side {
+        min-height: calc(100dvh - 79px);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .auth-art::after {
+        display: none;
+    }
+}

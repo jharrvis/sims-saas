@@ -139,6 +139,10 @@ class EmployeeForm extends Component
 
     public function save(): void
     {
+        // Authorization berjalan sebelum validasi dan sebelum ada upload foto:
+        // route middleware hanya melindungi GET, bukan aksi Livewire.
+        $this->authorize($this->employee?->exists ? 'guru.update' : 'guru.create');
+
         $this->validate();
 
         $data = [

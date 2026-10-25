@@ -6,6 +6,7 @@ namespace App\Livewire\Platform;
 
 use App\Domains\Platform\Services\TenantProvisioningService;
 use App\Models\Plan;
+use App\Models\User;
 use Illuminate\View\View;
 use Livewire\Component;
 
@@ -31,6 +32,15 @@ class TenantCreate extends Component
 
     public function simpan(TenantProvisioningService $provisioning): void
     {
+        $operator = auth()->user();
+
+        abort_unless(
+            $operator instanceof User
+                && $operator->is_platform
+                && $operator->hasPermissionTo('platform.tenant.create', 'platform'),
+            403,
+        );
+
         $this->validate([
             'nama' => ['required', 'string', 'max:150'],
             'jenjang' => ['required', 'in:SD,SMP,SMA,SMK'],

@@ -1,61 +1,61 @@
-<div class="px-4 pt-4 pb-28">
+<div class="screen app-screen screen-enter">
     @php
-        $hariDenganJadwal = collect($haris)->filter(fn ($h) => $items->has($h))->values();
-        $hariAktif = $hariDenganJadwal->contains(strtolower(now()->locale('id')->dayName))
-            ? strtolower(now()->locale('id')->dayName)
-            : $hariDenganJadwal->first();
-        $jadwalWarna = [
-            ['bg-blue-50', 'text-blue-700', 'text-blue-500'],
-            ['bg-purple-50', 'text-purple-700', 'text-purple-500'],
-            ['bg-emerald-50', 'text-emerald-700', 'text-emerald-500'],
-        ];
+        $scheduledDays = collect($haris)->filter(fn ($day) => $items->has($day))->values();
+        $today = strtolower(now()->locale('id')->dayName);
+        $activeDay = $scheduledDays->contains($today) ? $today : $scheduledDays->first();
     @endphp
 
-    @if ($rombel)
-        <p class="text-xs text-slate-400 mb-3">{{ $rombel->nama }}</p>
-    @endif
+    <div class="page-title">
+        <span class="overline">JADWAL MINGGUAN</span>
+        <h1>{{ $rombel?->nama ?? 'Jadwal pelajaran' }}</h1>
+        <p>{{ $rombel ? 'Pilih hari untuk melihat urutan mata pelajaran.' : 'Kelas aktif belum ditetapkan oleh sekolah.' }}</p>
+    </div>
 
-    @if ($hariDenganJadwal->isNotEmpty())
-        {{-- Pemilih hari (design siswa/jadwal.html) --}}
-        <div class="flex gap-2 overflow-x-auto no-scrollbar pb-2 mb-4">
-            @foreach ($hariDenganJadwal as $hari)
-                <button type="button" data-jadwal-pill="{{ $hari }}" onclick="pwaJadwalHari('{{ $hari }}')"
-                        class="px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-all {{ $hari === $hariAktif ? 'bg-[#3c50e0] text-white shadow-md' : 'bg-white text-slate-600 border border-slate-200' }}">
-                    {{ ucfirst($hari) }}
-                </button>
-            @endforeach
-        </div>
-
-        @foreach ($hariDenganJadwal as $hari)
-            <div data-jadwal-hari="{{ $hari }}" @if ($hari !== $hariAktif) class="hidden" @endif>
-                @foreach ($items[$hari] as $j)
-                    @php $w = $jadwalWarna[$loop->index % 3]; @endphp
-                    <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 flex gap-4 items-center mb-3">
-                        <div class="text-center min-w-[52px]">
-                            <p class="text-[10px] text-slate-400 font-medium">Jam ke</p>
-                            <p class="text-lg font-extrabold text-slate-800">{{ $j->jam_ke }}</p>
-                        </div>
-                        <div class="flex-1 {{ $w[0] }} rounded-xl p-3 min-w-0">
-                            <p class="font-bold {{ $w[1] }} text-sm truncate">{{ $j->subject?->nama ?? '—' }}</p>
-                            <p class="text-xs {{ $w[2] }} mt-0.5 truncate">{{ $j->employee?->nama }}{{ $j->ruang ? ' · '.$j->ruang : '' }}</p>
-                        </div>
-                    </div>
+    @if ($scheduledDays->isNotEmpty())
+        <div x-data="{ activeDay: @js($activeDay) }">
+            <div class="day-tabs" role="tablist" aria-label="Pilih hari jadwal">
+                @foreach ($scheduledDays as $day)
+                    <button type="button"
+                            class="day-tab"
+                            :class="activeDay === @js($day) ? 'active' : ''"
+                            :aria-selected="activeDay === @js($day)"
+                            @click="activeDay = @js($day)"
+                            role="tab">
+                        {{ ucfirst($day) }}
+                    </button>
                 @endforeach
             </div>
-        @endforeach
+
+            @foreach ($scheduledDays as $day)
+                <section x-show="activeDay === @js($day)" x-cloak role="tabpanel" aria-label="Jadwal {{ ucfirst($day) }}">
+                    <div class="section-head">
+                        <h3>{{ ucfirst($day) }}</h3>
+                        <span class="pwa-section-meta">{{ $items[$day]->count() }} pelajaran</span>
+                    </div>
+                    <div class="pwa-card-stack">
+                        @foreach ($items[$day] as $schedule)
+                            <article class="next-class-card schedule-card" wire:key="schedule-{{ $schedule->id }}">
+                                <span class="class-time"><small>JAM KE</small><strong>{{ $schedule->jam_ke }}</strong></span>
+                                <span class="class-accent" aria-hidden="true"></span>
+                                <span class="class-info">
+                                    <span class="schedule-code">{{ $schedule->subject?->kode ?: 'MAPEL' }}</span>
+                                    <h3>{{ $schedule->subject?->nama ?? 'Mata pelajaran' }}</h3>
+                                    <p>{{ $schedule->employee?->nama ?: 'Pengajar belum ditetapkan' }}{{ $schedule->ruang ? ' · '.$schedule->ruang : '' }}</p>
+                                </span>
+                                <span class="schedule-status" aria-label="Terjadwal"><x-icon name="calendar-days" class="h-4 w-4" /></span>
+                            </article>
+                        @endforeach
+                    </div>
+                </section>
+            @endforeach
+        </div>
     @else
-        <p class="text-sm text-slate-400 italic">Belum ada jadwal.</p>
+        <div class="surface-card pwa-state-card">
+            <span class="row-icon violet"><x-icon name="calendar-days" class="h-5 w-5" /></span>
+            <div>
+                <strong>Belum ada jadwal</strong>
+                <p>Jadwal mingguan akan tampil setelah sekolah menetapkan kelas dan mata pelajaran.</p>
+            </div>
+        </div>
     @endif
 </div>
-
-<script>
-function pwaJadwalHari(hari) {
-    document.querySelectorAll('[data-jadwal-hari]').forEach((el) => {
-        el.classList.toggle('hidden', el.getAttribute('data-jadwal-hari') !== hari);
-    });
-    document.querySelectorAll('[data-jadwal-pill]').forEach((btn) => {
-        const aktif = btn.getAttribute('data-jadwal-pill') === hari;
-        btn.className = 'px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-all ' + (aktif ? 'bg-[#3c50e0] text-white shadow-md' : 'bg-white text-slate-600 border border-slate-200');
-    });
-}
-</script>

@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 use App\Livewire\Kesiswaan\StudentIndex;
 use App\Models\AcademicYear;
+use App\Models\Membership;
 use App\Models\Rombel;
 use App\Models\School;
 use App\Models\Student;
+use App\Models\User;
 use App\Tenancy\TenantContext;
 use Database\Seeders\PermissionSeeder;
 use Database\Seeders\RoleSeeder;
@@ -40,6 +42,30 @@ beforeEach(function (): void {
         $s = Student::create(['nis' => "B$i", 'nama' => "Siswa B$i", 'jk' => 'P', 'status' => 'aktif']);
         $s->rombels()->attach($this->rombelB->id, ['academic_year_id' => $ta->id, 'status' => 'aktif']);
     }
+
+    $this->viewer = User::create([
+        'username' => 'viewer-'.uniqid(),
+        'name' => 'Guru Viewer',
+        'phone' => '62812'.random_int(1000000, 9999999),
+    ]);
+    Membership::create([
+        'user_id' => $this->viewer->id,
+        'school_id' => $this->school->id,
+        'status' => 'aktif',
+    ]);
+    $this->viewer->assignRole('guru-mapel');
+
+    $this->admin = User::create([
+        'username' => 'admin-'.uniqid(),
+        'name' => 'Admin Sekolah',
+        'phone' => '62813'.random_int(1000000, 9999999),
+    ]);
+    Membership::create([
+        'user_id' => $this->admin->id,
+        'school_id' => $this->school->id,
+        'status' => 'aktif',
+    ]);
+    $this->admin->assignRole('admin-sekolah');
 });
 
 afterEach(function (): void {
@@ -70,4 +96,43 @@ it('dropdown export menampilkan keterangan jumlah + filter yang aktif', function
         ->set('search', 'Siswa A1')
         ->assertSee('Export 1 siswa')
         ->assertSee('Cari');
+});
+
+it('reset filter membersihkan filter dan pilihan siswa', function (): void {
+    Livewire::test(StudentIndex::class)
+        ->set('search', 'Siswa A')
+        ->set('status', 'aktif')
+        ->set('rombel', (string) $this->rombelA->id)
+        ->set('selected', [1])
+        ->call('resetFilters')
+        ->assertSet('search', '')
+        ->assertSet('status', '')
+        ->assertSet('rombel', '')
+        ->assertSet('selected', []);
+});
+
+it('pengguna view-only tidak dapat membuka sampah melalui aksi langsung', function (): void {
+    Livewire::actingAs($this->viewer)
+        ->test(StudentIndex::class)
+        ->call('toggleTrashed')
+        ->assertForbidden();
+});
+
+it('pengguna view-only hanya melihat aksi massal export', function (): void {
+    Livewire::actingAs($this->viewer)
+        ->test(StudentIndex::class)
+        ->set('selected', [Student::query()->value('id')])
+        ->assertSee('Export Excel')
+        ->assertDontSee('Ubah status')
+        ->assertDontSee('Pindah rombel')
+        ->assertDontSee('Pindahkan ke sampah')
+        ->assertDontSee('Buka Sampah')
+        ->assertDontSee('Tambah Siswa');
+});
+
+it('halaman admin tetap tampil ketika fitur impor belum tersedia', function (): void {
+    $this->actingAs($this->admin)
+        ->get('/siswa')
+        ->assertOk()
+        ->assertDontSee('Impor Data');
 });

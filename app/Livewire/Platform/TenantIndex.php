@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Platform;
 
 use App\Domains\Platform\Services\PlatformService;
+use App\Models\User;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\View\View;
 use Livewire\Component;
@@ -28,17 +29,25 @@ class TenantIndex extends Component
         $this->resetPage();
     }
 
+    public function resetFilters(): void
+    {
+        $this->reset(['search', 'status']);
+        $this->resetPage();
+    }
+
     public function suspend(int $schoolId, PlatformService $platform): void
     {
+        $operator = $this->ensurePlatformPermission('platform.tenant.suspend');
         $tenant = $platform->findTenant($schoolId);
-        $platform->suspend($tenant, auth()->user(), 'Suspend manual via panel platform');
+        $platform->suspend($tenant, $operator, 'Suspend manual via panel platform');
         session()->flash('ok', "Tenant {$tenant->nama} di-suspend.");
     }
 
     public function activate(int $schoolId, PlatformService $platform): void
     {
+        $operator = $this->ensurePlatformPermission('platform.tenant.suspend');
         $tenant = $platform->findTenant($schoolId);
-        $platform->activate($tenant, auth()->user());
+        $platform->activate($tenant, $operator);
         session()->flash('ok', "Tenant {$tenant->nama} diaktifkan.");
     }
 
@@ -59,5 +68,19 @@ class TenantIndex extends Component
                 ['path' => request()->url(), 'query' => request()->query()]
             ),
         ])->layout('layouts.platform', ['title' => 'Tenant']);
+    }
+
+    private function ensurePlatformPermission(string $permission): User
+    {
+        $operator = auth()->user();
+
+        abort_unless(
+            $operator instanceof User
+                && $operator->is_platform
+                && $operator->hasPermissionTo($permission, 'platform'),
+            403,
+        );
+
+        return $operator;
     }
 }

@@ -10,6 +10,8 @@ use App\Domains\Pwa\Services\PwaIdentityService;
 use App\Models\AuditLog;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\View\View;
 use Livewire\Component;
 
@@ -19,11 +21,17 @@ use Livewire\Component;
  */
 class Login extends Component
 {
+    public string $tab = 'otp';
+
     public string $phone = '';
 
     public string $code = '';
 
     public int $step = 1;
+
+    public string $username = '';
+
+    public string $password = '';
 
     public ?string $error = null;
 
@@ -83,7 +91,19 @@ class Login extends Component
         // Tautkan ke siswa/wali + membership + peran (idempoten).
         $identity->linkByPhone($user);
 
+        if ($user->mfaSecret?->isConfirmed()) {
+            session([
+                'mfa_pending_user_id' => $user->id,
+                'pwa_login_pending' => true,
+            ]);
+
+            $this->redirect(route('mfa.verify'), navigate: true);
+
+            return;
+        }
+
         Auth::login($user, remember: true);
+        session()->forget('pwa_login_pending');
 
         AuditLog::create([
             'user_id' => $user->id,
@@ -105,12 +125,88 @@ class Login extends Component
         $this->info = null;
     }
 
+    /**
+     * Fallback username + password untuk pengguna PWA yang sudah mengatur
+     * password di Keamanan Akun (mis. saat WhatsApp bermasalah).
+     */
+    public function loginPassword(PwaIdentityService $identity): void
+    {
+        $this->validate([
+            'username' => ['required', 'string', 'max:80'],
+            'password' => ['required', 'string'],
+        ]);
+        $this->error = null;
+
+        $key = 'pwa-login-password:'.strtolower($this->username).':'.request()->ip();
+
+        if (RateLimiter::tooManyAttempts($key, 5)) {
+            $this->error = 'Terlalu banyak percobaan gagal. Coba lagi dalam '.RateLimiter::availableIn($key).' detik.';
+
+            return;
+        }
+
+        $phone = PwaIdentityService::normalize($this->username);
+        $user = User::where('username', $this->username)
+            ->orWhere('phone', $phone)
+            ->first();
+
+        if (! $user || ! $user->password || ! Hash::check($this->password, $user->password)) {
+            RateLimiter::hit($key, 900);
+
+            AuditLog::create([
+                'user_id' => $user?->id,
+                'aksi' => 'login_gagal',
+                'model_type' => User::class,
+                'model_id' => (string) ($user?->id ?? 0),
+                'after' => ['via' => 'pwa_password', 'username' => $this->username],
+                'ip_address' => request()->ip(),
+            ]);
+
+            $this->error = 'Username atau password salah.';
+
+            return;
+        }
+
+        RateLimiter::clear($key);
+
+        if ($user->phone) {
+            $identity->linkByPhone($user);
+        }
+
+        if ($user->mfaSecret?->isConfirmed()) {
+            session([
+                'mfa_pending_user_id' => $user->id,
+                'pwa_login_pending' => true,
+            ]);
+
+            $this->redirect(route('mfa.verify'), navigate: true);
+
+            return;
+        }
+
+        Auth::login($user, remember: true);
+        session()->forget('pwa_login_pending');
+
+        AuditLog::create([
+            'user_id' => $user->id,
+            'aksi' => 'login_pwa',
+            'model_type' => User::class,
+            'model_id' => (string) $user->id,
+            'after' => ['via' => 'password'],
+            'ip_address' => request()->ip(),
+        ]);
+
+        $this->redirect(route('pwa.home'), navigate: true);
+    }
+
     public function render(): View
     {
-        return view('livewire.pwa.login')->layout('layouts.pwa', [
+        return view('livewire.pwa.login')->layout('layouts.auth', [
             'title' => 'Masuk',
-            'hideHeader' => true,
-            'hideNav' => true,
+            'variant' => 'pwa',
+            'eyebrow' => 'SIMS MOBILE',
+            'storyTitle' => 'Sekolah dalam genggaman.',
+            'storyText' => 'Masuk untuk melihat jadwal, nilai, kehadiran, dan informasi sekolah Anda.',
         ]);
     }
 }

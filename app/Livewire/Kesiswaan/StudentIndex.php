@@ -79,10 +79,21 @@ class StudentIndex extends Component
 
     public function toggleTrashed(): void
     {
+        $this->authorize('siswa.delete');
+
         $this->showTrashed = ! $this->showTrashed;
         $this->resetPage();
         $this->resetSelection();
         $this->bulkAksi = '';
+    }
+
+    public function resetFilters(): void
+    {
+        $this->search = '';
+        $this->status = '';
+        $this->rombel = '';
+        $this->resetPage();
+        $this->resetSelection();
     }
 
     public function delete(Student $student): void
@@ -214,6 +225,8 @@ class StudentIndex extends Component
 
     private function bulkExport(): void
     {
+        $this->authorize('siswa.view');
+
         $ids = implode('&ids[]=', array_map('intval', $this->selected));
         $this->redirect(route('siswa.ekspor.excel').'?ids[]='.$ids, navigate: false);
     }
@@ -314,10 +327,16 @@ class StudentIndex extends Component
             ? Rombel::where('academic_year_id', $tahunAktifId)->orderBy('tingkat')->orderBy('nama')->get()
             : collect();
 
+        $statusCounts = Student::query()
+            ->selectRaw('status, count(*) as jumlah')
+            ->groupBy('status')
+            ->pluck('jumlah', 'status');
+
         return view('livewire.kesiswaan.student-index', [
             'students' => $students,
             'rombels' => $rombels,
             'trashedCount' => Student::onlyTrashed()->count(),
+            'statusCounts' => $statusCounts,
         ])->layout('layouts.app', ['title' => 'Data Siswa']);
     }
 }

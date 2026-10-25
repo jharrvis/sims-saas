@@ -3,6 +3,8 @@
 declare(strict_types=1);
 
 use App\Domains\Platform\Services\PlatformService;
+use App\Livewire\Platform\InvoiceIndex;
+use App\Livewire\Platform\PlanIndex;
 use App\Livewire\Platform\TenantIndex;
 use App\Livewire\Platform\TenantShow;
 use App\Models\AuditLog;
@@ -10,6 +12,7 @@ use App\Models\BillingInvoice;
 use App\Models\MfaSecret;
 use App\Models\Plan;
 use App\Models\School;
+use App\Models\Subscription;
 use App\Models\TenantQuotaOverride;
 use App\Models\User;
 use App\Scopes\SchoolScope;
@@ -141,6 +144,18 @@ it('suspend dan aktivasi tenant via panel', function (): void {
     expect($school->fresh()->status_langganan)->toBe('active');
 });
 
+it('menolak aksi lifecycle tenant tanpa izin suspend', function (): void {
+    $admin = platformAdmin(['platform.tenant.suspend']);
+    $school = tenantSchool();
+
+    Livewire::actingAs($admin)
+        ->test(TenantIndex::class)
+        ->call('suspend', $school->id)
+        ->assertForbidden();
+
+    expect($school->fresh()->status_langganan)->toBe('active');
+});
+
 it('membuat langganan trial 30 hari', function (): void {
     $admin = platformAdmin();
     $school = tenantSchool();
@@ -195,6 +210,97 @@ it('nomor tagihan berurutan anti-duplikat', function (): void {
         ->and(BillingInvoice::withoutGlobalScope(SchoolScope::class)->where('nomor', $b->nomor)->count())->toBe(1);
 });
 
+it('operator berizin dapat membuat paket dari panel platform', function (): void {
+    $admin = platformAdmin();
+
+    Livewire::actingAs($admin)
+        ->test(PlanIndex::class)
+        ->call('edit', null)
+        ->set('nama', 'Paket Sekolah Digital')
+        ->set('slug', 'sekolah-digital')
+        ->set('deskripsi', 'Paket pengujian panel platform.')
+        ->set('harga_bulanan', '750000')
+        ->set('harga_tahunan', '7500000')
+        ->set('max_siswa', '850')
+        ->call('simpan')
+        ->assertHasNoErrors();
+
+    $this->assertDatabaseHas('plans', [
+        'slug' => 'sekolah-digital',
+        'harga_bulanan' => 750000,
+        'max_siswa' => 850,
+        'aktif' => true,
+    ]);
+});
+
+it('menolak perubahan paket tanpa izin kelola paket', function (): void {
+    $admin = platformAdmin(['platform.plan.manage']);
+    $planCount = Plan::count();
+
+    Livewire::actingAs($admin)
+        ->test(PlanIndex::class)
+        ->assertDontSee('Paket Baru')
+        ->call('edit', null)
+        ->assertForbidden();
+
+    Livewire::actingAs($admin)
+        ->test(PlanIndex::class)
+        ->set('nama', 'Paket Terlarang')
+        ->set('slug', 'paket-terlarang')
+        ->set('harga_bulanan', '100000')
+        ->call('simpan')
+        ->assertForbidden();
+
+    expect(Plan::count())->toBe($planCount);
+});
+
+it('operator berizin dapat menerbitkan tagihan dari panel platform', function (): void {
+    $admin = platformAdmin();
+    $school = tenantSchool();
+    $plan = Plan::where('slug', 'basic')->firstOrFail();
+    $subscription = app(PlatformService::class)->createSubscription($school, $plan, 'bulanan', $admin);
+
+    Livewire::actingAs($admin)
+        ->test(InvoiceIndex::class)
+        ->set('subscription_id', (string) $subscription->id)
+        ->set('diskon', '25000')
+        ->call('issue')
+        ->assertHasNoErrors();
+
+    $this->assertDatabaseHas('billing_invoices', [
+        'subscription_id' => $subscription->id,
+        'status' => 'issued',
+        'diskon' => 25000,
+        'total' => 474000,
+    ]);
+});
+
+it('menolak penerbitan dan pelunasan tagihan tanpa izin kelola paket', function (): void {
+    $admin = platformAdmin();
+    $school = tenantSchool();
+    $plan = Plan::where('slug', 'basic')->firstOrFail();
+    $service = app(PlatformService::class);
+    $subscription = $service->createSubscription($school, $plan, 'bulanan', $admin);
+    $invoice = $service->issueInvoice($subscription, $admin);
+    $readOnlyOperator = platformAdmin(['platform.plan.manage']);
+
+    Livewire::actingAs($readOnlyOperator)
+        ->test(InvoiceIndex::class)
+        ->assertDontSee('Terbitkan Tagihan Manual')
+        ->assertDontSee('Tandai Lunas')
+        ->set('subscription_id', (string) $subscription->id)
+        ->call('issue')
+        ->assertForbidden();
+
+    Livewire::actingAs($readOnlyOperator)
+        ->test(InvoiceIndex::class)
+        ->call('markPaid', $invoice->id)
+        ->assertForbidden();
+
+    expect(BillingInvoice::withoutGlobalScope(SchoolScope::class)->count())->toBe(1)
+        ->and($invoice->fresh()->status)->toBe('issued');
+});
+
 it('quota override bisa dibuat dan dihapus dari detail tenant', function (): void {
     $admin = platformAdmin();
     $school = tenantSchool();
@@ -220,6 +326,32 @@ it('quota override bisa dibuat dan dihapus dari detail tenant', function (): voi
         TenantQuotaOverride::withoutGlobalScope(SchoolScope::class)
             ->where('school_id', $school->id)->count()
     )->toBe(0);
+});
+
+it('menolak perubahan langganan dan kuota tanpa izin provisioning tenant', function (string $action): void {
+    $admin = platformAdmin(['platform.tenant.create']);
+    $school = tenantSchool();
+
+    Livewire::actingAs($admin)
+        ->test(TenantShow::class, ['schoolId' => $school->id])
+        ->call($action)
+        ->assertForbidden();
+
+    expect(Subscription::withoutGlobalScope(SchoolScope::class)->where('school_id', $school->id)->exists())->toBeFalse()
+        ->and(TenantQuotaOverride::withoutGlobalScope(SchoolScope::class)->where('school_id', $school->id)->exists())->toBeFalse();
+})->with([
+    'langganan' => 'buatLangganan',
+    'override kuota' => 'tambahOverride',
+]);
+
+it('menolak toggle modul tanpa izin platform module toggle', function (): void {
+    $admin = platformAdmin(['platform.module.toggle']);
+    $school = tenantSchool();
+
+    Livewire::actingAs($admin)
+        ->test(TenantShow::class, ['schoolId' => $school->id])
+        ->call('toggleModule', 999)
+        ->assertForbidden();
 });
 
 it('metrik dashboard menghitung MRR dengan benar', function (): void {

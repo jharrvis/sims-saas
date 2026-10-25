@@ -1,62 +1,143 @@
-<div>
-    <h1 class="text-2xl font-extrabold mb-6">Dashboard Platform</h1>
-
-    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <div class="rounded-xl bg-white p-5 shadow-sm">
-            <p class="text-xs font-semibold text-slate-400 uppercase">Total Tenant</p>
-            <p class="text-3xl font-extrabold mt-1">{{ $metrics['total_tenant'] }}</p>
+<div class="page-stack flex flex-col">
+    <div class="page-header">
+        <div>
+            <span class="eyebrow">Sistem Informasi Manajemen Sekolah</span>
+            <h2 style="font-size: 21px;">Ringkasan Platform</h2>
+            <p>Pantau pertumbuhan tenant, langganan, dan kesehatan operasional layanan.</p>
         </div>
-        <div class="rounded-xl bg-white p-5 shadow-sm">
-            <p class="text-xs font-semibold text-slate-400 uppercase">MRR</p>
-            <p class="text-3xl font-extrabold mt-1">Rp{{ number_format($metrics['mrr'], 0, ',', '.') }}</p>
-        </div>
-        <div class="rounded-xl bg-white p-5 shadow-sm">
-            <p class="text-xs font-semibold text-slate-400 uppercase">Trial berakhir ≤ 7 hari</p>
-            <p class="text-3xl font-extrabold mt-1 text-amber-600">{{ $metrics['trial_berakhir_7_hari'] }}</p>
-        </div>
-        <div class="rounded-xl bg-white p-5 shadow-sm">
-            <p class="text-xs font-semibold text-slate-400 uppercase">Piutang</p>
-            <p class="text-3xl font-extrabold mt-1 text-danger">Rp{{ number_format($metrics['piutang'], 0, ',', '.') }}</p>
-            <p class="text-xs text-slate-400 mt-1">{{ $metrics['invoice_overdue'] }} tagihan overdue</p>
+        <div class="page-actions flex flex-wrap">
+            @if (\Illuminate\Support\Facades\Route::has('platform.tenants'))
+                <a href="{{ route('platform.tenants') }}" class="btn btn-outline">
+                    <x-icon name="school" class="h-4 w-4" /> Kelola Tenant
+                </a>
+            @endif
+            @if (\Illuminate\Support\Facades\Route::has('platform.invoices'))
+                <a href="{{ route('platform.invoices') }}" class="btn btn-primary">
+                    <x-icon name="receipt" class="h-4 w-4" /> Lihat Tagihan
+                </a>
+            @endif
         </div>
     </div>
 
-    <div class="rounded-xl bg-white p-5 shadow-sm mb-6">
-        <h2 class="font-bold mb-3">Tenant per Status Langganan</h2>
+    <div class="stats-grid grid">
+        <article class="card stat-card">
+            <div class="stat-top">
+                <span class="mini-icon blue"><x-icon name="school" class="h-5 w-5" /></span>
+                <span class="badge badge-blue">Tenant</span>
+            </div>
+            <div class="stat-value">{{ number_format($metrics['total_tenant'], 0, ',', '.') }}</div>
+            <div class="stat-caption">Total Tenant</div>
+            <div class="stat-footer"><span class="stat-note">Sekolah terdaftar di platform</span></div>
+        </article>
+
+        <article class="card stat-card">
+            <div class="stat-top">
+                <span class="mini-icon green"><x-icon name="wallet" class="h-5 w-5" /></span>
+                <span class="badge badge-green">MRR</span>
+            </div>
+            <div class="stat-value" style="font-size: 25px;">Rp{{ number_format($metrics['mrr'], 0, ',', '.') }}</div>
+            <div class="stat-caption">Pendapatan berulang bulanan</div>
+            <div class="stat-footer"><span class="stat-note">Langganan aktif</span></div>
+        </article>
+
+        <article class="card stat-card">
+            <div class="stat-top">
+                <span class="mini-icon orange"><x-icon name="clock" class="h-5 w-5" /></span>
+                <span class="badge badge-orange">≤ 7 hari</span>
+            </div>
+            <div class="stat-value">{{ number_format($metrics['trial_berakhir_7_hari'], 0, ',', '.') }}</div>
+            <div class="stat-caption">Trial berakhir ≤ 7 hari</div>
+            <div class="stat-footer"><span class="stat-note">Perlu tindak lanjut</span></div>
+        </article>
+
+        <article class="card stat-card">
+            <div class="stat-top">
+                <span class="mini-icon red"><x-icon name="receipt" class="h-5 w-5" /></span>
+                <span class="badge badge-red">{{ $metrics['invoice_overdue'] }} overdue</span>
+            </div>
+            <div class="stat-value" style="font-size: 25px;">Rp{{ number_format($metrics['piutang'], 0, ',', '.') }}</div>
+            <div class="stat-caption">Piutang</div>
+            <div class="stat-footer"><span class="stat-note">Tagihan belum dibayar</span></div>
+        </article>
+    </div>
+
+    <section class="card rounded-2xl border" style="margin-top: 16px;">
+        <div class="card-head">
+            <div class="card-title">
+                <span class="mini-icon purple"><x-icon name="repeat" class="h-[19px] w-[19px]" /></span>
+                <div>
+                    <h3>Tenant per Status Langganan</h3>
+                    <p>Komposisi tenant berdasarkan status aktif</p>
+                </div>
+            </div>
+        </div>
         <div class="flex flex-wrap gap-2">
             @forelse ($metrics['per_status'] as $status => $jumlah)
-                <span class="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1.5 text-sm">
-                    <span class="font-semibold capitalize">{{ str_replace('_', ' ', $status) }}</span>
-                    <span class="font-extrabold">{{ $jumlah }}</span>
+                <span class="badge badge-blue">
+                    <span class="capitalize">{{ str_replace('_', ' ', $status) }}</span>
+                    <strong>{{ $jumlah }}</strong>
                 </span>
             @empty
                 <p class="text-sm text-slate-400">Belum ada tenant.</p>
             @endforelse
         </div>
-    </div>
+    </section>
 
-    <div class="grid lg:grid-cols-2 gap-6">
-        <div class="rounded-xl bg-white p-5 shadow-sm">
-            <h2 class="font-bold mb-3">Trial Segera Berakhir</h2>
-            @forelse ($trialSoon as $s)
-                <div class="flex items-center justify-between py-2 border-b border-slate-100 last:border-0 text-sm">
-                    <span>{{ $this->schoolName($s->school_id) }}</span>
-                    <span class="text-amber-600 font-semibold">{{ $s->trial_berakhir_pada?->format('d M Y') }}</span>
+    <div class="grid gap-4 lg:grid-cols-2" style="margin-top: 16px;">
+        <section class="card rounded-2xl border">
+            <div class="card-head">
+                <div class="card-title">
+                    <span class="mini-icon orange"><x-icon name="clock" class="h-[19px] w-[19px]" /></span>
+                    <div>
+                        <h3>Trial Segera Berakhir</h3>
+                        <p>Tenant yang perlu dihubungi</p>
+                    </div>
+                </div>
+            </div>
+
+            @forelse ($trialSoon as $subscription)
+                <div class="setting-row">
+                    <div>
+                        <strong>{{ $this->schoolName($subscription->school_id) }}</strong>
+                        <p>{{ $subscription->plan?->nama ?? 'Paket trial' }}</p>
+                    </div>
+                    <span class="badge badge-orange">{{ $subscription->trial_berakhir_pada?->format('d M Y') ?? '—' }}</span>
                 </div>
             @empty
-                <p class="text-sm text-slate-400">Tidak ada.</p>
+                <div class="empty-state" style="padding: 28px 16px;">
+                    <div class="empty-symbol"><x-icon name="check-circle" class="h-6 w-6" /></div>
+                    <h3>Tidak ada trial mendesak</h3>
+                    <p>Semua trial masih memiliki waktu lebih dari 7 hari.</p>
+                </div>
             @endforelse
-        </div>
-        <div class="rounded-xl bg-white p-5 shadow-sm">
-            <h2 class="font-bold mb-3">Tagihan Overdue</h2>
-            @forelse ($overdue as $inv)
-                <div class="flex items-center justify-between py-2 border-b border-slate-100 last:border-0 text-sm">
-                    <span>{{ $inv->nama_sekolah_snapshot }} <span class="text-slate-400">· {{ $inv->nomor }}</span></span>
-                    <span class="text-danger font-semibold">Rp{{ number_format($inv->total, 0, ',', '.') }}</span>
+        </section>
+
+        <section class="card rounded-2xl border">
+            <div class="card-head">
+                <div class="card-title">
+                    <span class="mini-icon red"><x-icon name="alert-triangle" class="h-[19px] w-[19px]" /></span>
+                    <div>
+                        <h3>Tagihan Overdue</h3>
+                        <p>Prioritas penagihan platform</p>
+                    </div>
+                </div>
+            </div>
+
+            @forelse ($overdue as $invoice)
+                <div class="setting-row">
+                    <div>
+                        <strong>{{ $invoice->nama_sekolah_snapshot }}</strong>
+                        <p>{{ $invoice->nomor }}</p>
+                    </div>
+                    <span class="badge badge-red">Rp{{ number_format($invoice->total, 0, ',', '.') }}</span>
                 </div>
             @empty
-                <p class="text-sm text-slate-400">Tidak ada.</p>
+                <div class="empty-state" style="padding: 28px 16px;">
+                    <div class="empty-symbol"><x-icon name="check-circle" class="h-6 w-6" /></div>
+                    <h3>Tidak ada tagihan overdue</h3>
+                    <p>Seluruh tagihan platform dalam kondisi baik.</p>
+                </div>
             @endforelse
-        </div>
+        </section>
     </div>
 </div>

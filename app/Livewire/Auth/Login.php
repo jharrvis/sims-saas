@@ -86,7 +86,7 @@ class Login extends Component
         if ($user->mfaSecret?->isConfirmed()) {
             session(['mfa_pending_user_id' => $user->id]);
 
-            $this->redirect(route('mfa.verify'), navigate: true);
+            $this->redirect(route('mfa.verify'), navigate: false);
 
             return;
         }
@@ -101,7 +101,7 @@ class Login extends Component
 
         // Operator platform langsung ke panel platform, bukan dashboard sekolah.
         // Akun peran ganda (platform + sekolah) memilih dulu di pilih-peran.
-        $this->redirect(route($user->ruteSetelahLogin()), navigate: true);
+        $this->redirect(route($user->ruteSetelahLogin()), navigate: false);
     }
 
     public function back(): void
@@ -152,7 +152,7 @@ class Login extends Component
         // 2FA opt-in: minta verifikasi TOTP bila user mengaktifkannya.
         if ($user->mfaSecret?->isConfirmed()) {
             session(['mfa_pending_user_id' => $user->id]);
-            $this->redirect(route('mfa.verify'), navigate: true);
+            $this->redirect(route('mfa.verify'), navigate: false);
 
             return;
         }
@@ -165,7 +165,7 @@ class Login extends Component
             'ip_address' => request()->ip(),
         ]);
 
-        $this->redirect(route($user->ruteSetelahLogin()), navigate: true);
+        $this->redirect(route($user->ruteSetelahLogin()), navigate: false);
     }
 
     private function normalize(string $phone): string
@@ -181,6 +181,9 @@ class Login extends Component
 
     public function render(): View
     {
-        return view('livewire.auth.login')->layout('layouts.guest', ['title' => 'Masuk']);
+        return view('livewire.auth.login')->layout('layouts.auth', [
+            'title' => 'Masuk',
+            'variant' => 'desktop',
+        ]);
     }
 }

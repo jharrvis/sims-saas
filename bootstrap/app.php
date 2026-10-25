@@ -13,6 +13,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
+use Illuminate\Session\Middleware\StartSession;
 use Spatie\Permission\Middleware\PermissionMiddleware;
 use Spatie\Permission\Middleware\RoleMiddleware;
 use Spatie\Permission\Middleware\RoleOrPermissionMiddleware;
@@ -39,6 +40,26 @@ $app = Application::configure(basePath: dirname(__DIR__))
             ResolveTenant::class,
             SetSpatieTeam::class,
         ]);
+
+        // Keanggotaan grup web saja tidak menentukan urutan eksekusi: ketika
+        // keduanya tidak ada di middleware priority list, router menempatkannya
+        // SETELAH SubstituteBindings. Akibatnya route model binding
+        // (GET /guru/{employee}, /siswa/{id}, /kelas/{id}, dst.) melempar
+        // TenantContextMissing sebelum tenant sempat diresolusi, sementara
+        // route index tetap 200 karena tidak punya binding.
+        // Dua baris berikut menempatkan keduanya tepat setelah StartSession
+        // sehingga urutan efektifnya:
+        // StartSession -> ResolveTenant -> SetSpatieTeam -> SubstituteBindings
+        // ($request->user() sudah tersedia, dan `permission` tetap terakhir).
+        $middleware->appendToPriorityList(
+            StartSession::class,
+            ResolveTenant::class,
+        );
+
+        $middleware->appendToPriorityList(
+            ResolveTenant::class,
+            SetSpatieTeam::class,
+        );
 
         // API: resolusi tenant + team harus terjadi SEBELUM SubstituteBindings
         // agar route model binding ter-scope tenant yang benar.

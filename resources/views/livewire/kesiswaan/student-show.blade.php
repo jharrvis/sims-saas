@@ -42,55 +42,19 @@
     <div class="rounded-xl border border-slate-200 bg-white dark:bg-boxdark dark:border-slate-700 p-6">
         <h2 class="font-semibold text-slate-800 dark:text-white mb-4">Wali Murid</h2>
 
-        @can('wali-murid.link')
-            <form wire:submit="attachGuardian" class="flex flex-col sm:flex-row gap-3 mb-5">
-                <select wire:model="guardian_id" aria-label="Pilih wali"
-                        class="flex-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-transparent py-2.5 px-4 text-sm outline-none focus:border-primary dark:text-white dark:bg-boxdark">
-                    <option value="">— Pilih wali —</option>
-                    @foreach ($guardians as $w)
-                        <option value="{{ $w->id }}">{{ $w->nama }}@if($w->no_wa) ({{ $w->no_wa }})@endif</option>
-                    @endforeach
-                </select>
-                <select wire:model="hubungan" aria-label="Hubungan"
-                        class="rounded-lg border border-slate-200 dark:border-slate-700 bg-transparent py-2.5 px-4 text-sm outline-none focus:border-primary dark:text-white dark:bg-boxdark">
-                    <option value="ayah">Ayah</option>
-                    <option value="ibu">Ibu</option>
-                    <option value="orang_tua">Orang Tua</option>
-                    <option value="kakek">Kakek</option>
-                    <option value="nenek">Nenek</option>
-                    <option value="saudara">Saudara</option>
-                    <option value="wali">Wali</option>
-                </select>
-                <button type="submit" wire:loading.attr="disabled" class="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60">
-                    <i data-lucide="link" class="w-4 h-4"></i> Tautkan
-                </button>
-            </form>
-            @error('guardian_id') <p class="mb-3 text-xs text-danger">{{ $message }}</p> @enderror
-        @endcan
-
         @if ($student->guardians->isEmpty())
             <p class="text-sm text-slate-500">Belum ada data wali.</p>
         @else
             <ul class="divide-y divide-slate-100 dark:divide-slate-700/50">
                 @foreach ($student->guardians as $wali)
-                    <li class="py-3 flex items-center justify-between">
-                        <div>
-                            <p class="font-medium text-slate-800 dark:text-white">{{ $wali->nama }}</p>
-                            <p class="text-xs text-slate-500">{{ ucfirst($wali->pivot->hubungan) }} · {{ $wali->no_wa }}</p>
-                        </div>
-                        @can('wali-murid.link')
-                            <button wire:click="detachGuardian({{ $wali->id }})" wire:confirm="Lepas tautan wali ini?"
-                                    class="p-2 rounded-lg text-slate-400 hover:text-danger hover:bg-red-50 dark:hover:bg-red-900/20" aria-label="Lepas {{ $wali->nama }}">
-                                <i data-lucide="unlink" class="w-4 h-4"></i>
-                            </button>
-                        @endcan
+                    <li class="py-3">
+                        <p class="font-medium text-slate-800 dark:text-white">{{ $wali->nama }}</p>
+                        <p class="text-xs text-slate-500">{{ ucfirst($wali->pivot->hubungan) }} · {{ $wali->no_wa }}</p>
                     </li>
                 @endforeach
             </ul>
         @endif
     </div>
-
-    <livewire:kepatuhan.consent-panel subject-type="siswa" :subject-id="$student->id" />
 
     <a href="{{ route('siswa.index') }}" class="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-slate-700 dark:hover:text-slate-300">
         ← Kembali ke daftar siswa

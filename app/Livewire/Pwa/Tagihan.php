@@ -21,7 +21,7 @@ class Tagihan extends Component
         $items = $student
             ? Invoice::with('feeType:id,nama')
                 ->where('student_id', $student->id)
-                ->orderByRaw("FIELD(status, 'overdue','unpaid','partial','paid')")
+                ->orderByRaw("CASE status WHEN 'overdue' THEN 1 WHEN 'unpaid' THEN 2 WHEN 'partial' THEN 3 WHEN 'paid' THEN 4 ELSE 5 END")
                 ->orderByDesc('jatuh_tempo')
                 ->get()
             : collect();
@@ -29,9 +29,20 @@ class Tagihan extends Component
         $totalAktif = $items->whereIn('status', ['unpaid', 'partial', 'overdue'])
             ->sum(fn ($i) => (float) $i->sisa());
 
+        $totalDibayar = $items->sum(fn ($invoice): float => (float) $invoice->dibayar);
+        $jumlahAktif = $items->whereIn('status', ['unpaid', 'partial', 'overdue'])->count();
+        $jatuhTempoTerdekat = $items
+            ->whereIn('status', ['unpaid', 'partial', 'overdue'])
+            ->filter(fn ($invoice): bool => $invoice->jatuh_tempo !== null)
+            ->sortBy('jatuh_tempo')
+            ->first()?->jatuh_tempo;
+
         return view('livewire.pwa.tagihan', [
             'items' => $items,
             'totalAktif' => $totalAktif,
+            'totalDibayar' => $totalDibayar,
+            'jumlahAktif' => $jumlahAktif,
+            'jatuhTempoTerdekat' => $jatuhTempoTerdekat,
         ])->layout('layouts.pwa', [
             'title' => 'Tagihan',
             'schoolName' => $student?->school?->nama,

@@ -1,137 +1,235 @@
-<div>
+<div class="page-stack">
     @if (session('ok'))
-        <div class="mb-4 rounded-lg bg-success/10 text-success px-4 py-2.5 text-sm">{{ session('ok') }}</div>
+        <div class="platform-alert platform-alert-success" role="status" aria-live="polite">
+            <x-icon name="check-circle" class="h-5 w-5" />
+            <span>{{ session('ok') }}</span>
+        </div>
     @endif
 
-    <a href="{{ route('platform.tenants') }}" class="text-sm text-slate-500 hover:underline">← Kembali ke daftar tenant</a>
-    <div class="flex flex-wrap items-center justify-between gap-3">
-        <h1 class="text-2xl font-extrabold mt-1 mb-1">{{ $school->nama }}</h1>
+    @php
+        $schoolStatusClass = match ($school->status_langganan) {
+            'active' => 'badge-green',
+            'trialing' => 'badge-orange',
+            'past_due', 'suspended' => 'badge-red',
+            default => 'badge-gray',
+        };
+        $schoolStatusLabel = match ($school->status_langganan) {
+            'active' => 'Aktif',
+            'trialing' => 'Trial',
+            'past_due' => 'Lewat tempo',
+            'suspended' => 'Ditangguhkan',
+            'cancelled' => 'Dibatalkan',
+            default => ucfirst(str_replace('_', ' ', $school->status_langganan)),
+        };
+        $activeModuleCount = $tenantModules->filter(fn ($tenantModule) => $tenantModule->aktif)->count();
+    @endphp
+
+    <div class="page-header platform-detail-header">
+        <div>
+            <a href="{{ route('platform.tenants') }}" class="platform-back-link">
+                <x-icon name="arrow-left" class="h-4 w-4" /> Kembali ke daftar tenant
+            </a>
+            <span class="eyebrow">Platform / Detail Tenant</span>
+            <div class="platform-title-row">
+                <h2 class="platform-page-title">{{ $school->nama }}</h2>
+                <span class="badge {{ $schoolStatusClass }}">{{ $schoolStatusLabel }}</span>
+            </div>
+            <p>{{ $school->jenjang }} @if ($school->npsn) · NPSN {{ $school->npsn }} @endif · ID Tenant #{{ $school->id }}</p>
+        </div>
         @if (auth()->user()?->hasPermissionTo('platform.tenant.impersonate', 'platform'))
-            <button wire:click="impersonate" wire:confirm="Masuk sebagai admin {{ $school->nama }}? Aksi ini dicatat di audit log."
-                    class="rounded-lg bg-amber-500 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-600">
-                Masuk sebagai Admin
-            </button>
+            <div class="page-actions">
+                <button type="button" wire:click="impersonate"
+                    wire:confirm="Masuk sebagai admin {{ $school->nama }}? Aksi ini dicatat di audit log."
+                    wire:loading.attr="disabled" wire:target="impersonate" class="btn btn-outline">
+                    <x-icon name="user-check" class="h-4 w-4" />
+                    <span wire:loading.remove wire:target="impersonate">Masuk sebagai Admin</span>
+                    <span wire:loading wire:target="impersonate">Membuka workspace...</span>
+                </button>
+            </div>
         @endif
     </div>
-    <p class="text-sm text-slate-500 mb-6">{{ $school->jenjang }}@if($school->npsn) · NPSN {{ $school->npsn }}@endif · Status: <span class="font-semibold">{{ str_replace('_', ' ', $school->status_langganan) }}</span></p>
 
-    <div class="grid lg:grid-cols-2 gap-6">
-        {{-- Langganan --}}
-        <div class="rounded-xl bg-white p-5 shadow-sm">
-            <h2 class="font-bold mb-3">Langganan</h2>
+    <div class="stats-grid platform-tenant-stats">
+        <article class="card stat-card">
+            <div class="stat-top"><span class="mini-icon blue"><x-icon name="users" class="h-5 w-5" /></span><span class="badge badge-blue">Aktif</span></div>
+            <div class="stat-value">{{ number_format($siswaCount, 0, ',', '.') }}</div>
+            <div class="stat-caption">Siswa aktif</div>
+            <div class="stat-footer"><span class="stat-note">Pemakaian tenant saat ini</span></div>
+        </article>
+        <article class="card stat-card">
+            <div class="stat-top"><span class="mini-icon purple"><x-icon name="puzzle" class="h-5 w-5" /></span><span class="badge badge-purple">{{ $modules->count() }} tersedia</span></div>
+            <div class="stat-value">{{ $activeModuleCount }}</div>
+            <div class="stat-caption">Modul aktif</div>
+            <div class="stat-footer"><span class="stat-note">Sesuai paket dan override</span></div>
+        </article>
+        <article class="card stat-card">
+            <div class="stat-top"><span class="mini-icon orange"><x-icon name="settings" class="h-5 w-5" /></span><span class="badge badge-orange">Khusus</span></div>
+            <div class="stat-value">{{ $overrides->count() }}</div>
+            <div class="stat-caption">Override kuota</div>
+            <div class="stat-footer"><span class="stat-note">Aturan khusus tenant</span></div>
+        </article>
+        <article class="card stat-card">
+            <div class="stat-top"><span class="mini-icon green"><x-icon name="receipt" class="h-5 w-5" /></span><span class="badge badge-green">10 terbaru</span></div>
+            <div class="stat-value">{{ $invoices->count() }}</div>
+            <div class="stat-caption">Tagihan tercatat</div>
+            <div class="stat-footer"><span class="stat-note">Riwayat langganan terbaru</span></div>
+        </article>
+    </div>
+
+    <div class="platform-detail-grid">
+        <section class="card" aria-labelledby="subscription-title">
+            <div class="card-head">
+                <div class="card-title">
+                    <span class="mini-icon green"><x-icon name="repeat" class="h-[19px] w-[19px]" /></span>
+                    <div><h3 id="subscription-title">Langganan</h3><p>Paket dan periode layanan tenant</p></div>
+                </div>
+                @if ($subscription)<span class="badge badge-green">{{ ucfirst($subscription->status) }}</span>@endif
+            </div>
+
             @if ($subscription)
-                <dl class="text-sm space-y-1.5 mb-4">
-                    <div class="flex justify-between"><dt class="text-slate-500">Paket</dt><dd class="font-semibold">{{ $subscription->plan?->nama }} ({{ $subscription->periode }})</dd></div>
-                    <div class="flex justify-between"><dt class="text-slate-500">Status</dt><dd class="font-semibold">{{ $subscription->status }}</dd></div>
-                    @if ($subscription->trial_berakhir_pada)
-                        <div class="flex justify-between"><dt class="text-slate-500">Trial berakhir</dt><dd class="font-semibold">{{ $subscription->trial_berakhir_pada->format('d M Y') }}</dd></div>
-                    @endif
-                    @if ($subscription->periode_berakhir_pada)
-                        <div class="flex justify-between"><dt class="text-slate-500">Periode berakhir</dt><dd class="font-semibold">{{ $subscription->periode_berakhir_pada->format('d M Y') }}</dd></div>
-                    @endif
+                <dl class="platform-definition-list">
+                    <div><dt>Paket</dt><dd>{{ $subscription->plan?->nama ?? '—' }}</dd></div>
+                    <div><dt>Periode</dt><dd>{{ ucfirst($subscription->periode) }}</dd></div>
+                    @if ($subscription->trial_berakhir_pada)<div><dt>Trial berakhir</dt><dd>{{ $subscription->trial_berakhir_pada->format('d M Y') }}</dd></div>@endif
+                    @if ($subscription->periode_berakhir_pada)<div><dt>Periode berakhir</dt><dd>{{ $subscription->periode_berakhir_pada->format('d M Y') }}</dd></div>@endif
                 </dl>
             @else
-                <p class="text-sm text-slate-400 mb-4">Belum ada langganan.</p>
+                <div class="platform-inline-empty"><x-icon name="calendar-x" class="h-5 w-5" /><span>Belum ada langganan aktif.</span></div>
             @endif
-            <h3 class="text-sm font-bold mb-2">Buat / Ganti Langganan</h3>
-            <div class="flex flex-wrap gap-2 items-end">
-                <div>
-                    <label class="text-xs text-slate-500">Paket</label>
-                    <select wire:model="plan_id" class="block rounded-lg border border-slate-200 py-2 px-3 text-sm">
-                        <option value="">— Pilih —</option>
-                        @foreach ($plans as $p)
-                            <option value="{{ $p->id }}">{{ $p->nama }} — Rp{{ number_format($p->harga_bulanan, 0, ',', '.') }}/bln</option>
-                        @endforeach
-                    </select>
-                    @error('plan_id') <p class="text-xs text-danger">{{ $message }}</p> @enderror
-                </div>
-                <div>
-                    <label class="text-xs text-slate-500">Periode</label>
-                    <select wire:model="periode" class="block rounded-lg border border-slate-200 py-2 px-3 text-sm">
-                        <option value="bulanan">Bulanan</option>
-                        <option value="tahunan">Tahunan</option>
-                    </select>
-                </div>
-                <label class="inline-flex items-center gap-1.5 text-sm pb-2">
-                    <input type="checkbox" wire:model="trial" class="accent-primary"> Trial 30 hari
-                </label>
-                <button wire:click="buatLangganan" wire:confirm="Buat langganan baru? Langganan aktif sebelumnya dibatalkan."
-                        class="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white">Simpan</button>
-            </div>
-        </div>
 
-        {{-- Kuota --}}
-        <div class="rounded-xl bg-white p-5 shadow-sm">
-            <h2 class="font-bold mb-3">Kuota & Pemakaian ({{ now()->format('M Y') }})</h2>
-            <dl class="text-sm space-y-1.5 mb-3">
-                <div class="flex justify-between"><dt class="text-slate-500">Siswa aktif</dt><dd class="font-semibold">{{ $siswaCount }}</dd></div>
-                @foreach ($usages as $u)
-                    <div class="flex justify-between"><dt class="text-slate-500">{{ $u->metrik }}</dt><dd class="font-semibold">{{ $u->nilai }}</dd></div>
+            @if (auth()->user()?->hasPermissionTo('platform.tenant.create', 'platform'))
+                <div class="platform-card-section">
+                    <h4>Buat atau ganti langganan</h4>
+                    <div class="platform-compact-form">
+                        <div class="form-group platform-form-grow">
+                            <label for="plan_id">Paket</label>
+                            <select id="plan_id" wire:model="plan_id" class="select-field">
+                                <option value="">Pilih paket</option>
+                                @foreach ($plans as $plan)
+                                    <option value="{{ $plan->id }}">{{ $plan->nama }} — Rp{{ number_format($plan->harga_bulanan, 0, ',', '.') }}/bulan</option>
+                                @endforeach
+                            </select>
+                            @error('plan_id') <span class="platform-field-error" role="alert">{{ $message }}</span> @enderror
+                        </div>
+                        <div class="form-group">
+                            <label for="periode">Periode</label>
+                            <select id="periode" wire:model="periode" class="select-field">
+                                <option value="bulanan">Bulanan</option>
+                                <option value="tahunan">Tahunan</option>
+                            </select>
+                        </div>
+                        <label class="platform-check-control"><input type="checkbox" wire:model="trial"><span>Trial 30 hari</span></label>
+                        <button type="button" wire:click="buatLangganan" wire:confirm="Buat langganan baru? Langganan aktif sebelumnya dibatalkan."
+                            wire:loading.attr="disabled" wire:target="buatLangganan" class="btn btn-primary">
+                            <span wire:loading.remove wire:target="buatLangganan">Simpan</span><span wire:loading wire:target="buatLangganan">Menyimpan...</span>
+                        </button>
+                    </div>
+                </div>
+            @endif
+        </section>
+
+        <section class="card" aria-labelledby="quota-title">
+            <div class="card-head">
+                <div class="card-title">
+                    <span class="mini-icon orange"><x-icon name="bar-chart-3" class="h-[19px] w-[19px]" /></span>
+                    <div><h3 id="quota-title">Kuota & Pemakaian</h3><p>Periode {{ now()->locale('id')->translatedFormat('F Y') }}</p></div>
+                </div>
+            </div>
+            <dl class="platform-definition-list">
+                <div><dt>Siswa aktif</dt><dd>{{ number_format($siswaCount, 0, ',', '.') }}</dd></div>
+                @foreach ($usages as $usage)
+                    <div wire:key="tenant-usage-{{ $usage->id }}"><dt>{{ str_replace('_', ' ', $usage->metrik) }}</dt><dd>{{ number_format($usage->nilai, 0, ',', '.') }}</dd></div>
                 @endforeach
             </dl>
-            <h3 class="text-sm font-bold mb-2">Override Kuota</h3>
-            @foreach ($overrides as $ov)
-                <div class="flex items-center justify-between text-sm py-1.5 border-b border-slate-100 last:border-0">
-                    <span>{{ $ov->metrik }} → <span class="font-semibold">{{ $ov->batas_custom ?? 'tanpa batas' }}</span>
-                        @if (! $ov->isBerlaku()) <span class="text-xs text-danger">(kedaluwarsa)</span> @endif
-                    </span>
-                    <button wire:click="hapusOverride({{ $ov->id }})" wire:confirm="Hapus override ini?" class="text-xs text-danger font-semibold">Hapus</button>
-                </div>
-            @endforeach
-            <div class="flex flex-wrap gap-2 items-end mt-3">
-                <div>
-                    <label class="text-xs text-slate-500">Metrik</label>
-                    <select wire:model="ov_metrik" class="block rounded-lg border border-slate-200 py-2 px-3 text-sm">
-                        <option value="">—</option>
-                        <option value="siswa_aktif">siswa_aktif</option>
-                        <option value="user_staf">user_staf</option>
-                        <option value="storage_mb">storage_mb</option>
-                        <option value="wa_bulanan">wa_bulanan</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="text-xs text-slate-500">Batas (kosong = tanpa batas)</label>
-                    <input type="number" wire:model="ov_batas" min="0" class="block rounded-lg border border-slate-200 py-2 px-3 text-sm w-32">
-                </div>
-                <div class="flex-1 min-w-40">
-                    <label class="text-xs text-slate-500">Alasan</label>
-                    <input type="text" wire:model="ov_alasan" class="block w-full rounded-lg border border-slate-200 py-2 px-3 text-sm">
-                </div>
-                <button wire:click="tambahOverride" class="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white">Simpan</button>
-            </div>
-            @error('ov_metrik') <p class="text-xs text-danger mt-1">{{ $message }}</p> @enderror
-            @error('ov_alasan') <p class="text-xs text-danger mt-1">{{ $message }}</p> @enderror
-        </div>
 
-        {{-- Modul --}}
-        <div class="rounded-xl bg-white p-5 shadow-sm">
-            <h2 class="font-bold mb-3">Modul Tenant</h2>
-            <div class="space-y-1.5 max-h-80 overflow-y-auto">
-                @foreach ($modules as $m)
-                    @php $tm = $tenantModules->get($m->id); @endphp
-                    <div class="flex items-center justify-between text-sm py-1.5 border-b border-slate-100 last:border-0">
-                        <span>{{ $m->nama }} <span class="text-xs text-slate-400">({{ $m->kategori }})</span></span>
-                        <button wire:click="toggleModule({{ $m->id }})"
-                                class="text-[11px] font-bold px-2.5 py-1 rounded-full {{ $tm?->aktif ? 'bg-success/10 text-success' : 'bg-slate-100 text-slate-500' }}">
-                            {{ $tm?->aktif ? 'AKTIF' : 'NONAKTIF' }}
+            <div class="platform-card-section">
+                <h4>Override kuota</h4>
+                <div class="platform-record-list">
+                    @forelse ($overrides as $override)
+                        <div class="platform-record-row" wire:key="tenant-override-{{ $override->id }}">
+                            <span><strong>{{ str_replace('_', ' ', $override->metrik) }}</strong><small>{{ $override->batas_custom === null ? 'Tanpa batas' : number_format($override->batas_custom, 0, ',', '.') }}@if (! $override->isBerlaku()) · Kedaluwarsa @endif</small></span>
+                            @if (auth()->user()?->hasPermissionTo('platform.tenant.create', 'platform'))
+                                <button type="button" wire:click="hapusOverride({{ $override->id }})" wire:confirm="Hapus override ini?"
+                                    wire:loading.attr="disabled" wire:target="hapusOverride({{ $override->id }})" class="table-action danger"
+                                    aria-label="Hapus override {{ $override->metrik }}"><x-icon name="trash-2" class="h-4 w-4" /></button>
+                            @endif
+                        </div>
+                    @empty
+                        <div class="platform-inline-empty"><x-icon name="settings" class="h-5 w-5" /><span>Belum ada override khusus.</span></div>
+                    @endforelse
+                </div>
+
+                @if (auth()->user()?->hasPermissionTo('platform.tenant.create', 'platform'))
+                    <div class="platform-compact-form platform-quota-form">
+                        <div class="form-group">
+                            <label for="ov_metrik">Metrik</label>
+                            <select id="ov_metrik" wire:model="ov_metrik" class="select-field">
+                                <option value="">Pilih metrik</option><option value="siswa_aktif">Siswa aktif</option><option value="user_staf">User staf</option><option value="storage_mb">Storage MB</option><option value="wa_bulanan">WA bulanan</option>
+                            </select>
+                            @error('ov_metrik') <span class="platform-field-error" role="alert">{{ $message }}</span> @enderror
+                        </div>
+                        <div class="form-group">
+                            <label for="ov_batas">Batas</label>
+                            <input id="ov_batas" type="number" wire:model="ov_batas" min="0" class="field platform-short-field" placeholder="Tanpa batas">
+                            @error('ov_batas') <span class="platform-field-error" role="alert">{{ $message }}</span> @enderror
+                        </div>
+                        <div class="form-group platform-form-grow">
+                            <label for="ov_alasan">Alasan</label>
+                            <input id="ov_alasan" type="text" wire:model="ov_alasan" class="field" placeholder="Contoh: penyesuaian kontrak">
+                            @error('ov_alasan') <span class="platform-field-error" role="alert">{{ $message }}</span> @enderror
+                        </div>
+                        <button type="button" wire:click="tambahOverride" wire:loading.attr="disabled" wire:target="tambahOverride" class="btn btn-primary">
+                            <span wire:loading.remove wire:target="tambahOverride">Tambah</span><span wire:loading wire:target="tambahOverride">Menyimpan...</span>
                         </button>
+                    </div>
+                @endif
+            </div>
+        </section>
+
+        <section class="card" aria-labelledby="modules-title">
+            <div class="card-head">
+                <div class="card-title">
+                    <span class="mini-icon purple"><x-icon name="puzzle" class="h-[19px] w-[19px]" /></span>
+                    <div><h3 id="modules-title">Modul Tenant</h3><p>{{ $activeModuleCount }} dari {{ $modules->count() }} modul aktif</p></div>
+                </div>
+            </div>
+            <div class="platform-module-list sims-scroll">
+                @foreach ($modules as $module)
+                    @php $tenantModule = $tenantModules->get($module->id); @endphp
+                    <div class="platform-module-row" wire:key="tenant-module-{{ $module->id }}">
+                        <span><strong>{{ $module->nama }}</strong><small>{{ ucfirst($module->kategori) }}</small></span>
+                        @if (auth()->user()?->hasPermissionTo('platform.module.toggle', 'platform'))
+                            <button type="button" wire:click="toggleModule({{ $module->id }})" wire:loading.attr="disabled"
+                                wire:target="toggleModule({{ $module->id }})" class="platform-module-toggle {{ $tenantModule?->aktif ? 'is-active' : '' }}"
+                                aria-pressed="{{ $tenantModule?->aktif ? 'true' : 'false' }}">
+                                <span aria-hidden="true"></span>{{ $tenantModule?->aktif ? 'Aktif' : 'Nonaktif' }}
+                            </button>
+                        @else
+                            <span class="badge {{ $tenantModule?->aktif ? 'badge-green' : 'badge-gray' }}">{{ $tenantModule?->aktif ? 'Aktif' : 'Nonaktif' }}</span>
+                        @endif
                     </div>
                 @endforeach
             </div>
-        </div>
+        </section>
 
-        {{-- Tagihan --}}
-        <div class="rounded-xl bg-white p-5 shadow-sm">
-            <h2 class="font-bold mb-3">Tagihan Langganan</h2>
-            @forelse ($invoices as $inv)
-                <div class="flex items-center justify-between text-sm py-1.5 border-b border-slate-100 last:border-0">
-                    <span>{{ $inv->nomor }} <span class="text-slate-400">· {{ $inv->status }}</span></span>
-                    <span class="font-semibold">Rp{{ number_format($inv->total, 0, ',', '.') }}</span>
+        <section class="card" aria-labelledby="invoices-title">
+            <div class="card-head">
+                <div class="card-title">
+                    <span class="mini-icon blue"><x-icon name="receipt" class="h-[19px] w-[19px]" /></span>
+                    <div><h3 id="invoices-title">Tagihan Langganan</h3><p>Sepuluh transaksi terbaru tenant</p></div>
                 </div>
-            @empty
-                <p class="text-sm text-slate-400">Belum ada tagihan.</p>
-            @endforelse
-            <a href="{{ route('platform.invoices') }}" class="text-sm text-primary font-semibold hover:underline mt-3 inline-block">Kelola tagihan →</a>
-        </div>
+                <a href="{{ route('platform.invoices') }}" class="action-link">Semua tagihan <x-icon name="arrow-right" class="h-3.5 w-3.5" /></a>
+            </div>
+            <div class="platform-record-list">
+                @forelse ($invoices as $invoice)
+                    <div class="platform-record-row" wire:key="tenant-invoice-{{ $invoice->id }}">
+                        <span><strong class="platform-tabular">{{ $invoice->nomor }}</strong><small>Jatuh tempo {{ $invoice->jatuh_tempo?->format('d M Y') ?? '—' }}</small></span>
+                        <span class="platform-invoice-value"><strong>Rp{{ number_format($invoice->total, 0, ',', '.') }}</strong><span class="badge {{ $invoice->status === 'paid' ? 'badge-green' : ($invoice->status === 'overdue' ? 'badge-red' : 'badge-orange') }}">{{ ucfirst($invoice->status) }}</span></span>
+                    </div>
+                @empty
+                    <div class="empty-state platform-compact-empty"><div class="empty-symbol"><x-icon name="receipt" class="h-6 w-6" /></div><h3>Belum ada tagihan</h3><p>Tagihan langganan tenant akan tampil di sini.</p></div>
+                @endforelse
+            </div>
+        </section>
     </div>
 </div>

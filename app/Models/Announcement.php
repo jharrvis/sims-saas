@@ -79,6 +79,39 @@ class Announcement extends Model
             ->where(fn (Builder $q): Builder => $q->whereNull('tayang_sampai')->orWhereDate('tayang_sampai', '>=', $tanggal));
     }
 
+    /**
+     * Batasi pengumuman PWA ke audiens peran dan kelas siswa aktif.
+     *
+     * @param  array<int>  $rombelIds
+     * @return Builder<Announcement>
+     */
+    public function scopeVisibleToPwa(Builder $query, ?string $role, array $rombelIds = []): Builder
+    {
+        $rombelIds = array_values(array_unique(array_map('intval', $rombelIds)));
+
+        return $query->where(function (Builder $audience) use ($role, $rombelIds): void {
+            $audience->where('target_type', 'semua');
+
+            if ($role !== null) {
+                $audience->orWhere(function (Builder $roles) use ($role): void {
+                    $roles->where('target_type', 'peran')
+                        ->whereJsonContains('target_data->roles', $role);
+                });
+            }
+
+            if ($rombelIds !== []) {
+                $audience->orWhere(function (Builder $classes) use ($rombelIds): void {
+                    $classes->where('target_type', 'kelas')
+                        ->where(function (Builder $targets) use ($rombelIds): void {
+                            foreach ($rombelIds as $rombelId) {
+                                $targets->orWhereJsonContains('target_data->rombel_ids', $rombelId);
+                            }
+                        });
+                });
+            }
+        });
+    }
+
     public function getTargetLabelAttribute(): string
     {
         /** @var array<string,mixed>|null $target */

@@ -12,9 +12,18 @@ use Livewire\Component;
 
 class ModuleIndex extends Component
 {
+    public string $search = '';
+
     public function render(): View
     {
-        $modules = Module::orderBy('kategori')->orderBy('nama')->get();
+        $modules = Module::query()
+            ->when($this->search !== '', fn ($query) => $query->where(fn ($nested) => $nested
+                ->where('nama', 'like', '%'.$this->search.'%')
+                ->orWhere('kode', 'like', '%'.$this->search.'%')
+                ->orWhere('kategori', 'like', '%'.$this->search.'%')))
+            ->orderBy('kategori')
+            ->orderBy('nama')
+            ->get();
 
         $counts = TenantModule::withoutGlobalScope(SchoolScope::class)
             ->where('aktif', true)

@@ -1,16 +1,21 @@
-<div class="px-4 pt-4 pb-28">
-    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 text-center mt-4">
-        <div class="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto">
-            <x-icon name="user-x" class="w-8 h-8 text-slate-400" />
+<div class="screen app-screen screen-enter unlinked-screen">
+    <section class="surface-card unlinked-card" aria-labelledby="unlinked-title">
+        <span class="unlinked-icon"><x-icon name="user-x" class="h-8 w-8" /></span>
+        <span class="overline">PERLU BANTUAN SEKOLAH</span>
+        <h1 id="unlinked-title">Akun belum terhubung</h1>
+        <p>Nomor WhatsApp akun ini belum terhubung dengan data siswa atau wali. Hubungi tata usaha sekolah agar nomor Anda didaftarkan pada profil yang benar.</p>
+
+        <div class="unlinked-steps">
+            <span><strong>1</strong><small>Hubungi tata usaha sekolah</small></span>
+            <span><strong>2</strong><small>Minta nomor akun ditautkan</small></span>
+            <span><strong>3</strong><small>Masuk kembali setelah diperbarui</small></span>
         </div>
-        <h2 class="font-bold mt-4 text-slate-800">Akun Belum Terhubung</h2>
-        <p class="text-sm text-slate-500 mt-2 leading-relaxed">
-            Nomor WhatsApp ini belum terdaftar sebagai siswa atau wali murid di sekolah mana pun.
-            Hubungi tata usaha sekolah untuk mendaftarkan nomor Anda.
-        </p>
-        <form method="POST" action="{{ route('pwa.logout') }}" class="mt-6">
+
+        <form method="POST" action="{{ route('pwa.logout') }}">
             @csrf
-            <button class="text-sm font-bold text-primary">Keluar dan ganti nomor</button>
+            <button class="sims-btn sims-btn-primary sims-btn-lg w-full" type="submit">
+                <x-icon name="log-out" class="h-4 w-4" /> Keluar dan ganti akun
+            </button>
         </form>
-    </div>
+    </section>
 </div>

@@ -1,55 +1,63 @@
-<div class="px-4 pt-4 pb-28">
+<div class="screen app-screen screen-enter">
     @php
-        $rekapWarna = [
-            'H' => ['bg-success/10', 'text-success'],
-            'I' => ['bg-warning/10', 'text-warning'],
-            'S' => ['bg-primary/10', 'text-primary'],
-            'A' => ['bg-danger/10', 'text-danger'],
-        ];
-        $statusIkon = [
-            'H' => ['check', 'bg-success/15', 'text-success'],
-            'I' => ['info', 'bg-warning/15', 'text-warning'],
-            'S' => ['info', 'bg-primary/15', 'text-primary'],
-            'A' => ['x', 'bg-danger/15', 'text-danger'],
-        ];
+        $attendanceTotal = $rekap->sum();
+        $presentPercentage = $attendanceTotal > 0 ? (int) round(($rekap['H'] ?? 0) / $attendanceTotal * 100) : 0;
+        $metricTones = ['H' => 'green', 'I' => 'amber', 'S' => 'blue', 'A' => 'coral'];
     @endphp
 
-    {{-- Ringkasan (design siswa/absensi.html) --}}
-    <div class="grid grid-cols-4 gap-2 mb-4">
-        @foreach (['H', 'I', 'S', 'A'] as $kode)
-            @php $w = $rekapWarna[$kode]; @endphp
-            <div class="{{ $w[0] }} rounded-xl p-3 text-center">
-                <p class="text-xl font-extrabold {{ $w[1] }}">{{ $rekap[$kode] ?? 0 }}</p>
-                <p class="text-[10px] {{ $w[1] }} font-medium">{{ $labels[$kode] }}</p>
-            </div>
-        @endforeach
+    <div class="page-title">
+        <span class="overline">REKAP BULANAN</span>
+        <h1>{{ now()->locale('id')->isoFormat('MMMM YYYY') }}</h1>
+        <p>{{ $presentPercentage }}% kehadiran dari {{ $attendanceTotal }} catatan absensi.</p>
     </div>
-    <p class="text-[11px] text-slate-400 mb-3">Rekap bulan {{ now()->locale('id')->monthName }}</p>
 
-    <h3 class="font-bold text-slate-800 text-sm mb-3">Detail Absensi</h3>
-    <div class="space-y-2">
-        @forelse ($items as $a)
-            @php $ikon = $statusIkon[$a->status] ?? $statusIkon['H']; @endphp
-            <div class="bg-white rounded-xl p-3.5 shadow-sm border border-slate-100 flex items-center gap-3">
-                <div class="text-center min-w-[36px]">
-                    <p class="text-xs text-slate-400">{{ $a->tanggal->locale('id')->isoFormat('ddd') }}</p>
-                    <p class="text-lg font-extrabold text-slate-800">{{ $a->tanggal->locale('id')->isoFormat('D') }}</p>
-                </div>
-                <div class="w-px h-8 bg-slate-100"></div>
-                <div class="flex-1 min-w-0">
-                    <p class="text-sm font-semibold {{ $a->status === 'H' ? 'text-slate-700' : ($a->status === 'A' ? 'text-danger' : 'text-primary') }}">{{ $labels[$a->status] ?? $a->status }}</p>
-                    <p class="text-xs text-slate-400 truncate">{{ $a->keterangan ?: $a->tanggal->locale('id')->isoFormat('dddd, D MMM Y') }}</p>
-                </div>
-                <span class="w-7 h-7 rounded-full {{ $ikon[1] }} flex items-center justify-center shrink-0">
-                    <x-icon :name="$ikon[0]" class="w-4 h-4 {{ $ikon[2] }}" />
+    <section class="attendance-summary" aria-label="Ringkasan absensi bulan ini">
+        @foreach (['H', 'I', 'S', 'A'] as $code)
+            <article class="attendance-metric {{ $metricTones[$code] }}" wire:key="attendance-summary-{{ $code }}">
+                <span class="attendance-metric-icon">
+                    @switch($code)
+                        @case('H') <x-icon name="check-circle" class="h-5 w-5" /> @break
+                        @case('I') <x-icon name="clock" class="h-5 w-5" /> @break
+                        @case('S') <x-icon name="circle-help" class="h-5 w-5" /> @break
+                        @default <x-icon name="user-x" class="h-5 w-5" />
+                    @endswitch
                 </span>
-            </div>
-        @empty
-            <p class="text-sm text-slate-400 italic">Belum ada data absensi.</p>
-        @endforelse
-    </div>
+                <strong>{{ $rekap[$code] ?? 0 }}</strong>
+                <small>{{ $labels[$code] }}</small>
+            </article>
+        @endforeach
+    </section>
+
+    <section>
+        <div class="section-head">
+            <h3>Detail Absensi</h3>
+            <span class="pwa-section-meta">Terbaru dahulu</span>
+        </div>
+        <div class="surface-card compact-list attendance-list">
+            @forelse ($items as $attendance)
+                <article class="data-row" wire:key="attendance-{{ $attendance->id }}">
+                    <span class="attendance-date">
+                        <small>{{ $attendance->tanggal->locale('id')->isoFormat('ddd') }}</small>
+                        <strong>{{ $attendance->tanggal->locale('id')->isoFormat('D') }}</strong>
+                    </span>
+                    <span>
+                        <strong>{{ $labels[$attendance->status] ?? $attendance->status }}</strong>
+                        <small>{{ $attendance->keterangan ?: $attendance->tanggal->locale('id')->isoFormat('dddd, D MMMM Y') }}</small>
+                    </span>
+                    <span class="status-chip {{ $attendance->status === 'H' ? 'success' : ($attendance->status === 'A' ? 'danger' : 'warning') }}">
+                        {{ $attendance->status }}
+                    </span>
+                </article>
+            @empty
+                <div class="pwa-empty-state pwa-empty-state-plain">
+                    <span class="row-icon green"><x-icon name="check-circle" class="h-5 w-5" /></span>
+                    <span><strong>Belum ada data absensi</strong><small>Catatan kehadiran dari sekolah akan tampil di sini.</small></span>
+                </div>
+            @endforelse
+        </div>
+    </section>
 
     @if (method_exists($items, 'links'))
-        <div class="mt-4">{{ $items->links() }}</div>
+        <div class="pwa-pagination">{{ $items->links() }}</div>
     @endif
 </div>

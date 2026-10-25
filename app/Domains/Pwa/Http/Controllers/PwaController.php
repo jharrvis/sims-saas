@@ -18,6 +18,7 @@ use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 /**
  * Aksi non-Livewire PWA: ganti profil anak, keluar, halaman offline.
@@ -65,6 +66,23 @@ class PwaController extends Controller
     public function offline(): View
     {
         return view('pwa.offline');
+    }
+
+    public function serviceWorker(): BinaryFileResponse
+    {
+        $path = public_path('pwa-assets/sw.js');
+
+        abort_unless(is_file($path), 404);
+
+        $response = response()->file($path, [
+            'Content-Type' => 'application/javascript; charset=UTF-8',
+            'Service-Worker-Allowed' => '/pwa',
+        ]);
+
+        $response->setPrivate();
+        $response->headers->set('Cache-Control', 'private, no-cache, no-store, must-revalidate');
+
+        return $response;
     }
 
     /**

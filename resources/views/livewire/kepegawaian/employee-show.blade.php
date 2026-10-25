@@ -1,124 +1,184 @@
-<div class="max-w-4xl mx-auto space-y-5">
-    <a href="{{ route('guru.index') }}" class="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200">
-        <x-icon name="arrow-left" class="w-4 h-4" /> Kembali ke Data Guru
-    </a>
+<div class="page-stack">
+    @php
+        $namaParts = preg_split('/\s+/', trim($employee->nama));
+        $inisial = strtoupper(mb_substr($namaParts[0], 0, 1).(count($namaParts) > 1 ? mb_substr(end($namaParts), 0, 1) : ''));
+        $badgeStatus = $employee->status_aktif ? 'badge-green' : 'badge-gray';
+        $labelStatus = $employee->status_aktif ? 'Aktif' : 'Nonaktif';
+    @endphp
 
-    <div class="rounded-xl border border-slate-200 bg-white dark:bg-boxdark dark:border-slate-700 p-6">
-        <div class="flex items-start justify-between gap-4">
-            <div class="flex items-center gap-4">
-                @php
-                    $namaParts = preg_split('/\s+/', trim($employee->nama));
-                    $inisial = strtoupper(mb_substr($namaParts[0], 0, 1) . (count($namaParts) > 1 ? mb_substr(end($namaParts), 0, 1) : ''));
-                    $avatarColors = [
-                        'bg-primary/10 text-primary',
-                        'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
-                        'bg-amber-500/10 text-amber-600 dark:text-amber-400',
-                        'bg-sky-500/10 text-sky-600 dark:text-sky-400',
-                        'bg-violet-500/10 text-violet-600 dark:text-violet-400',
-                        'bg-rose-500/10 text-rose-600 dark:text-rose-400',
-                    ];
-                    $avatarColor = $avatarColors[abs(crc32($employee->nama)) % count($avatarColors)];
-                @endphp
-                <span class="w-16 h-16 shrink-0 overflow-hidden rounded-full {{ $employee->fotoUrl() ? '' : $avatarColor }} flex items-center justify-center text-2xl font-bold">
-                    @if ($employee->fotoUrl())
-                        <img src="{{ $employee->fotoUrl() }}" alt="Foto {{ $employee->nama }}" class="h-full w-full object-cover">
-                    @else
-                        {{ $inisial }}
-                    @endif
-                </span>
-                <div>
-                    <h1 class="text-xl font-bold text-slate-800 dark:text-white">{{ $employee->nama }}</h1>
-                    <p class="text-sm text-slate-500">{{ $employee->labelJenis() }}@if($employee->jabatan) · {{ $employee->jabatan }}@endif</p>
-                    <span class="inline-flex mt-1 px-2.5 py-0.5 rounded-full text-xs font-medium
-                        {{ $employee->status_aktif ? 'bg-success/10 text-success' : 'bg-slate-500/10 text-slate-500' }}">
-                        {{ $employee->status_aktif ? 'Aktif' : 'Nonaktif' }}
-                    </span>
-                </div>
+    <div class="page-header management-page-header">
+        <div class="management-detail-identity">
+            @if ($employee->fotoUrl())
+                <img src="{{ $employee->fotoUrl() }}" alt="Foto {{ $employee->nama }}" class="management-detail-photo">
+            @else
+                <span class="management-detail-photo-fallback" aria-hidden="true">{{ $inisial }}</span>
+            @endif
+            <div>
+                <a href="{{ route('guru.index') }}" class="management-back-link">
+                    <x-icon name="arrow-left" class="h-4 w-4" /> Kembali ke Direktori Guru
+                </a>
+                <span class="eyebrow">Kepegawaian / Data Induk</span>
+                <h2 class="management-page-title">{{ $employee->nama }}</h2>
+                <p>
+                    {{ $employee->labelJenis() }}@if ($employee->jabatan) · {{ $employee->jabatan }}@endif · NIP / NUPTK {{ $employee->nip_nuptk ?? '—' }}
+                    <span class="badge {{ $badgeStatus }}">{{ $labelStatus }}</span>
+                </p>
             </div>
+        </div>
+        <div class="page-actions">
             @can('guru.update')
-                <a href="{{ route('guru.edit', $employee) }}" class="inline-flex items-center gap-2 rounded-lg border border-slate-200 dark:border-slate-700 px-4 py-2 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-800">
-                    <x-icon name="pencil" class="w-4 h-4" /> Ubah
+                <a href="{{ route('guru.edit', $employee) }}" class="btn btn-outline">
+                    <x-icon name="pencil" class="h-4 w-4" /> Ubah Data
                 </a>
             @endcan
         </div>
-
-        <dl class="mt-6 grid sm:grid-cols-2 gap-x-8 gap-y-4 text-sm">
-            <div><dt class="text-slate-500 dark:text-slate-400">NIP / NUPTK</dt><dd class="font-medium text-slate-800 dark:text-white">{{ $employee->nip_nuptk ?? '—' }}</dd></div>
-            <div><dt class="text-slate-500 dark:text-slate-400">NIK</dt><dd class="font-medium text-slate-800 dark:text-white">{{ $employee->nik ?? '—' }}</dd></div>
-            <div><dt class="text-slate-500 dark:text-slate-400">Tempat, Tanggal Lahir</dt><dd class="font-medium text-slate-800 dark:text-white">{{ $employee->tempat_lahir ?? '—' }}, {{ $employee->tgl_lahir?->format('d M Y') ?? '—' }}</dd></div>
-            <div><dt class="text-slate-500 dark:text-slate-400">Jenis Kelamin</dt><dd class="font-medium text-slate-800 dark:text-white">{{ $employee->labelJk() }}</dd></div>
-            <div><dt class="text-slate-500 dark:text-slate-400">Agama</dt><dd class="font-medium text-slate-800 dark:text-white">{{ $employee->agama ?? '—' }}</dd></div>
-            <div><dt class="text-slate-500 dark:text-slate-400">Email</dt><dd class="font-medium text-slate-800 dark:text-white">{{ $employee->email ?? '—' }}</dd></div>
-            <div><dt class="text-slate-500 dark:text-slate-400">No. HP</dt><dd class="font-medium text-slate-800 dark:text-white">{{ $employee->phone ?? '—' }}</dd></div>
-            <div><dt class="text-slate-500 dark:text-slate-400">Status</dt><dd class="font-medium text-slate-800 dark:text-white">{{ $employee->status_aktif ? 'Aktif' : 'Nonaktif' }}</dd></div>
-            <div class="sm:col-span-2"><dt class="text-slate-500 dark:text-slate-400">Alamat</dt><dd class="font-medium text-slate-800 dark:text-white">{{ $employee->alamat ?? '—' }}</dd></div>
-        </dl>
     </div>
 
-    <div class="rounded-xl border border-slate-200 bg-white dark:bg-boxdark dark:border-slate-700 p-6">
-        <h2 class="font-semibold text-slate-800 dark:text-white mb-4">Pendidikan</h2>
-        <dl class="grid sm:grid-cols-2 gap-x-8 gap-y-4 text-sm">
-            <div><dt class="text-slate-500 dark:text-slate-400">Pendidikan Terakhir</dt><dd class="font-medium text-slate-800 dark:text-white">{{ $employee->labelPendidikan() }}</dd></div>
-            <div><dt class="text-slate-500 dark:text-slate-400">Tahun Lulus</dt><dd class="font-medium text-slate-800 dark:text-white">{{ $employee->tahun_lulus ?? '—' }}</dd></div>
-            <div><dt class="text-slate-500 dark:text-slate-400">Jurusan</dt><dd class="font-medium text-slate-800 dark:text-white">{{ $employee->jurusan ?? '—' }}</dd></div>
-            <div><dt class="text-slate-500 dark:text-slate-400">Perguruan Tinggi / Sekolah</dt><dd class="font-medium text-slate-800 dark:text-white">{{ $employee->perguruan_tinggi ?? '—' }}</dd></div>
-        </dl>
-    </div>
+    <section class="card" aria-labelledby="employee-identity-title">
+        <div class="card-head">
+            <div class="card-title">
+                <span class="mini-icon blue"><x-icon name="contact-round" class="h-[19px] w-[19px]" /></span>
+                <div>
+                    <h3 id="employee-identity-title">Identitas &amp; Kontak</h3>
+                    <p>Data utama dan nomor yang dapat dihubungi.</p>
+                </div>
+            </div>
+        </div>
 
-    <div class="rounded-xl border border-slate-200 bg-white dark:bg-boxdark dark:border-slate-700 p-6">
-        <h2 class="font-semibold text-slate-800 dark:text-white mb-4">Kepegawaian</h2>
-        <dl class="grid sm:grid-cols-2 gap-x-8 gap-y-4 text-sm">
-            <div><dt class="text-slate-500 dark:text-slate-400">Jenis</dt><dd class="font-medium text-slate-800 dark:text-white">{{ $employee->labelJenis() }}</dd></div>
-            <div><dt class="text-slate-500 dark:text-slate-400">Status Kepegawaian</dt><dd class="font-medium text-slate-800 dark:text-white">{{ ucfirst($employee->status_kepegawaian) }}</dd></div>
-            <div><dt class="text-slate-500 dark:text-slate-400">Jabatan</dt><dd class="font-medium text-slate-800 dark:text-white">{{ $employee->jabatan ?? '—' }}</dd></div>
-            <div><dt class="text-slate-500 dark:text-slate-400">TMT</dt><dd class="font-medium text-slate-800 dark:text-white">{{ $employee->tmt?->format('d M Y') ?? '—' }}</dd></div>
-            <div><dt class="text-slate-500 dark:text-slate-400">Golongan / Pangkat</dt><dd class="font-medium text-slate-800 dark:text-white">{{ $employee->golongan ?? '—' }}</dd></div>
-            <div><dt class="text-slate-500 dark:text-slate-400">Sertifikasi</dt><dd class="font-medium text-slate-800 dark:text-white">{{ $employee->labelSertifikasi() }}</dd></div>
-            <div><dt class="text-slate-500 dark:text-slate-400">No. Sertifikat Pendidik</dt><dd class="font-medium text-slate-800 dark:text-white">{{ $employee->no_sertifikat ?? '—' }}</dd></div>
+        <dl class="management-definition-list">
+            <div><dt>NIP / NUPTK</dt><dd>{{ $employee->nip_nuptk ?? '—' }}</dd></div>
+            <div><dt>NIK</dt><dd>{{ $employee->nik ?? '—' }}</dd></div>
+            <div><dt>Tempat, Tanggal Lahir</dt><dd>{{ $employee->tempat_lahir ?? '—' }}, {{ $employee->tgl_lahir?->format('d M Y') ?? '—' }}</dd></div>
+            <div><dt>Jenis Kelamin</dt><dd>{{ $employee->labelJk() }}</dd></div>
+            <div><dt>Agama</dt><dd>{{ $employee->agama ?? '—' }}</dd></div>
+            <div><dt>Email</dt><dd>{{ $employee->email ?? '—' }}</dd></div>
+            <div><dt>No. HP</dt><dd>{{ $employee->phone ?? '—' }}</dd></div>
+            <div><dt>Status</dt><dd>{{ $labelStatus }}</dd></div>
+            <div><dt>Alamat</dt><dd>{{ $employee->alamat ?? '—' }}</dd></div>
         </dl>
-    </div>
+    </section>
 
-    <div class="rounded-xl border border-slate-200 bg-white dark:bg-boxdark dark:border-slate-700 p-6">
-        <h2 class="font-semibold text-slate-800 dark:text-white mb-4">Wali Kelas</h2>
+    <section class="card" aria-labelledby="employee-pendidikan-title">
+        <div class="card-head">
+            <div class="card-title">
+                <span class="mini-icon purple"><x-icon name="scroll-text" class="h-[19px] w-[19px]" /></span>
+                <div>
+                    <h3 id="employee-pendidikan-title">Pendidikan</h3>
+                    <p>Riwayat pendidikan formal terakhir.</p>
+                </div>
+            </div>
+        </div>
+        <dl class="management-definition-list">
+            <div><dt>Pendidikan Terakhir</dt><dd>{{ $employee->labelPendidikan() }}</dd></div>
+            <div><dt>Tahun Lulus</dt><dd>{{ $employee->tahun_lulus ?? '—' }}</dd></div>
+            <div><dt>Jurusan</dt><dd>{{ $employee->jurusan ?? '—' }}</dd></div>
+            <div><dt>Perguruan Tinggi / Sekolah</dt><dd>{{ $employee->perguruan_tinggi ?? '—' }}</dd></div>
+        </dl>
+    </section>
+
+    <section class="card" aria-labelledby="employee-kepegawaian-title">
+        <div class="card-head">
+            <div class="card-title">
+                <span class="mini-icon green"><x-icon name="briefcase" class="h-[19px] w-[19px]" /></span>
+                <div>
+                    <h3 id="employee-kepegawaian-title">Kepegawaian</h3>
+                    <p>Status, jabatan, dan masa kerja.</p>
+                </div>
+            </div>
+        </div>
+        <dl class="management-definition-list">
+            <div><dt>Jenis</dt><dd>{{ $employee->labelJenis() }}</dd></div>
+            <div><dt>Status Kepegawaian</dt><dd>{{ ucfirst($employee->status_kepegawaian) }}</dd></div>
+            <div><dt>Jabatan</dt><dd>{{ $employee->jabatan ?? '—' }}</dd></div>
+            <div><dt>TMT</dt><dd>{{ $employee->tmt?->format('d M Y') ?? '—' }}</dd></div>
+            <div><dt>Golongan / Pangkat</dt><dd>{{ $employee->golongan ?? '—' }}</dd></div>
+            <div><dt>Sertifikasi</dt><dd>{{ $employee->labelSertifikasi() }}</dd></div>
+            <div><dt>No. Sertifikat Pendidik</dt><dd>{{ $employee->no_sertifikat ?? '—' }}</dd></div>
+        </dl>
+    </section>
+
+    <section class="card" aria-labelledby="employee-wali-title">
+        <div class="card-head">
+            <div class="card-title">
+                <span class="mini-icon orange"><x-icon name="school" class="h-[19px] w-[19px]" /></span>
+                <div>
+                    <h3 id="employee-wali-title">Wali Kelas</h3>
+                    <p>Rombel yang dibina sebagai wali kelas.</p>
+                </div>
+            </div>
+        </div>
+
         @if ($employee->rombelsAsWali->isEmpty())
-            <p class="text-sm text-slate-500">Bukan wali kelas di rombel manapun.</p>
+            <div class="empty-state">
+                <div class="empty-symbol"><x-icon name="school" class="h-7 w-7" /></div>
+                <h3>Bukan wali kelas</h3>
+                <p>Guru ini belum menjadi wali kelas di rombel manapun.</p>
+            </div>
         @else
-            <ul class="divide-y divide-slate-100 dark:divide-slate-700/50">
-                @foreach ($employee->rombelsAsWali as $rombel)
-                    <li class="py-3 flex items-center justify-between">
-                        <div>
-                            <p class="font-medium text-slate-800 dark:text-white">{{ $rombel->nama }}</p>
-                            <p class="text-xs text-slate-500">Tingkat {{ $rombel->tingkat }}</p>
-                        </div>
-                    </li>
-                @endforeach
-            </ul>
-        @endif
-    </div>
-
-    <div class="rounded-xl border border-slate-200 bg-white dark:bg-boxdark dark:border-slate-700 p-6">
-        <h2 class="font-semibold text-slate-800 dark:text-white mb-4">Jadwal Mengajar</h2>
-        @if ($jadwalPerHari->isEmpty())
-            <p class="text-sm text-slate-500">Belum ada jadwal mengajar.</p>
-        @else
-            <div class="space-y-4">
-                @foreach ($jadwalPerHari as $hari => $entries)
-                    <div>
-                        <h3 class="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">{{ ucfirst($hari) }}</h3>
-                        <ul class="divide-y divide-slate-100 dark:divide-slate-700/50">
-                            @foreach ($entries as $entry)
-                                <li class="py-2 flex items-center justify-between text-sm">
-                                    <div>
-                                        <span class="font-medium text-slate-800 dark:text-white">{{ $entry->subject?->nama ?? '—' }}</span>
-                                        <span class="text-slate-500"> · Kelas {{ $entry->rombel?->nama ?? '—' }}</span>
-                                    </div>
-                                    <span class="text-slate-500">Jam ke-{{ $entry->jam_ke }}</span>
-                                </li>
-                            @endforeach
-                        </ul>
-                    </div>
-                @endforeach
+            <div class="table-scroll">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Kelas</th>
+                            <th scope="col">Tingkat</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($employee->rombelsAsWali as $rombel)
+                            <tr wire:key="employee-wali-{{ $rombel->id }}">
+                                <td><strong>{{ $rombel->nama }}</strong></td>
+                                <td>Tingkat {{ $rombel->tingkat }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
             </div>
         @endif
-    </div>
+    </section>
+
+    <section class="card" aria-labelledby="employee-jadwal-title">
+        <div class="card-head">
+            <div class="card-title">
+                <span class="mini-icon blue"><x-icon name="calendar-days" class="h-[19px] w-[19px]" /></span>
+                <div>
+                    <h3 id="employee-jadwal-title">Jadwal Mengajar</h3>
+                    <p>Diurutkan per hari lalu menurut jam ke-.</p>
+                </div>
+            </div>
+        </div>
+
+        @if ($jadwalPerHari->isEmpty())
+            <div class="empty-state">
+                <div class="empty-symbol"><x-icon name="calendar-days" class="h-7 w-7" /></div>
+                <h3>Belum ada jadwal mengajar</h3>
+                <p>Atur penugasan mata pelajaran untuk menampilkan jadwal di sini.</p>
+            </div>
+        @else
+            @foreach ($jadwalPerHari as $hari => $entries)
+                <div class="management-card-section">
+                    <h4>{{ ucfirst($hari) }}</h4>
+                    <div class="table-scroll">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Mata Pelajaran</th>
+                                    <th scope="col">Kelas</th>
+                                    <th scope="col">Jam</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($entries as $entry)
+                                    <tr wire:key="employee-jadwal-{{ $hari }}-{{ $entry->id }}">
+                                        <td><strong>{{ $entry->subject?->nama ?? '—' }}</strong></td>
+                                        <td>{{ $entry->rombel?->nama ?? '—' }}</td>
+                                        <td>Jam ke-{{ $entry->jam_ke }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            @endforeach
+        @endif
+    </section>
 </div>

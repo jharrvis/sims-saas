@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wireframe SIMS — Sistem Informasi Manajemen Sekolah (SaaS)</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif; background: #ececec; color: #2b2b2b; line-height: 1.45; font-size: 14px; }
+  .page { max-width: 1360px; margin: 0 auto; padding: 24px 20px 60px; }
+  .doc-head { background: #fff; border: 2px solid #8a8a8a; padding: 20px 24px; margin-bottom: 20px; }
+  .doc-head h1 { font-size: 22px; margin-bottom: 6px; }
+  .doc-head p { color: #555; }
+  .tag { display: inline-block; background: #2b2b2b; color: #fff; font-size: 11px; padding: 2px 8px; border-radius: 3px; margin-right: 6px; }
+  /* Indeks */
+  .index { background: #fff; border: 2px solid #8a8a8a; padding: 16px 24px; margin-bottom: 28px; columns: 2; }
+  .index h2 { column-span: all; font-size: 16px; margin-bottom: 10px; }
+  .index a { display: block; color: #2b2b2b; text-decoration: none; padding: 3px 0; border-bottom: 1px dotted #ccc; break-inside: avoid; }
+  .index a:hover { text-decoration: underline; }
+  .index .grp { font-weight: bold; margin-top: 8px; }
+  /* Layar */
+  .screen { background: #fff; border: 2px solid #6f6f6f; margin-bottom: 36px; scroll-margin-top: 12px; }
+  .screen-head { background: #2b2b2b; color: #fff; padding: 10px 18px; }
+  .screen-head h2 { font-size: 16px; }
+  .screen-head .tujuan { font-size: 12.5px; color: #d6d6d6; margin-top: 2px; }
+  .frame-desktop { max-width: 1240px; margin: 18px auto; border: 1px solid #999; background: #fafafa; }
+  .frame-mobile { max-width: 390px; margin: 18px auto; border: 3px solid #444; border-radius: 22px; background: #fafafa; overflow: hidden; }
+  /* Placeholder */
+  .ph { background: #e3e3e3; border: 1px dashed #8a8a8a; color: #666; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 12px; padding: 8px; }
+  /* Komponen umum */
+  .topbar { display: flex; justify-content: space-between; align-items: center; background: #3a3a3a; color: #fff; padding: 10px 16px; }
+  .topbar .brand { display: flex; align-items: center; gap: 10px; font-weight: bold; }
+  .logo-box { width: 36px; height: 36px; background: #cfcfcf; border: 1px dashed #fff; color: #3a3a3a; font-size: 9px; display: flex; align-items: center; justify-content: center; }
+  .layout { display: flex; min-height: 480px; }
+  .sidebar { width: 210px; background: #f1f1f1; border-right: 1px solid #bbb; padding: 12px 0; flex-shrink: 0; }
+  .sidebar a { display: block; padding: 8px 16px; color: #333; text-decoration: none; font-size: 13px; border-left: 3px solid transparent; }
+  .sidebar a.active { background: #dcdcdc; border-left-color: #2b2b2b; font-weight: bold; }
+  .content { flex: 1; padding: 18px 20px; }
+  .content h3 { font-size: 18px; margin-bottom: 4px; }
+  .sub { color: #666; font-size: 12.5px; margin-bottom: 14px; }
+  .row { display: flex; gap: 12px; flex-wrap: wrap; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
+  .kpi { background: #fff; border: 1px solid #aaa; padding: 12px; }
+  .kpi .lbl { font-size: 11.5px; color: #666; }
+  .kpi .val { font-size: 24px; font-weight: bold; margin: 4px 0; }
+  .kpi .hint { font-size: 11px; color: #777; }
+  .panel { background: #fff; border: 1px solid #aaa; padding: 12px 14px; margin-bottom: 14px; }
+  .panel h4 { font-size: 14px; margin-bottom: 8px; border-bottom: 1px solid #ddd; padding-bottom: 6px; }
+  .alert-item { background: #f4f4f4; border-left: 4px solid #777; padding: 8px 10px; margin-bottom: 8px; font-size: 13px; }
+  .btn { display: inline-block; background: #fff; border: 1px solid #555; color: #222; padding: 7px 14px; font-size: 13px; cursor: pointer; text-decoration: none; border-radius: 3px; }
+  .btn-primary { background: #2b2b2b; color: #fff; border-color: #2b2b2b; }
+  .btn-sm { padding: 4px 10px; font-size: 12px; }
+  .btn:disabled { opacity: .5; cursor: not-allowed; }
+  .toolbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
+  .input, select.input { border: 1px solid #888; padding: 7px 10px; font-size: 13px; border-radius: 3px; background: #fff; font-family: inherit; }
+  table.wire { width: 100%; border-collapse: collapse; background: #fff; font-size: 13px; }
+  table.wire th, table.wire td { border: 1px solid #bbb; padding: 8px 10px; text-align: left; }
+  table.wire th { background: #e6e6e6; font-size: 12px; text-transform: uppercase; letter-spacing: .3px; }
+  table.wire tr:nth-child(even) td { background: #f7f7f7; }
+  .badge { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 10px; border: 1px solid #666; background: #eee; }
+  .badge.ok { background: #d9d9d9; border-color: #555; font-weight: bold; }
+  .badge.warn { background: #fff; border: 2px solid #555; font-weight: bold; }
+  .foto { width: 34px; height: 34px; border-radius: 50%; background: #d5d5d5; border: 1px dashed #888; display: inline-flex; align-items: center; justify-content: center; font-size: 9px; color: #666; }
+  .radio-row label { margin-right: 10px; font-size: 13px; }
+  .meter { height: 10px; background: #ddd; border: 1px solid #999; border-radius: 5px; overflow: hidden; margin: 6px 0 2px; }
+  .meter > div { height: 100%; background: #555; }
+  .cards-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .mod-card { background: #fff; border: 1px solid #aaa; padding: 12px; }
+  .mod-card h4 { font-size: 14px; margin: 8px 0 4px; }
+  .mod-card p { font-size: 12.5px; color: #555; margin-bottom: 8px; }
+  .price { font-weight: bold; font-size: 13px; margin-bottom: 8px; }
+  /* Mobile */
+  .m-top { background: #3a3a3a; color: #fff; padding: 12px 16px; }
+  .m-top .hello { font-size: 13px; color: #cfcfcf; }
+  .m-top .name { font-size: 17px; font-weight: bold; }
+  .m-body { padding: 14px; }
+  .m-card { background: #fff; border: 1px solid #aaa; border-radius: 8px; padding: 12px; margin-bottom: 12px; }
+  .m-card h4 { font-size: 14px; margin-bottom: 8px; }
+  .m-list-item { display: flex; gap: 10px; padding: 9px 0; border-bottom: 1px solid #e2e2e2; align-items: center; }
+  .m-list-item:last-child { border-bottom: none; }
+  .m-nav { display: flex; border-top: 1px solid #aaa; background: #fff; }
+  .m-nav a { flex: 1; text-align: center; padding: 10px 4px; font-size: 11px; color: #333; text-decoration: none; border-top: 3px solid transparent; }
+  .m-nav a.active { border-top-color: #2b2b2b; font-weight: bold; background: #f1f1f1; }
+  .otp-boxes { display: flex; gap: 8px; justify-content: center; margin: 12px 0; }
+  .otp-boxes .input { width: 44px; height: 50px; text-align: center; font-size: 20px; }
+  .login-card { max-width: 380px; margin: 60px auto; background: #fff; border: 1px solid #999; padding: 28px; }
+  .login-card h3 { text-align: center; margin-bottom: 4px; }
+  .login-card .sub { text-align: center; }
+  .field { margin-bottom: 12px; }
+  .field label { display: block; font-size: 12.5px; margin-bottom: 4px; color: #444; }
+  .field .input { width: 100%; }
+  .full { width: 100%; text-align: center; }
+  .link { color: #2b2b2b; font-size: 12.5px; }
+  .note { font-size: 12px; color: #666; background: #f4f4f4; border: 1px dashed #999; padding: 8px 10px; margin-top: 12px; }
+  .tabs { display: flex; border-bottom: 2px solid #2b2b2b; margin-bottom: 14px; }
+  .tabs button { flex: 1; background: none; border: none; padding: 10px; font-size: 13px; cursor: pointer; font-family: inherit; }
+  .tabs button.active { background: #2b2b2b; color: #fff; font-weight: bold; }
+  .foot { text-align: center; color: #888; font-size: 12px; padding: 20px; }
+  @media (max-width: 800px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } .cards-grid { grid-template-columns: 1fr; } .index { columns: 1; } .layout { flex-direction: column; } .sidebar { width: 100%; } }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="doc-head">
+    <h1>Wireframe SIMS — Sistem Informasi Manajemen Sekolah (SaaS)</h1>
+    <p><span class="tag">Grayscale</span><span class="tag">v1.0</span> Sketsa struktur layar — bukan desain final. Semua kotak berlabel <em>[...]</em> adalah placeholder. Data contoh realistis Indonesia.</p>
+  </div>
+
+  <div class="index">
+    <h2>Indeks Layar</h2>
+    <div class="grp">A. Web Admin (desktop ±1280px)</div>
+    <a href="#w-01">W-01 — Login staf</a>
+    <a href="#w-02">W-02 — Dashboard Admin Sekolah</a>
+    <a href="#w-03">W-03 — Data Siswa</a>
+    <a href="#w-04">W-04 — Input Absensi Harian</a>
+    <a href="#w-05">W-05 — Input Nilai</a>
+    <a href="#w-06">W-06 — Laporan</a>
+    <a href="#w-07">W-07 — Billing &amp; Langganan</a>
+    <a href="#w-08">W-08 — Katalog Modul</a>
+    <a href="#w-09">W-09 — Template Notifikasi</a>
+    <div class="grp">B. PWA Siswa &amp; Orang Tua (mobile ±390px)</div>
+    <a href="#p-01">P-01 — Login (OTP WA)</a>
+    <a href="#p-02">P-02 — Beranda Siswa</a>
+    <a href="#p-03">P-03 — Nilai Saya</a>
+    <a href="#p-04">P-04 — Beranda Orang Tua</a>
+    <a href="#p-05">P-05 — Pengumuman</a>
+    <a href="#p-06">P-06 — Profil &amp; Perangkat</a>
+    <div class="grp">C. Panel Operator Platform (desktop ±1280px)</div>
+    <a href="#pf-01">PF-01 — Daftar Tenant</a>
+    <a href="#pf-02">PF-02 — Kelola Paket &amp; Kuota</a>
+  </div>
+
+  <!-- ============ W-01 LOGIN ============ -->
+  <div class="screen" id="w-01">
+    <div class="screen-head"><h2>W-01 — Login (Web Staf)</h2><div class="tujuan">Tujuan: pintu masuk aman untuk staf sekolah &amp; operator platform; FR-901 s.d. FR-906.</div></div>
+    <div class="frame-desktop" style="padding:24px;">
+      <div class="login-card">
+        <div class="ph" style="height:56px; margin-bottom:12px;">[Logo SIMS]</div>
+        <h3>Masuk ke SIMS</h3>
+        <p class="sub">SMA Negeri 1 Bandung &nbsp;·&nbsp; <span class="link">bukan sekolah Anda?</span></p>
+        <div class="field"><label>Email / Username</label><input class="input" value="tu.sman1@example.sch.id" readonly></div>
+        <div class="field"><label>Kata sandi</label><input class="input" type="password" value="••••••••••" readonly></div>
+        <div class="field"><label>Masuk sebagai</label><select class="input"><option>Staf Sekolah</option><option>Operator Platform</option></select></div>
+        <button class="btn btn-primary full">Masuk</button>
+        <p style="text-align:center; margin-top:10px;"><a class="link" href="#">Lupa kata sandi?</a></p>
+        <div class="note">Akun terkunci 15 menit setelah 5x gagal login. Riwayat login (waktu, IP, perangkat) tercatat.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ W-02 DASHBOARD ============ -->
+  <div class="screen" id="w-02">
+    <div class="screen-head"><h2>W-02 — Dashboard Admin Sekolah</h2><div class="tujuan">Tujuan: gambaran operasional harian sekilas + peringatan dini; FR-1101, FR-1104.</div></div>
+    <div class="frame-desktop">
+      <div class="topbar">
+        <div class="brand"><div class="logo-box">[Logo]</div> SMA Negeri 1 Bandung</div>
+        <div style="font-size:13px;">Halo, Ratna (Admin Sekolah) &nbsp;|&nbsp; TA 2026/2027 Ganjil &nbsp;|&nbsp; <u>Keluar</u></div>
+      </div>
+      <div class="layout">
+        <div class="sidebar">
+          <a href="#" class="active">Dashboard</a><a href="#">Data Siswa</a><a href="#">Data Wali Murid</a><a href="#">Guru &amp; Pegawai</a><a href="#">Kelas &amp; Mapel</a><a href="#">Jadwal Pelajaran</a><a href="#">Absensi</a><a href="#">Nilai</a><a href="#">Tahun Ajaran</a><a href="#">Pengguna</a><a href="#">Laporan</a><a href="#">Billing</a><a href="#">Katalog Modul</a>
+        </div>
+        <div class="content">
+          <h3>Dashboard</h3><p class="sub">Jumat, 9 Oktober 2026</p>
+          <div class="kpi-grid">
+            <div class="kpi"><div class="lbl">Total Siswa Aktif</div><div class="val">1.247</div><div class="hint">36 rombel · 3 tingkat</div></div>
+            <div class="kpi"><div class="lbl">Guru &amp; Tendik</div><div class="val">86</div><div class="hint">64 guru · 22 tendik</div></div>
+            <div class="kpi"><div class="lbl">Kehadiran Hari Ini</div><div class="val">96,2%</div><div class="hint">1.200 hadir · 47 tidak hadir</div></div>
+            <div class="kpi"><div class="lbl">Rata-rata Nilai PTS</div><div class="val">82,4</div><div class="hint">Semester ganjil 2026/2027</div></div>
+          </div>
+          <div class="row">
+            <div class="panel" style="flex:1; min-width:280px;">
+              <h4>Peringatan Dini</h4>
+              <div class="alert-item"><b>12 siswa</b> alpa ≥ 3x bulan ini — <u>lihat daftar</u></div>
+              <div class="alert-item"><b>5 guru</b> belum input nilai PTS (batas 12 Okt) — <u>kirim pengingat</u></div>
+              <div class="alert-item"><b>3 rombel</b> belum dikunci absensinya kemarin — <u>lihat</u></div>
+            </div>
+            <div class="panel" style="flex:1; min-width:280px;">
+              <h4>Pengumuman &amp; Agenda</h4>
+              <div class="m-list-item"><div><b>Upacara Hari Kesaktian Pancasila</b><br><span style="color:#666;font-size:12px;">1 Okt 2026 · seluruh siswa</span></div></div>
+              <div class="m-list-item"><div><b>Batas input nilai PTS</b><br><span style="color:#666;font-size:12px;">12 Okt 2026 · guru mapel</span></div></div>
+              <div class="m-list-item"><div><b>Rapat dewan guru</b><br><span style="color:#666;font-size:12px;">16 Okt 2026 · 13.00 · Aula</span></div></div>
+            </div>
+          </div>
+          <div class="panel"><h4>Tren Kehadiran 30 Hari Terakhir</h4><div class="ph" style="height:120px;">[Grafik garis: % kehadiran harian]</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ W-03 DATA SISWA ============ -->
+  <div class="screen" id="w-03">
+    <div class="screen-head"><h2>W-03 — Data Siswa</h2><div class="tujuan">Tujuan: kelola master siswa (CRUD, cari, import massal); FR-101 s.d. FR-106.</div></div>
+    <div class="frame-desktop">
+      <div class="topbar"><div class="brand"><div class="logo-box">[Logo]</div> SMA Negeri 1 Bandung</div><div style="font-size:13px;">Halo, Ratna (Admin Sekolah)</div></div>
+      <div class="layout">
+        <div class="sidebar"><a href="#">Dashboard</a><a href="#" class="active">Data Siswa</a><a href="#">Data Wali Murid</a><a href="#">Guru &amp; Pegawai</a><a href="#">Kelas &amp; Mapel</a><a href="#">Jadwal Pelajaran</a><a href="#">Absensi</a><a href="#">Nilai</a><a href="#">Laporan</a></div>
+        <div class="content">
+          <h3>Data Siswa</h3><p class="sub">1.247 siswa aktif · TA 2026/2027</p>
+          <div class="toolbar">
+            <input class="input" placeholder="Cari nama / NIS / NISN…" style="width:240px;">
+            <select class="input"><option>Semua Kelas</option><option>XII IPA 1</option><option>XII IPA 2</option><option>XI IPS 1</option></select>
+            <select class="input"><option>Semua Angkatan</option><option>2024</option><option>2025</option><option>2026</option></select>
+            <select class="input"><option>Semua Status</option><option>Aktif</option><option>Pindah</option><option>Lulus</option></select>
+            <span style="flex:1"></span>
+            <button class="btn btn-primary">+ Tambah Siswa</button>
+            <button class="btn">Import Excel</button>
+            <button class="btn">Export</button>
+          </div>
+          <table class="wire">
+            <tr><th></th><th>NIS</th><th>Nama</th><th>Kelas</th><th>L/P</th><th>Status</th><th>Aksi</th></tr>
+            <tr><td><span class="foto">Foto</span></td><td>2425001</td><td>Ahmad Fauzi</td><td>XII IPA 1</td><td>L</td><td><span class="badge ok">Aktif</span></td><td><u>Detail</u> · <u>Ubah</u></td></tr>
+            <tr><td><span class="foto">Foto</span></td><td>2425002</td><td>Siti Aminah</td><td>XII IPA 1</td><td>P</td><td><span class="badge ok">Aktif</span></td><td><u>Detail</u> · <u>Ubah</u></td></tr>
+            <tr><td><span class="foto">Foto</span></td><td>2425003</td><td>Budi Santoso</td><td>XII IPA 2</td><td>L</td><td><span class="badge ok">Aktif</span></td><td><u>Detail</u> · <u>Ubah</u></td></tr>
+            <tr><td><span class="foto">Foto</span></td><td>2425044</td><td>Dewi Lestari</td><td>XI IPS 1</td><td>P</td><td><span class="badge">Pindah</span></td><td><u>Detail</u> · <u>Ubah</u></td></tr>
+            <tr><td><span class="foto">Foto</span></td><td>2425077</td><td>Rizky Pratama</td><td>XII IPA 1</td><td>L</td><td><span class="badge ok">Aktif</span></td><td><u>Detail</u> · <u>Ubah</u></td></tr>
+          </table>
+          <p class="sub" style="margin-top:10px;">Menampilkan 1–5 dari 1.247 &nbsp;|&nbsp; <u>&lt; Sebelumnya</u> &nbsp; <u>1</u> &nbsp; <u>2</u> … <u>250</u> &nbsp; <u>Berikutnya &gt;</u></p>
+          <div class="note">Klik "Detail" membuka profil 360°: biodata, wali, riwayat kelas, kehadiran, nilai, catatan BK.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ W-04 ABSENSI ============ -->
+  <div class="screen" id="w-04">
+    <div class="screen-head"><h2>W-04 — Input Absensi Harian</h2><div class="tujuan">Tujuan: input kehadiran ≤ 2 menit per kelas + notifikasi alpa otomatis ke ortu; FR-601 s.d. FR-606.</div></div>
+    <div class="frame-desktop">
+      <div class="topbar"><div class="brand"><div class="logo-box">[Logo]</div> SMA Negeri 1 Bandung</div><div style="font-size:13px;">Halo, Ibu Sri (Wali Kelas XII IPA 1)</div></div>
+      <div class="layout">
+        <div class="sidebar"><a href="#">Dashboard</a><a href="#">Data Siswa</a><a href="#" class="active">Absensi</a><a href="#">Nilai</a><a href="#">Jadwal Pelajaran</a><a href="#">Laporan</a></div>
+        <div class="content">
+          <h3>Absensi Harian</h3><p class="sub">Wali Kelas: Dra. Sri Wahyuni</p>
+          <div class="toolbar">
+            <label>Tanggal <input class="input" type="text" value="09-10-2026" style="width:120px;"></label>
+            <label>Rombel <select class="input"><option>XII IPA 1 (36 siswa)</option><option>XII IPA 2</option></select></label>
+            <button class="btn">Tandai semua hadir</button>
+            <span class="badge warn">Belum dikunci</span>
+          </div>
+          <table class="wire">
+            <tr><th>No</th><th>Nama</th><th>NIS</th><th>Status</th><th>Keterangan</th></tr>
+            <tr><td>1</td><td>Ahmad Fauzi</td><td>2425001</td><td class="radio-row"><label><input type="radio" checked> H</label><label><input type="radio"> I</label><label><input type="radio"> S</label><label><input type="radio"> A</label></td><td><input class="input" style="width:100%" placeholder="—"></td></tr>
+            <tr><td>2</td><td>Siti Aminah</td><td>2425002</td><td class="radio-row"><label><input type="radio"> H</label><label><input type="radio"> I</label><label><input type="radio" checked> S</label><label><input type="radio"> A</label></td><td><input class="input" style="width:100%" value="Demam, surat dokter"></td></tr>
+            <tr><td>3</td><td>Budi Santoso</td><td>2425003</td><td class="radio-row"><label><input type="radio"> H</label><label><input type="radio"> I</label><label><input type="radio"> S</label><label><input type="radio" checked> A</label></td><td><input class="input" style="width:100%" placeholder="—"></td></tr>
+            <tr><td>4</td><td>Rizky Pratama</td><td>2425077</td><td class="radio-row"><label><input type="radio" checked> H</label><label><input type="radio"> I</label><label><input type="radio"> S</label><label><input type="radio"> A</label></td><td><input class="input" style="width:100%" placeholder="—"></td></tr>
+          </table>
+          <div class="toolbar" style="margin-top:12px;">
+            <button class="btn btn-primary">Simpan</button>
+            <button class="btn">Simpan &amp; Kunci</button>
+            <span style="font-size:12px; color:#666;">Setelah dikunci, perubahan hanya oleh Admin dengan alasan tercatat.</span>
+          </div>
+          <div class="note">Saat dikunci: siswa berstatus <b>Alpa</b> otomatis memicu notifikasi WA/push ke orang tua (maks. 30 menit).</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ W-05 NILAI ============ -->
+  <div class="screen" id="w-05">
+    <div class="screen-head"><h2>W-05 — Input Nilai</h2><div class="tujuan">Tujuan: input &amp; rekap nilai per komponen berbobot; hanya kelas ampuan; FR-701 s.d. FR-707.</div></div>
+    <div class="frame-desktop">
+      <div class="topbar"><div class="brand"><div class="logo-box">[Logo]</div> SMA Negeri 1 Bandung</div><div style="font-size:13px;">Halo, Bpk. Bambang (Guru Matematika)</div></div>
+      <div class="layout">
+        <div class="sidebar"><a href="#">Dashboard</a><a href="#">Absensi</a><a href="#" class="active">Nilai</a><a href="#">Jadwal Mengajar</a><a href="#">Laporan</a></div>
+        <div class="content">
+          <h3>Input Nilai — Matematika</h3><p class="sub">Semester Ganjil 2026/2027 · hanya kelas ampuan Anda</p>
+          <div class="toolbar">
+            <label>Kelas <select class="input"><option>XII IPA 1</option><option>XII IPA 2</option></select></label>
+            <label>Komponen <select class="input"><option>UH 1</option><option>Tugas 1</option><option>PTS</option><option>PAS</option></select></label>
+            <span style="font-size:12.5px; color:#555;">Bobot: Tugas 20% · UH 30% · PTS 20% · PAS 30%</span>
+            <span style="flex:1"></span>
+            <button class="btn">Impor Excel</button>
+            <button class="btn">Hitung Otomatis</button>
+          </div>
+          <table class="wire">
+            <tr><th>No</th><th>Nama</th><th>Tugas (20%)</th><th>UH 1 (30%)</th><th>PTS (20%)</th><th>Nilai Akhir</th><th>Predikat</th></tr>
+            <tr><td>1</td><td>Ahmad Fauzi</td><td><input class="input" value="85" style="width:60px;"></td><td><input class="input" value="90" style="width:60px;"></td><td><input class="input" value="88" style="width:60px;"></td><td><b>87,6</b></td><td>A</td></tr>
+            <tr><td>2</td><td>Siti Aminah</td><td><input class="input" value="78" style="width:60px;"></td><td><input class="input" value="82" style="width:60px;"></td><td><input class="input" value="80" style="width:60px;"></td><td><b>80,2</b></td><td>B</td></tr>
+            <tr><td>3</td><td>Rizky Pratama</td><td><input class="input" value="70" style="width:60px;"></td><td><input class="input" value="68" style="width:60px;"></td><td><input class="input" value="72" style="width:60px;"></td><td><b>69,8</b></td><td>C</td></tr>
+          </table>
+          <div class="toolbar" style="margin-top:12px;">
+            <button class="btn btn-primary">Simpan</button>
+            <button class="btn">Kunci Periode</button>
+            <span class="badge warn">Periode: Terbuka</span>
+          </div>
+          <div class="note">Nilai tampil di PWA siswa/orang tua <b>hanya setelah dirilis</b> oleh wali kelas/kepala sekolah. Pembukaan kunci butuh persetujuan + alasan.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ W-06 LAPORAN ============ -->
+  <div class="screen" id="w-06">
+    <div class="screen-head"><h2>W-06 — Laporan</h2><div class="tujuan">Tujuan: hasilkan laporan siap cetak/unduh dengan kop sekolah; FR-1001 s.d. FR-1005.</div></div>
+    <div class="frame-desktop">
+      <div class="topbar"><div class="brand"><div class="logo-box">[Logo]</div> SMA Negeri 1 Bandung</div><div style="font-size:13px;">Halo, Ratna (Admin Sekolah)</div></div>
+      <div class="layout">
+        <div class="sidebar"><a href="#">Dashboard</a><a href="#">Data Siswa</a><a href="#">Absensi</a><a href="#">Nilai</a><a href="#" class="active">Laporan</a></div>
+        <div class="content">
+          <h3>Laporan</h3><p class="sub">Semua dokumen memakai kop &amp; logo sekolah otomatis</p>
+          <div class="row">
+            <div class="panel" style="flex:0 0 240px;">
+              <h4>Template Laporan</h4>
+              <div class="m-list-item"><u>Data Siswa</u></div>
+              <div class="m-list-item"><u>Rekap Absensi Bulanan</u></div>
+              <div class="m-list-item"><u>Leger Nilai</u></div>
+              <div class="m-list-item"><u>Mutasi Siswa</u></div>
+              <div class="m-list-item"><u>Data Guru &amp; Tendik</u></div>
+              <div class="m-list-item"><u>Daftar Kelas</u></div>
+            </div>
+            <div class="panel" style="flex:1; min-width:300px;">
+              <h4>Builder — Rekap Absensi Bulanan</h4>
+              <p style="font-size:13px; margin-bottom:6px;"><b>Pilih kolom:</b></p>
+              <p style="font-size:13px; margin-bottom:10px;"><label><input type="checkbox" checked> Nama</label> <label><input type="checkbox" checked> Kelas</label> <label><input type="checkbox" checked> Hadir</label> <label><input type="checkbox" checked> Izin</label> <label><input type="checkbox" checked> Sakit</label> <label><input type="checkbox" checked> Alpa</label> <label><input type="checkbox"> % Kehadiran</label></p>
+              <div class="toolbar">
+                <label>Bulan <select class="input"><option>Oktober 2026</option><option>September 2026</option></select></label>
+                <label>Kelas <select class="input"><option>Semua</option><option>XII IPA 1</option></select></label>
+                <button class="btn btn-primary btn-sm">Pratinjau</button>
+              </div>
+              <table class="wire" style="margin-top:10px;">
+                <tr><th>Nama</th><th>Kelas</th><th>H</th><th>I</th><th>S</th><th>A</th></tr>
+                <tr><td>Ahmad Fauzi</td><td>XII IPA 1</td><td>19</td><td>1</td><td>0</td><td>0</td></tr>
+                <tr><td>Budi Santoso</td><td>XII IPA 2</td><td>16</td><td>0</td><td>1</td><td>3</td></tr>
+              </table>
+              <div class="toolbar" style="margin-top:12px;">
+                <button class="btn">Export Excel</button>
+                <button class="btn">Export PDF</button>
+                <button class="btn">Simpan Template</button>
+              </div>
+              <div class="note">Export &gt; 5.000 baris diproses via antrean — Anda dapat notifikasi saat file siap diunduh.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ W-07 BILLING ============ -->
+  <div class="screen" id="w-07">
+    <div class="screen-head"><h2>W-07 — Billing &amp; Langganan</h2><div class="tujuan">Tujuan: kelola paket, pantau kuota, dan bayar tagihan secara mandiri (SaaS self-service).</div></div>
+    <div class="frame-desktop">
+      <div class="topbar"><div class="brand"><div class="logo-box">[Logo]</div> SMA Negeri 1 Bandung</div><div style="font-size:13px;">Halo, Ratna (Admin Sekolah)</div></div>
+      <div class="layout">
+        <div class="sidebar"><a href="#">Dashboard</a><a href="#">Laporan</a><a href="#" class="active">Billing</a><a href="#">Katalog Modul</a><a href="#">Pengaturan</a></div>
+        <div class="content">
+          <h3>Billing &amp; Langganan</h3><p class="sub">Kelola paket dan pembayaran sekolah Anda</p>
+          <div class="row">
+            <div class="panel" style="flex:1; min-width:280px;">
+              <h4>Paket Aktif</h4>
+              <p style="font-size:20px; font-weight:bold;">PRO <span class="badge warn">Trial — sisa 12 hari</span></p>
+              <p style="font-size:13px; color:#555;">Rp 1.499.000/bulan · periode berikutnya 21 Nov 2026</p>
+              <div style="margin-top:10px;"><button class="btn btn-primary">Upgrade / Pilih Paket</button> <button class="btn">Ganti Kartu / Metode</button></div>
+            </div>
+            <div class="panel" style="flex:1; min-width:280px;">
+              <h4>Pemakaian Kuota</h4>
+              <p style="font-size:13px;">Siswa aktif <b>342 / 500</b></p><div class="meter"><div style="width:68%"></div></div>
+              <p style="font-size:13px;">Storage <b>1,2 / 5 GB</b></p><div class="meter"><div style="width:24%"></div></div>
+              <p style="font-size:13px;">User staf <b>24 / 50</b></p><div class="meter"><div style="width:48%"></div></div>
+            </div>
+          </div>
+          <div class="panel">
+            <h4>Riwayat Invoice</h4>
+            <table class="wire">
+              <tr><th>Nomor</th><th>Periode</th><th>Total</th><th>Status</th><th></th></tr>
+              <tr><td>INV-2026-1003</td><td>Okt 2026</td><td>Rp 1.499.000</td><td><span class="badge warn">Menunggu bayar</span></td><td><button class="btn btn-sm btn-primary">Bayar</button> <u>Unduh</u></td></tr>
+              <tr><td>INV-2026-0941</td><td>Sep 2026</td><td>Rp 1.499.000</td><td><span class="badge ok">Lunas</span></td><td><u>Unduh</u></td></tr>
+              <tr><td>INV-2026-0880</td><td>Agu 2026</td><td>Rp 0 (trial)</td><td><span class="badge ok">Lunas</span></td><td><u>Unduh</u></td></tr>
+            </table>
+          </div>
+          <div class="note">Pembayaran via VA bank, QRIS, e-wallet. Gagal bayar: pengingat H-7/H-3/H+0 → masa tenggang read-only 14 hari → suspend otomatis.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ W-08 KATALOG MODUL ============ -->
+  <div class="screen" id="w-08">
+    <div class="screen-head"><h2>W-08 — Katalog Modul</h2><div class="tujuan">Tujuan: lihat &amp; ajukan add-on modul per sekolah (arsitektur modular SaaS).</div></div>
+    <div class="frame-desktop">
+      <div class="topbar"><div class="brand"><div class="logo-box">[Logo]</div> SMA Negeri 1 Bandung</div><div style="font-size:13px;">Halo, Ratna (Admin Sekolah)</div></div>
+      <div class="layout">
+        <div class="sidebar"><a href="#">Dashboard</a><a href="#">Billing</a><a href="#" class="active">Katalog Modul</a><a href="#">Pengaturan</a></div>
+        <div class="content">
+          <h3>Katalog Modul</h3><p class="sub">Modul inti selalu aktif · add-on dapat diajukan per sekolah</p>
+          <div class="cards-grid">
+            <div class="mod-card"><div class="ph" style="height:44px;">[Ikon]</div><h4>Inti Akademik</h4><p>Siswa, absensi, nilai, jadwal, laporan — fondasi SIMS.</p><span class="badge ok">Aktif · termasuk paket</span></div>
+            <div class="mod-card"><div class="ph" style="height:44px;">[Ikon]</div><h4>Keuangan &amp; SPP</h4><p>Tagihan, VA/QRIS, kuitansi, tunggakan.</p><div class="price">Rp 199rb/bln</div><span class="badge">Nonaktif</span> <button class="btn btn-sm btn-primary" style="margin-top:6px;">Ajukan aktivasi</button></div>
+            <div class="mod-card"><div class="ph" style="height:44px;">[Ikon]</div><h4>PPDB Online</h4><p>Pendaftaran, berkas, seleksi, daftar ulang.</p><span class="badge ok">Aktif · termasuk paket Pro</span></div>
+            <div class="mod-card"><div class="ph" style="height:44px;">[Ikon]</div><h4>E-Rapor</h4><p>Template Merdeka/K13 + QR verifikasi.</p><span class="badge ok">Aktif · termasuk paket Pro</span></div>
+            <div class="mod-card"><div class="ph" style="height:44px;">[Ikon]</div><h4>Perpustakaan Digital</h4><p>Katalog, peminjaman, denda.</p><div class="price">Rp 99rb/bln</div><span class="badge">Nonaktif</span> <button class="btn btn-sm btn-primary" style="margin-top:6px;">Ajukan aktivasi</button></div>
+            <div class="mod-card"><div class="ph" style="height:44px;">[Ikon]</div><h4>LMS Mini</h4><p>Materi, tugas &amp; kuis online.</p><div class="price">Rp 149rb/bln</div><span class="badge">Nonaktif</span> <button class="btn btn-sm btn-primary" style="margin-top:6px;">Ajukan aktivasi</button></div>
+          </div>
+          <div class="note">Menu &amp; permission aplikasi otomatis mengikuti modul yang aktif. Menonaktifkan modul menyembunyikan fiturnya (data historis tetap read-only).</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ W-09 TEMPLATE NOTIFIKASI ============ -->
+  <div class="screen" id="w-09">
+    <div class="screen-head"><h2>W-09 — Template Notifikasi</h2><div class="tujuan">Tujuan: kelola template pesan WA/push per sekolah dengan variabel dinamis (US-107).</div></div>
+    <div class="frame-desktop">
+      <div class="topbar"><div class="brand"><div class="logo-box">[Logo]</div> SMA Negeri 1 Bandung</div><div style="font-size:13px;">Halo, Ratna (Admin Sekolah)</div></div>
+      <div class="layout">
+        <div class="sidebar"><a href="#">Dashboard</a><a href="#">Pengumuman</a><a href="#" class="active">Template Notifikasi</a><a href="#">Pengaturan</a></div>
+        <div class="content">
+          <h3>Template Notifikasi</h3><p class="sub">Pesan otomatis WA &amp; push — sesuaikan bahasa sekolah Anda</p>
+          <table class="wire">
+            <tr><th>Nama template</th><th>Channel</th><th>Trigger</th><th>Status</th><th></th></tr>
+            <tr><td>Siswa alpa</td><td><span class="badge">WA</span> <span class="badge">Push</span></td><td>Absensi dikunci, status A</td><td><span class="badge ok">Aktif</span></td><td><button class="btn btn-sm">Ubah</button></td></tr>
+            <tr><td>Nilai dirilis</td><td><span class="badge">Push</span></td><td>Wali kelas merilis nilai</td><td><span class="badge ok">Aktif</span></td><td><button class="btn btn-sm">Ubah</button></td></tr>
+            <tr><td>Pengingat SPP</td><td><span class="badge">WA</span></td><td>H-3 jatuh tempo</td><td><span class="badge">Nonaktif</span></td><td><button class="btn btn-sm">Ubah</button></td></tr>
+          </table>
+          <button class="btn btn-primary" style="margin:12px 0;">+ Tambah template</button>
+          <h3>Editor template: "Siswa alpa"</h3>
+          <div class="field">
+            <label>Isi pesan</label><textarea class="input" rows="4" style="width:100%;">Yth. Bapak/Ibu {{nama_wali}}, ananda {{nama_siswa}} ({{kelas}}) tidak hadir tanpa keterangan pada {{tanggal}}. Mohon konfirmasi ke wali kelas. — {{nama_sekolah}}</textarea>
+          </div>
+          <p class="sub">Variabel tersedia: {{nama_siswa}} {{nama_wali}} {{kelas}} {{tanggal}} {{nama_sekolah}} — klik untuk sisipkan</p>
+          <div style="margin-top:10px;">
+            <button class="btn">Kirim tes ke nomor saya</button>
+            <button class="btn btn-primary">Simpan template</button>
+          </div>
+          <div class="note">Selalu kirim tes ke nomor sendiri dan pratinjau sebelum mengaktifkan template.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ P-01 LOGIN PWA ============ -->
+  <div class="screen" id="p-01">
+    <div class="screen-head"><h2>P-01 — Login PWA (Siswa / Orang Tua)</h2><div class="tujuan">Tujuan: masuk aman via OTP WhatsApp; FR-1306, FR-204.</div></div>
+    <div class="frame-mobile">
+      <div class="m-body" style="padding-top:26px;">
+        <div class="ph" style="height:52px; margin-bottom:10px;">[Logo SMA Negeri 1 Bandung]</div>
+        <h3 style="text-align:center;">SIMS Siswa &amp; Ortu</h3>
+        <p class="sub" style="text-align:center;">Aplikasi pendamping resmi sekolah</p>
+        <div class="tabs" style="margin-top:14px;">
+          <button class="active" onclick="tabOtp(true)">WhatsApp OTP</button>
+          <button onclick="tabOtp(false)">Username</button>
+        </div>
+        <div id="pane-otp">
+          <div class="field"><label>Nomor WhatsApp</label><input class="input" value="0812-3456-7890"></div>
+          <button class="btn btn-primary full">Kirim Kode OTP</button>
+          <div class="field" style="margin-top:14px;"><label>Kode OTP (6 digit)</label></div>
+          <div class="otp-boxes"><input class="input" value="4"><input class="input" value="8"><input class="input" value="1"><input class="input"><input class="input"><input class="input"></div>
+          <button class="btn btn-primary full">Verifikasi &amp; Masuk</button>
+          <p style="text-align:center; margin-top:8px;"><a class="link" href="#">Kirim ulang (0:42)</a></p>
+        </div>
+        <div id="pane-user" style="display:none;">
+          <div class="field"><label>Username (NIS / email)</label><input class="input" placeholder="2425001"></div>
+          <div class="field"><label>Kata sandi</label><input class="input" type="password" placeholder="••••••••"></div>
+          <button class="btn btn-primary full">Masuk</button>
+        </div>
+        <div class="note">Satu akun orang tua dapat memantau <b>semua anaknya</b>, termasuk yang beda sekolah.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ P-02 BERANDA SISWA ============ -->
+  <div class="screen" id="p-02">
+    <div class="screen-head"><h2>P-02 — Beranda Siswa</h2><div class="tujuan">Tujuan: jadwal hari ini, kehadiran &amp; pengumuman sekilas; FR-1302.</div></div>
+    <div class="frame-mobile">
+      <div class="m-top"><div class="hello">Selamat pagi,</div><div class="name">Ahmad Fauzi</div><div class="hello">XII IPA 1 · SMA Negeri 1 Bandung</div></div>
+      <div class="m-body">
+        <div class="m-card"><h4>Jadwal Hari Ini — Jumat</h4>
+          <div class="m-list-item"><div class="ph" style="width:44px;height:44px;">07.00</div><div><b>Matematika</b><br><span style="color:#666;font-size:12px;">Drs. Bambang S. · R. XII-1</span></div></div>
+          <div class="m-list-item"><div class="ph" style="width:44px;height:44px;">08.30</div><div><b>Fisika</b><br><span style="color:#666;font-size:12px;">Drs. Hadi P. · Lab Fisika</span></div></div>
+          <div class="m-list-item"><div class="ph" style="width:44px;height:44px;">10.15</div><div><b>Bahasa Inggris</b><br><span style="color:#666;font-size:12px;">Ms. Ratih · R. XII-1</span></div></div>
+        </div>
+        <div class="m-card"><h4>Kehadiran Bulan Ini</h4><p style="font-size:26px; font-weight:bold;">98% <span style="font-size:12px; font-weight:normal; color:#666;">(H 19 · I 1 · S 0 · A 0)</span></p><div class="meter"><div style="width:98%"></div></div></div>
+        <div class="m-card"><h4>Pengumuman Terbaru</h4>
+          <div class="m-list-item"><div><b>Batas input nilai PTS 12 Okt</b><br><span style="color:#666;font-size:12px;">8 Okt 2026</span></div></div>
+          <div class="m-list-item"><div><b>Upacara Kesaktian Pancasila</b><br><span style="color:#666;font-size:12px;">1 Okt 2026</span></div></div>
+        </div>
+      </div>
+      <div class="m-nav"><a href="#" class="active">Beranda</a><a href="#">Nilai</a><a href="#">Pengumuman</a><a href="#">Profil</a></div>
+    </div>
+  </div>
+
+  <!-- ============ P-03 NILAI ============ -->
+  <div class="screen" id="p-03">
+    <div class="screen-head"><h2>P-03 — Nilai Saya</h2><div class="tujuan">Tujuan: transparansi nilai per mapel setelah dirilis resmi; FR-707, FR-1302.</div></div>
+    <div class="frame-mobile">
+      <div class="m-top"><div class="name">Nilai Saya</div><div class="hello">Ahmad Fauzi · XII IPA 1</div></div>
+      <div class="m-body">
+        <div class="field"><label>Semester</label><select class="input" style="width:100%;"><option>Ganjil 2026/2027</option><option>Genap 2025/2026</option></select></div>
+        <div class="m-card"><div class="m-list-item"><div style="flex:1"><b>Matematika</b><br><span style="color:#666;font-size:12px;">KKM 75</span></div><div style="text-align:right"><b style="font-size:20px;">88</b><br><span class="badge ok">A</span></div></div></div>
+        <div class="m-card"><div class="m-list-item"><div style="flex:1"><b>Fisika</b><br><span style="color:#666;font-size:12px;">KKM 75</span></div><div style="text-align:right"><b style="font-size:20px;">84</b><br><span class="badge ok">B</span></div></div></div>
+        <div class="m-card"><div class="m-list-item"><div style="flex:1"><b>Bahasa Indonesia</b><br><span style="color:#666;font-size:12px;">KKM 75</span></div><div style="text-align:right"><b style="font-size:20px;">90</b><br><span class="badge ok">A</span></div></div></div>
+        <div class="m-card" style="border-style:dashed;"><div class="m-list-item"><div style="flex:1"><b>Kimia</b></div><span class="badge warn">Menunggu rilis wali kelas</span></div></div>
+        <div class="note">Nilai hanya tampil setelah dirilis resmi oleh wali kelas/kepala sekolah.</div>
+      </div>
+      <div class="m-nav"><a href="#">Beranda</a><a href="#" class="active">Nilai</a><a href="#">Pengumuman</a><a href="#">Profil</a></div>
+    </div>
+  </div>
+
+  <!-- ============ P-04 BERANDA ORTU ============ -->
+  <div class="screen" id="p-04">
+    <div class="screen-head"><h2>P-04 — Beranda Orang Tua</h2><div class="tujuan">Tujuan: pantau semua anak (bahkan beda sekolah) dalam satu dasbor; FR-1303, FR-203.</div></div>
+    <div class="frame-mobile">
+      <div class="m-top"><div class="hello">Selamat pagi,</div><div class="name">Bpk. Haryanto</div><div class="hello">Orang tua · 2 anak</div></div>
+      <div class="m-body">
+        <div class="m-card">
+          <div class="m-list-item"><span class="foto" style="width:44px;height:44px;">Foto</span><div style="flex:1"><b>Ahmad Fauzi</b><br><span style="color:#666;font-size:12px;">XII IPA 1 · SMA Negeri 1 Bandung</span></div><span class="badge ok">Hadir hari ini</span></div>
+          <div class="row" style="margin-top:8px; font-size:12.5px;">
+            <div style="flex:1; background:#f4f4f4; padding:8px; text-align:center;">Kehadiran Okt<br><b>98%</b></div>
+            <div style="flex:1; background:#f4f4f4; padding:8px; text-align:center;">Rata-rata PTS<br><b>87,3</b></div>
+          </div>
+          <button class="btn full" style="margin-top:8px;">Lihat detail Ahmad →</button>
+        </div>
+        <div class="m-card">
+          <div class="m-list-item"><span class="foto" style="width:44px;height:44px;">Foto</span><div style="flex:1"><b>Dinda Aulia</b><br><span style="color:#666;font-size:12px;">VIII A · SMP Negeri 2 Bandung</span></div><span class="badge warn">Izin — Sakit</span></div>
+          <div class="row" style="margin-top:8px; font-size:12.5px;">
+            <div style="flex:1; background:#f4f4f4; padding:8px; text-align:center;">Kehadiran Okt<br><b>95%</b></div>
+            <div style="flex:1; background:#f4f4f4; padding:8px; text-align:center;">Rata-rata PTS<br><b>84,1</b></div>
+          </div>
+          <button class="btn full" style="margin-top:8px;">Lihat detail Dinda →</button>
+        </div>
+        <div class="m-card"><h4>Pengumuman</h4>
+          <div class="m-list-item"><div><b>Rapor PTS dibagikan 18 Okt</b><br><span style="color:#666;font-size:12px;">SMA Negeri 1 Bandung</span></div></div>
+        </div>
+      </div>
+      <div class="m-nav"><a href="#" class="active">Anak Saya</a><a href="#">Pengumuman</a><a href="#">Profil</a></div>
+    </div>
+  </div>
+
+  <!-- ============ P-05 PENGUMUMAN ============ -->
+  <div class="screen" id="p-05">
+    <div class="screen-head"><h2>P-05 — Pengumuman</h2><div class="tujuan">Tujuan: baca pengumuman resmi sekolah + notifikasi push; FR-1302, FR-1304.</div></div>
+    <div class="frame-mobile">
+      <div class="m-top"><div class="name">Pengumuman</div><div class="hello">SMA Negeri 1 Bandung</div></div>
+      <div class="m-body">
+        <div class="m-card" style="border:2px solid #555;">
+          <p style="font-size:11px; color:#666;">9 Okt 2026 · Akademik</p>
+          <h4>Rapor PTS dibagikan 18 Oktober</h4>
+          <p style="font-size:13px;">Yth. Bapak/Ibu orang tua/wali, pengambilan rapor PTS semester ganjil dilaksanakan Sabtu, 18 Oktober 2026 pukul 08.00–11.00 di kelas masing-masing. Mohon kehadiran tepat waktu.</p>
+          <p style="font-size:12px; color:#666; margin-top:6px;">— Waka Kurikulum</p>
+        </div>
+        <div class="m-card"><div class="m-list-item"><div><p style="font-size:11px; color:#666;">3 Okt 2026 · Kesiswaan</p><b>Seleksi OSN tingkat kota</b></div></div></div>
+        <div class="m-card"><div class="m-list-item"><div><p style="font-size:11px; color:#666;">28 Sep 2026 · Umum</p><b>Jadwal PTS semester ganjil</b></div></div></div>
+      </div>
+      <div class="m-nav"><a href="#">Beranda</a><a href="#">Nilai</a><a href="#" class="active">Pengumuman</a><a href="#">Profil</a></div>
+    </div>
+  </div>
+
+  <!-- ============ P-06 PROFIL ============ -->
+  <div class="screen" id="p-06">
+    <div class="screen-head"><h2>P-06 — Profil &amp; Perangkat</h2><div class="tujuan">Tujuan: kelola akun &amp; sesi perangkat (cabut jarak jauh); FR-1306, FR-905.</div></div>
+    <div class="frame-mobile">
+      <div class="m-top"><div class="name">Profil</div></div>
+      <div class="m-body">
+        <div class="m-card">
+          <div class="m-list-item"><span class="foto" style="width:52px;height:52px;">Foto</span><div><b>Ahmad Fauzi</b><br><span style="color:#666;font-size:12px;">NIS 2425001 · XII IPA 1<br>SMA Negeri 1 Bandung</span></div></div>
+        </div>
+        <div class="m-card"><h4>Perangkat login</h4>
+          <div class="m-list-item"><div style="flex:1"><b>HP Android — Redmi 12</b><br><span style="color:#666;font-size:12px;">Aktif sekarang · Bandung</span></div><span class="badge ok">Perangkat ini</span></div>
+          <div class="m-list-item"><div style="flex:1"><b>Chrome — Laptop</b><br><span style="color:#666;font-size:12px;">Terakhir 7 Okt 2026</span></div><button class="btn btn-sm">Cabut</button></div>
+        </div>
+        <div class="m-card"><h4>Notifikasi</h4>
+          <p style="font-size:13px;"><label><input type="checkbox" checked> Anak alpa / tidak hadir</label></p>
+          <p style="font-size:13px;"><label><input type="checkbox" checked> Nilai dirilis</label></p>
+          <p style="font-size:13px;"><label><input type="checkbox" checked> Pengumuman penting</label></p>
+        </div>
+        <button class="btn full">Keluar</button>
+        <p class="sub" style="text-align:center; margin-top:10px;">SIMS PWA v1.0 · mode offline aktif</p>
+      </div>
+      <div class="m-nav"><a href="#">Beranda</a><a href="#">Nilai</a><a href="#">Pengumuman</a><a href="#" class="active">Profil</a></div>
+    </div>
+  </div>
+
+  <!-- ============ PF-01 DAFTAR TENANT ============ -->
+  <div class="screen" id="pf-01">
+    <div class="screen-head"><h2>PF-01 — Daftar Tenant (Operator Platform)</h2><div class="tujuan">Tujuan: kelola sekolah pelanggan — status langganan, impersonasi tercatat, suspend (US-102).</div></div>
+    <div class="frame-desktop">
+      <div class="topbar"><div class="brand"><div class="logo-box">[Logo]</div> SIMS Platform</div><div style="font-size:13px;">Halo, Dimas (Platform Support)</div></div>
+      <div class="layout">
+        <div class="sidebar"><a href="#">Dashboard</a><a href="#" class="active">Tenant</a><a href="#">Paket &amp; Kuota</a><a href="#">Audit Platform</a></div>
+        <div class="content">
+          <h3>Daftar Tenant</h3>
+          <div style="display:flex; gap:8px; margin:10px 0;">
+            <input class="input" placeholder="Cari nama / subdomain / NPSN…" style="flex:1;"/>
+            <select class="input"><option>Semua status</option><option>Trial</option><option>Active</option><option>Past due</option><option>Suspended</option></select>
+          </div>
+          <table class="wire">
+            <tr><th>Sekolah</th><th>Paket</th><th>Status</th><th>Siswa</th><th>MRR</th><th></th></tr>
+            <tr><td>SMA Negeri 1 Bandung<br/><span class="sub">sman1bdb.sims.id</span></td><td>Pro</td><td><span class="badge ok">Active</span></td><td>842 / 1.500</td><td>Rp 999 rb</td><td><button class="btn btn-sm">Impersonasi</button></td></tr>
+            <tr><td>SD Pelita Bangsa<br/><span class="sub">sdpelita.sims.id</span></td><td>Basic</td><td><span class="badge warn">Trial (12 hari)</span></td><td>96 / 100</td><td>Rp 0</td><td><button class="btn btn-sm">Impersonasi</button></td></tr>
+            <tr><td>SMP Tunas Harapan<br/><span class="sub">smptunas.sims.id</span></td><td>Pro</td><td><span class="badge danger">Past due</span></td><td>610 / 1.500</td><td>Rp 999 rb</td><td><button class="btn btn-sm">Suspend</button></td></tr>
+          </table>
+          <div class="note">Impersonasi selalu berlabel, auto-expire 30 menit, dan tercatat ganda (audit platform + audit tenant).</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ PF-02 KELOLA PAKET & KUOTA ============ -->
+  <div class="screen" id="pf-02">
+    <div class="screen-head"><h2>PF-02 — Kelola Paket &amp; Kuota (Operator Platform)</h2><div class="tujuan">Tujuan: ubah harga &amp; batasan paket tanpa deploy; override kuota per tenant (US-118, US-119).</div></div>
+    <div class="frame-desktop">
+      <div class="topbar"><div class="brand"><div class="logo-box">[Logo]</div> SIMS Platform</div><div style="font-size:13px;">Halo, Dimas (Platform Admin)</div></div>
+      <div class="layout">
+        <div class="sidebar"><a href="#">Dashboard</a><a href="#">Tenant</a><a href="#" class="active">Paket &amp; Kuota</a><a href="#">Audit Platform</a></div>
+        <div class="content">
+          <h3>Paket Langganan</h3>
+          <table class="wire">
+            <tr><th>Paket</th><th>Harga/bln</th><th>Siswa</th><th>Staf</th><th>Storage</th><th>WA/bln</th><th>Rate limit</th><th></th></tr>
+            <tr><td>Basic</td><td>Rp 499.000</td><td>300</td><td>20</td><td>10 GB</td><td>500</td><td>60/mnt</td><td><button class="btn btn-sm">Ubah</button></td></tr>
+            <tr><td>Pro</td><td>Rp 999.000</td><td>1.500</td><td>75</td><td>50 GB</td><td>3.000</td><td>300/mnt</td><td><button class="btn btn-sm">Ubah</button></td></tr>
+            <tr><td>Enterprise</td><td>Rp 2.500.000+</td><td>∞</td><td>∞</td><td>200 GB+</td><td>15.000</td><td>Kustom</td><td><button class="btn btn-sm">Ubah</button></td></tr>
+          </table>
+          <div class="note">Perubahan harga hanya berlaku untuk langganan baru (grandfathering) — tidak mengubah invoice berjalan.</div>
+          <h3 style="margin-top:16px;">Override Kuota Tenant</h3>
+          <table class="wire">
+            <tr><th>Tenant</th><th>Metrik</th><th>Batas paket → Kustom</th><th>Berlaku s/d</th><th>Alasan</th><th></th></tr>
+            <tr><td>SD Pelita Bangsa</td><td>Siswa aktif</td><td>100 → 150</td><td>31 Jul 2026</td><td>Dispensasi PPDB</td><td><button class="btn btn-sm">Cabut</button></td></tr>
+          </table>
+          <button class="btn btn-primary" style="margin-top:12px;">+ Tambah override</button>
+          <div class="note">Override wajib mencantumkan alasan + tanggal kedaluwarsa; otomatis kembali ke batas paket saat kedaluwarsa.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">Wireframe SIMS v1.0 — 17 layar (9 web admin + 6 PWA + 2 platform) · Grayscale · Data contoh fiktif</div>
+
+</div>
+<script>
+  function tabOtp(isOtp) {
+    document.getElementById('pane-otp').style.display = isOtp ? 'block' : 'none';
+    document.getElementById('pane-user').style.display = isOtp ? 'none' : 'block';
+    var btns = document.querySelectorAll('#p-01 .tabs button');
+    btns[0].classList.toggle('active', isOtp);
+    btns[1].classList.toggle('active', !isOtp);
+  }
+</script>
+</body>
+</html>

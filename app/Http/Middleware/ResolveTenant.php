@@ -26,6 +26,12 @@ final class ResolveTenant
     public function handle(Request $request, Closure $next): Response
     {
         $tenant = app(TenantContext::class);
+        $tenant->clear();
+
+        if ($request->user()?->is_platform) {
+            return $next($request);
+        }
+
         $school = null;
 
         // 1. Resolusi utama via domain — HANYA yang terverifikasi & aktif

@@ -20,8 +20,14 @@ class Pengumuman extends Component
     public function render(PwaContext $pwa): View
     {
         $student = $pwa->activeStudent();
+        $role = $pwa->role();
+        $rombel = $student?->rombels()
+            ->wherePivot('status', 'aktif')
+            ->latest('class_student.id')
+            ->first();
 
         $items = Announcement::tayang()
+            ->visibleToPwa($role, $rombel ? [$rombel->id] : [])
             ->orderByDesc('penting')
             ->orderByDesc('tayang_dari')
             ->paginate(15);
@@ -30,7 +36,7 @@ class Pengumuman extends Component
             ->layout('layouts.pwa', [
                 'title' => 'Pengumuman',
                 'schoolName' => $student?->school?->nama,
-                'showChildSwitcher' => $pwa->role() === 'orang-tua',
+                'showChildSwitcher' => $role === 'orang-tua',
                 'children' => $pwa->children(),
                 'activeStudentId' => $student?->id,
             ]);

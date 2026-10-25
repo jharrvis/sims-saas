@@ -1,20 +1,160 @@
 @import 'tailwindcss';
+@import './sims.css';
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
+@source '../views/**/*.blade.php';
+@source '../js/**/*.js';
 
 /* Dark mode berbasis class, sesuai design system (darkMode: 'class') */
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* Token design system SIMS — port dari design/tailwind.config.js */
+/*
+ * SIMS semantic tokens.
+ *
+ * The reference bundle uses two closely related palettes (PWA indigo and
+ * desktop blue). We use the PWA contract as the canonical palette so every
+ * surface shares one token system; the desktop shell keeps its own layout
+ * density via resources/css/desktop.css.
+ */
 @theme {
-    --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    --font-sans: 'DM Sans', 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --font-heading: 'Plus Jakarta Sans', 'DM Sans', ui-sans-serif, system-ui, sans-serif;
+    --font-mobile: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
 
-    --color-primary: #3c50e0;
+    --color-primary: #4f46e5;
+    --color-primary-dark: #3730a3;
+    --color-primary-soft: #eef2ff;
     --color-secondary: #80caee;
-    --color-success: #219653;
-    --color-danger: #d34053;
-    --color-warning: #ffa70b;
-    --color-boxdark: #24303f;
-    --color-boxdark2: #1a222c;
+
+    --color-success: #16805b;
+    --color-success-soft: #e9f8f1;
+    --color-danger: #d14343;
+    --color-danger-soft: #fff0ed;
+    --color-warning: #b56207;
+    --color-warning-soft: #fff5e5;
+    --color-info: #2563eb;
+    --color-info-soft: #eaf2ff;
+
+    --color-ink: #172033;
+    --color-muted: #68738a;
+    --color-surface: #ffffff;
+    --color-canvas: #f5f7fb;
+    --color-line: #e8ebf2;
+
+    --color-boxdark: #172339;
+    --color-boxdark2: #0d1525;
+    --color-boxdark3: #1d2b43;
+}
+
+/* Runtime variables for custom CSS components and inline SVG charts. */
+:root {
+    --sims-primary: #4f46e5;
+    --sims-primary-dark: #3730a3;
+    --sims-primary-soft: #eef2ff;
+    --sims-ink: #172033;
+    --sims-muted: #68738a;
+    --sims-surface: #ffffff;
+    --sims-canvas: #f5f7fb;
+    --sims-line: #e8ebf2;
+    --sims-success: #16805b;
+    --sims-success-soft: #e9f8f1;
+    --sims-warning: #b56207;
+    --sims-warning-soft: #fff5e5;
+    --sims-danger: #d14343;
+    --sims-danger-soft: #fff0ed;
+    --sims-info: #2563eb;
+    --sims-info-soft: #eaf2ff;
+    --sims-radius: 20px;
+    --sims-radius-sm: 14px;
+    --sims-shadow-sm: 0 2px 8px rgba(27, 39, 74, 0.06);
+    --sims-shadow-md: 0 12px 32px rgba(27, 39, 74, 0.11);
+    --sims-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+    --sims-sidebar-width: 264px;
+    --sims-topbar-height: 72px;
+    --sims-safe-bottom: max(10px, env(safe-area-inset-bottom));
+}
+
+.dark {
+    --sims-primary: #818cf8;
+    --sims-primary-dark: #a5b4fc;
+    --sims-primary-soft: #27305a;
+    --sims-ink: #edf3ff;
+    --sims-muted: #95a5bf;
+    --sims-surface: #172339;
+    --sims-canvas: #0d1525;
+    --sims-line: #2a3951;
+    --sims-success: #34d399;
+    --sims-success-soft: #123c32;
+    --sims-warning: #fbbf24;
+    --sims-warning-soft: #422f12;
+    --sims-danger: #fb7185;
+    --sims-danger-soft: #431f2a;
+    --sims-info: #93c5fd;
+    --sims-info-soft: #1e3a5f;
+    color-scheme: dark;
+}
+
+html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+}
+
+body {
+    margin: 0;
+    background: var(--sims-canvas);
+    color: var(--sims-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4 {
+    font-family: var(--font-heading);
+    letter-spacing: -0.035em;
+}
+
+button,
+input,
+select,
+textarea {
+    font: inherit;
+}
+
+button,
+a {
+    touch-action: manipulation;
+}
+
+svg {
+    flex-shrink: 0;
+}
+
+:focus-visible {
+    outline: 3px solid rgba(79, 70, 229, 0.35);
+    outline-offset: 2px;
+}
+
+::selection {
+    background: rgba(79, 70, 229, 0.18);
+}
+
+[x-cloak] {
+    display: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
 }

@@ -22,6 +22,8 @@ class StudentShow extends Component
 
     public function render(): View
     {
+        // Hanya tampilan read-only wali; form penautan & consent-panel dihapus
+        // karena backend-nya tidak pernah ada (lihat handover Batch 1).
         return view('livewire.kesiswaan.student-show')
             ->layout('layouts.app', ['title' => 'Profil Siswa']);
     }

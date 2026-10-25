@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Platform;
 
 use App\Models\Plan;
+use App\Models\User;
 use Illuminate\View\View;
 use Livewire\Component;
 
@@ -30,6 +31,7 @@ class PlanIndex extends Component
 
     public function edit(?int $id): void
     {
+        $this->ensurePlatformPermission('platform.plan.manage');
         $this->reset(['nama', 'slug', 'deskripsi', 'harga_bulanan', 'harga_tahunan', 'max_siswa']);
         $this->editId = $id;
         $this->aktif = true;
@@ -49,12 +51,16 @@ class PlanIndex extends Component
 
     public function simpan(): void
     {
+        $this->ensurePlatformPermission('platform.plan.manage');
+
         $this->validate([
             'nama' => ['required', 'string', 'max:50'],
             'slug' => ['required', 'string', 'max:50', 'alpha_dash', 'unique:plans,slug'.($this->editId ? ','.$this->editId : '')],
+            'deskripsi' => ['nullable', 'string', 'max:500'],
             'harga_bulanan' => ['required', 'integer', 'min:0'],
             'harga_tahunan' => ['nullable', 'integer', 'min:0'],
             'max_siswa' => ['nullable', 'integer', 'min:0'],
+            'aktif' => ['boolean'],
         ]);
 
         $data = [
@@ -78,10 +84,31 @@ class PlanIndex extends Component
         session()->flash('ok', 'Paket disimpan.');
     }
 
+    public function closeForm(): void
+    {
+        $this->reset(['editId', 'nama', 'slug', 'deskripsi', 'harga_bulanan', 'harga_tahunan', 'max_siswa', 'showForm']);
+        $this->aktif = true;
+        $this->resetValidation();
+    }
+
     public function render(): View
     {
         return view('livewire.platform.plan-index', [
             'plans' => Plan::orderBy('harga_bulanan')->get(),
         ])->layout('layouts.platform', ['title' => 'Paket Langganan']);
+    }
+
+    private function ensurePlatformPermission(string $permission): User
+    {
+        $operator = auth()->user();
+
+        abort_unless(
+            $operator instanceof User
+                && $operator->is_platform
+                && $operator->hasPermissionTo($permission, 'platform'),
+            403,
+        );
+
+        return $operator;
     }
 }

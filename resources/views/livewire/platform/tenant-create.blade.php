@@ -1,69 +1,137 @@
-<div>
-    <div class="mb-5">
-        <h1 class="text-2xl font-extrabold">Tambah Tenant</h1>
-        <p class="text-sm text-slate-500 mt-1">Sekolah baru langsung mendapat trial 30 hari + akun admin superadmin. Nomor WA admin boleh sudah terdaftar (satu nomor bisa untuk banyak peran).</p>
+<div class="page-stack">
+    <div class="page-header">
+        <div>
+            <a href="{{ route('platform.tenants') }}" class="platform-back-link">
+                <x-icon name="arrow-left" class="h-4 w-4" /> Kembali ke daftar tenant
+            </a>
+            <span class="eyebrow">Platform / Provisioning</span>
+            <h2 class="platform-page-title">Tambah Tenant Baru</h2>
+            <p>Buat workspace sekolah, langganan trial, admin pertama, dan modul inti dalam satu proses terkontrol.</p>
+        </div>
     </div>
 
-    <form wire:submit="simpan" class="max-w-2xl rounded-xl bg-white shadow-sm p-6 space-y-4">
-        <div>
-            <label class="block text-sm font-semibold text-slate-700 mb-1" for="nama">Nama sekolah</label>
-            <input id="nama" type="text" wire:model="nama" placeholder="cth. SDN 01 Jakarta"
-                   class="w-full rounded-lg border border-slate-200 py-2.5 px-4 text-sm outline-none focus:border-primary">
-            @error('nama') <p class="text-xs text-danger mt-1">{{ $message }}</p> @enderror
-        </div>
-
-        <div class="grid sm:grid-cols-2 gap-4">
-            <div>
-                <label class="block text-sm font-semibold text-slate-700 mb-1" for="jenjang">Jenjang</label>
-                <select id="jenjang" wire:model="jenjang"
-                        class="w-full rounded-lg border border-slate-200 py-2.5 px-3 text-sm outline-none focus:border-primary">
-                    <option value="">— Pilih —</option>
-                    @foreach (['SD', 'SMP', 'SMA', 'SMK'] as $j)
-                        <option value="{{ $j }}">{{ $j }}</option>
-                    @endforeach
-                </select>
-                @error('jenjang') <p class="text-xs text-danger mt-1">{{ $message }}</p> @enderror
+    <div class="platform-create-layout">
+        <form wire:submit="simpan" class="card platform-form-card" aria-labelledby="tenant-form-title">
+            <div class="card-head">
+                <div class="card-title">
+                    <span class="mini-icon orange"><x-icon name="school" class="h-[19px] w-[19px]" /></span>
+                    <div>
+                        <h3 id="tenant-form-title">Identitas Sekolah</h3>
+                        <p>Data dasar untuk workspace tenant</p>
+                    </div>
+                </div>
+                <span class="badge badge-orange">Langkah tunggal</span>
             </div>
-            <div>
-                <label class="block text-sm font-semibold text-slate-700 mb-1" for="npsn">NPSN <span class="font-normal text-slate-400">(opsional)</span></label>
-                <input id="npsn" type="text" wire:model="npsn" placeholder="cth. 20100123"
-                       class="w-full rounded-lg border border-slate-200 py-2.5 px-4 text-sm outline-none focus:border-primary">
-                @error('npsn') <p class="text-xs text-danger mt-1">{{ $message }}</p> @enderror
-            </div>
-        </div>
 
-        <div class="grid sm:grid-cols-2 gap-4">
-            <div>
-                <label class="block text-sm font-semibold text-slate-700 mb-1" for="admin_nama">Nama admin sekolah</label>
-                <input id="admin_nama" type="text" wire:model="admin_nama" placeholder="Nama penanggung jawab"
-                       class="w-full rounded-lg border border-slate-200 py-2.5 px-4 text-sm outline-none focus:border-primary">
-                @error('admin_nama') <p class="text-xs text-danger mt-1">{{ $message }}</p> @enderror
-            </div>
-            <div>
-                <label class="block text-sm font-semibold text-slate-700 mb-1" for="admin_phone">No. WA admin</label>
-                <input id="admin_phone" type="text" wire:model="admin_phone" placeholder="6281234567890"
-                       class="w-full rounded-lg border border-slate-200 py-2.5 px-4 text-sm outline-none focus:border-primary">
-                @error('admin_phone') <p class="text-xs text-danger mt-1">{{ $message }}</p> @enderror
-            </div>
-        </div>
+            @if ($errors->any())
+                <div class="platform-alert platform-alert-danger" role="alert" aria-live="assertive">
+                    <x-icon name="alert-triangle" class="h-5 w-5" />
+                    <span>Periksa kembali bidang yang ditandai sebelum membuat tenant.</span>
+                </div>
+            @endif
 
-        <div>
-            <label class="block text-sm font-semibold text-slate-700 mb-1" for="plan_slug">Paket trial</label>
-            <select id="plan_slug" wire:model="plan_slug"
-                    class="w-full rounded-lg border border-slate-200 py-2.5 px-3 text-sm outline-none focus:border-primary">
-                @foreach ($plans as $p)
-                    <option value="{{ $p->slug }}">{{ $p->nama }} — Rp{{ number_format($p->harga_bulanan, 0, ',', '.') }}/bln</option>
-                @endforeach
-            </select>
-            @error('plan_slug') <p class="text-xs text-danger mt-1">{{ $message }}</p> @enderror
-        </div>
+            <fieldset class="platform-fieldset">
+                <legend>Informasi sekolah</legend>
+                <div class="form-grid">
+                    <div class="form-group platform-form-full">
+                        <label for="nama">Nama sekolah <span class="required" aria-hidden="true">*</span></label>
+                        <input id="nama" type="text" wire:model="nama" class="field" placeholder="Contoh: SDN 01 Jakarta"
+                            autocomplete="organization" required aria-describedby="nama-hint nama-error">
+                        <span id="nama-hint" class="helper-text">Gunakan nama resmi sekolah yang akan tampil di workspace.</span>
+                        @error('nama') <span id="nama-error" class="platform-field-error" role="alert">{{ $message }}</span> @enderror
+                    </div>
+                    <div class="form-group">
+                        <label for="jenjang">Jenjang <span class="required" aria-hidden="true">*</span></label>
+                        <select id="jenjang" wire:model="jenjang" class="select-field" required>
+                            <option value="">Pilih jenjang</option>
+                            @foreach (['SD', 'SMP', 'SMA', 'SMK'] as $level)
+                                <option value="{{ $level }}">{{ $level }}</option>
+                            @endforeach
+                        </select>
+                        @error('jenjang') <span class="platform-field-error" role="alert">{{ $message }}</span> @enderror
+                    </div>
+                    <div class="form-group">
+                        <label for="npsn">NPSN <span class="platform-optional">Opsional</span></label>
+                        <input id="npsn" type="text" wire:model="npsn" class="field platform-tabular" placeholder="20100123"
+                            inputmode="numeric" autocomplete="off">
+                        @error('npsn') <span class="platform-field-error" role="alert">{{ $message }}</span> @enderror
+                    </div>
+                </div>
+            </fieldset>
 
-        <div class="flex items-center gap-3 pt-2">
-            <button type="submit"
-                    class="rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-white hover:opacity-90">
-                Buat Tenant
-            </button>
-            <a href="{{ route('platform.tenants') }}" class="text-sm text-slate-500 hover:underline">Batal</a>
-        </div>
-    </form>
+            <fieldset class="platform-fieldset">
+                <legend>Administrator sekolah</legend>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="admin_nama">Nama administrator <span class="required" aria-hidden="true">*</span></label>
+                        <input id="admin_nama" type="text" wire:model="admin_nama" class="field" placeholder="Nama penanggung jawab"
+                            autocomplete="name" required>
+                        @error('admin_nama') <span class="platform-field-error" role="alert">{{ $message }}</span> @enderror
+                    </div>
+                    <div class="form-group">
+                        <label for="admin_phone">Nomor WhatsApp <span class="required" aria-hidden="true">*</span></label>
+                        <input id="admin_phone" type="tel" wire:model="admin_phone" class="field platform-tabular"
+                            placeholder="6281234567890" inputmode="tel" autocomplete="tel" required>
+                        <span class="helper-text">Awali dengan kode negara 62 tanpa tanda +.</span>
+                        @error('admin_phone') <span class="platform-field-error" role="alert">{{ $message }}</span> @enderror
+                    </div>
+                </div>
+            </fieldset>
+
+            <fieldset class="platform-fieldset">
+                <legend>Langganan awal</legend>
+                <div class="form-group">
+                    <label for="plan_slug">Paket trial <span class="required" aria-hidden="true">*</span></label>
+                    <select id="plan_slug" wire:model="plan_slug" class="select-field" required>
+                        @foreach ($plans as $plan)
+                            <option value="{{ $plan->slug }}">{{ $plan->nama }} — Rp{{ number_format($plan->harga_bulanan, 0, ',', '.') }}/bulan</option>
+                        @endforeach
+                    </select>
+                    <span class="helper-text">Tenant akan memperoleh trial 30 hari sebelum penagihan reguler.</span>
+                    @error('plan_slug') <span class="platform-field-error" role="alert">{{ $message }}</span> @enderror
+                </div>
+            </fieldset>
+
+            <div class="form-actions platform-form-actions">
+                <a href="{{ route('platform.tenants') }}" class="btn btn-soft">Batal</a>
+                <button type="submit" class="btn btn-primary btn-lg" wire:loading.attr="disabled" wire:target="simpan">
+                    <span wire:loading.remove wire:target="simpan" class="platform-button-label">
+                        <x-icon name="plus" class="h-4 w-4" /> Buat Tenant
+                    </span>
+                    <span wire:loading.flex wire:target="simpan" class="platform-button-label">
+                        <span class="platform-button-spinner" aria-hidden="true"></span> Menyiapkan tenant...
+                    </span>
+                </button>
+            </div>
+        </form>
+
+        <aside class="platform-provisioning-aside" aria-label="Ringkasan provisioning">
+            <section class="card">
+                <div class="card-head">
+                    <div class="card-title">
+                        <span class="mini-icon green"><x-icon name="check-circle" class="h-[19px] w-[19px]" /></span>
+                        <div>
+                            <h3>Dibuat Otomatis</h3>
+                            <p>Provisioning aman oleh server</p>
+                        </div>
+                    </div>
+                </div>
+                <ul class="platform-check-list">
+                    <li><x-icon name="check" class="h-4 w-4" /><span>Workspace sekolah dan slug unik</span></li>
+                    <li><x-icon name="check" class="h-4 w-4" /><span>Langganan trial selama 30 hari</span></li>
+                    <li><x-icon name="check" class="h-4 w-4" /><span>Membership administrator sekolah</span></li>
+                    <li><x-icon name="check" class="h-4 w-4" /><span>Aktivasi modul inti sesuai paket</span></li>
+                    <li><x-icon name="check" class="h-4 w-4" /><span>Catatan audit proses provisioning</span></li>
+                </ul>
+            </section>
+
+            <section class="card platform-note-card">
+                <span class="mini-icon orange"><x-icon name="circle-help" class="h-[19px] w-[19px]" /></span>
+                <div>
+                    <h3>Satu nomor, banyak peran</h3>
+                    <p>Jika nomor WhatsApp sudah terdaftar, sistem tidak membuat pengguna ganda. Membership sekolah baru ditambahkan ke identitas yang sama.</p>
+                </div>
+            </section>
+        </aside>
+    </div>
 </div>

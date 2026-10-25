@@ -1,83 +1,90 @@
-<div class="px-4 pt-4 pb-28">
-    <div class="mb-4">
-        <label for="semester" class="text-xs font-semibold text-slate-500">Semester</label>
-        <select id="semester" wire:model.live="semester_id"
-                class="mt-1 w-full rounded-xl border border-slate-200 py-2.5 px-3 text-sm outline-none focus:border-primary bg-white">
-            @foreach ($semesters as $s)
-                <option value="{{ $s->id }}">{{ $s->nama }}</option>
+<div class="screen app-screen screen-enter">
+    <div class="field-group pwa-filter-field">
+        <label for="semester">Periode nilai</label>
+        <select id="semester" wire:model.live="semester_id" class="field">
+            @foreach ($semesters as $semester)
+                <option value="{{ $semester->id }}">{{ ucfirst($semester->nama) }}</option>
             @endforeach
         </select>
     </div>
 
-    @if ($hasil === null)
-        <p class="text-sm text-slate-400 italic">Pilih semester.</p>
-    @elseif (! ($hasil['released'] ?? false))
-        <div class="rounded-2xl bg-white shadow-sm border border-slate-100 p-5 text-center">
-            <div class="w-12 h-12 rounded-xl bg-warning/10 flex items-center justify-center mx-auto">
-                <x-icon name="lock" class="w-6 h-6 text-warning" />
-            </div>
-            <p class="text-sm font-semibold text-slate-700 mt-3">Nilai belum dirilis</p>
-            <p class="text-xs text-slate-500 mt-1">{{ $hasil['message'] ?? '' }}</p>
-        </div>
-    @else
-        @php
-            $mapel = $hasil['mapel'] ?? [];
-            $adaBelumRilis = collect($mapel)->contains(fn ($m) => $m['nilai_akhir'] === null);
-            $tertinggi = collect($mapel)->map(fn ($m) => $m['nilai_akhir'])->filter(fn ($v) => $v !== null)->max();
-        @endphp
-        {{-- Ringkasan (design siswa/nilai.html) --}}
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 mb-5 flex items-center gap-4">
-            <div class="flex-1 text-center border-r border-slate-100">
-                <p class="text-2xl font-extrabold text-[#3c50e0]">{{ $hasil['rata_rata'] !== null ? number_format($hasil['rata_rata'], 1) : '—' }}</p>
-                <p class="text-xs text-slate-500 font-medium">Rata-rata</p>
-            </div>
-            <div class="flex-1 text-center border-r border-slate-100">
-                <p class="text-2xl font-extrabold text-slate-700">{{ count($mapel) }}</p>
-                <p class="text-xs text-slate-500 font-medium">Mapel</p>
-            </div>
-            <div class="flex-1 text-center">
-                <p class="text-2xl font-extrabold text-success">{{ $tertinggi !== null ? number_format($tertinggi, 0) : '—' }}</p>
-                <p class="text-xs text-slate-500 font-medium">Tertinggi</p>
-            </div>
-        </div>
+    <div wire:loading wire:target="semester_id" class="page-skeleton" aria-live="polite">
+        <span class="sr-only">Memuat nilai semester...</span>
+        <div class="skeleton skeleton-hero"></div>
+        <div class="skeleton skeleton-line"></div>
+        <div class="skeleton skeleton-list"></div>
+        <div class="skeleton skeleton-list"></div>
+    </div>
 
-        @if ($adaBelumRilis)
-            <p class="text-xs text-warning bg-warning/10 rounded-lg px-3 py-2 mb-4 flex items-center gap-2">
-                <x-icon name="lock" class="w-3.5 h-3.5 shrink-0" /> Beberapa nilai belum dirilis oleh guru.
-            </p>
-        @endif
-
-        <div class="space-y-3">
-            @foreach ($mapel as $m)
-                @php
-                    $nilai = $m['nilai_akhir'];
-                    $diAtasKkm = $nilai !== null && $nilai >= $m['kkm'];
-                    $lebar = $nilai !== null ? min(100, (float) $nilai) : 0;
-                @endphp
-                <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
-                    <div class="flex justify-between items-start mb-2 gap-3">
-                        <div class="min-w-0">
-                            <p class="font-bold text-slate-800 text-sm truncate">{{ $m['nama'] }}</p>
-                            <p class="text-xs text-slate-400">KKM {{ number_format($m['kkm'], 0) }}</p>
-                        </div>
-                        <div class="text-right shrink-0">
-                            @if ($nilai === null)
-                                <p class="text-lg font-extrabold text-slate-400">—</p>
-                                <p class="text-[10px] text-slate-400">Belum dirilis</p>
-                            @elseif ($diAtasKkm)
-                                <p class="text-lg font-extrabold text-success">{{ number_format($nilai, 0) }}</p>
-                                <p class="text-[10px] text-success">Di atas KKM</p>
-                            @else
-                                <p class="text-lg font-extrabold text-danger">{{ number_format($nilai, 0) }}</p>
-                                <p class="text-[10px] text-danger">Di bawah KKM</p>
-                            @endif
-                        </div>
-                    </div>
-                    <div class="w-full bg-slate-100 rounded-full h-1.5">
-                        <div class="{{ $nilai === null ? 'bg-slate-300' : ($diAtasKkm ? 'bg-success' : 'bg-danger') }} h-1.5 rounded-full" style="width: {{ $lebar }}%"></div>
-                    </div>
+    <div wire:loading.remove wire:target="semester_id">
+        @if ($hasil === null)
+            <div class="surface-card pwa-empty-state pwa-empty-state-centered">
+                <span class="row-icon violet"><x-icon name="book-open" class="h-5 w-5" /></span>
+                <span><strong>Pilih semester</strong><small>Ringkasan dan rincian nilai akan tampil sesuai periode.</small></span>
+            </div>
+        @elseif (! ($hasil['released'] ?? false))
+            <div class="surface-card pwa-state-card">
+                <span class="row-icon amber"><x-icon name="lock" class="h-5 w-5" /></span>
+                <div>
+                    <strong>Nilai belum dirilis</strong>
+                    <p>{{ $hasil['message'] ?? 'Sekolah belum membuka nilai pada periode ini.' }}</p>
                 </div>
-            @endforeach
-        </div>
-    @endif
+            </div>
+        @else
+            @php
+                $subjects = collect($hasil['mapel'] ?? []);
+                $unreleasedCount = $subjects->whereNull('nilai_akhir')->count();
+                $highestScore = $subjects->pluck('nilai_akhir')->filter(fn ($score) => $score !== null)->max();
+            @endphp
+
+            <section class="academic-summary three" aria-label="Ringkasan nilai semester">
+                <span><small>Rata-rata</small><strong>{{ $hasil['rata_rata'] !== null ? number_format($hasil['rata_rata'], 1) : '—' }}</strong><small>Nilai akhir</small></span>
+                <i class="summary-divider" aria-hidden="true"></i>
+                <span><small>Mata pelajaran</small><strong>{{ $subjects->count() }}</strong><small>Dalam rapor</small></span>
+                <i class="summary-divider" aria-hidden="true"></i>
+                <span><small>Nilai tertinggi</small><strong>{{ $highestScore !== null ? number_format($highestScore, 0) : '—' }}</strong><small>Pencapaian terbaik</small></span>
+            </section>
+
+            @if ($unreleasedCount > 0)
+                <div class="pwa-inline-alert warning" role="status">
+                    <x-icon name="lock" class="h-4 w-4" />
+                    <span>{{ $unreleasedCount }} mata pelajaran masih menunggu rilis guru.</span>
+                </div>
+            @endif
+
+            <section>
+                <div class="section-head">
+                    <h3>Rincian Nilai</h3>
+                    <span class="pwa-section-meta">KKM per mapel</span>
+                </div>
+                <div class="surface-card grade-list">
+                    @forelse ($subjects as $subject)
+                        @php
+                            $score = $subject['nilai_akhir'];
+                            $passes = $score !== null && $score >= $subject['kkm'];
+                            $progress = $score !== null ? min(100, max(0, (float) $score)) : 0;
+                            $mark = str($subject['nama'])->substr(0, 2)->upper();
+                        @endphp
+                        <div class="grade-row" wire:key="grade-{{ $loop->index }}">
+                            <span class="subject-mark">{{ $mark }}</span>
+                            <span>
+                                <strong>{{ $subject['nama'] }}</strong>
+                                <small>KKM {{ number_format($subject['kkm'], 0) }}</small>
+                                <span class="grade-progress" aria-hidden="true"><i class="{{ $score === null ? 'muted' : ($passes ? 'success' : 'danger') }}" style="width: {{ $progress }}%"></i></span>
+                            </span>
+                            <span class="grade-score">
+                                <strong>{{ $score !== null ? number_format($score, 0) : '—' }}</strong>
+                                <small class="{{ $score === null ? 'is-muted' : ($passes ? '' : 'is-danger') }}">{{ $score === null ? 'Belum rilis' : ($passes ? 'Tuntas' : 'Perlu tindak lanjut') }}</small>
+                            </span>
+                        </div>
+                    @empty
+                        <div class="pwa-empty-state pwa-empty-state-plain">
+                            <span class="row-icon violet"><x-icon name="book-open" class="h-5 w-5" /></span>
+                            <span><strong>Belum ada rincian nilai</strong><small>Nilai per mata pelajaran akan tampil setelah diproses sekolah.</small></span>
+                        </div>
+                    @endforelse
+                </div>
+            </section>
+        @endif
+    </div>
 </div>

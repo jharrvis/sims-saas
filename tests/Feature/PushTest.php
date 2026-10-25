@@ -27,7 +27,11 @@ use Spatie\Permission\PermissionRegistrar;
 
 beforeEach(function (): void {
     $this->withoutVite();
-    config(['push.enabled_in_tests' => true]);
+    config([
+        'push.enabled_in_tests' => true,
+        'push.vapid.public_key' => 'test-public-key',
+        'push.vapid.private_key' => 'test-private-key',
+    ]);
 
     $this->school = School::create([
         'nama' => 'Sekolah Push', 'slug' => 'push-'.uniqid(), 'jenjang' => 'SMA',

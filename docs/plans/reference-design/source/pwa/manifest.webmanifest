@@ -1,0 +1,21 @@
+{
+  "name": "SIMS Mobile",
+  "short_name": "SIMS",
+  "description": "Akses sekolah untuk siswa, guru, dan pegawai.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#f4f7fc",
+  "theme_color": "#3157d5",
+  "lang": "id-ID",
+  "categories": ["education", "productivity"],
+  "icons": [
+    {
+      "src": "icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

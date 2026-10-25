@@ -19,6 +19,23 @@ class SubscriptionIndex extends Component
 
     public string $search = '';
 
+    public function updatingStatus(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatingSearch(): void
+    {
+        $this->resetPage();
+    }
+
+    public function resetFilters(): void
+    {
+        $this->status = '';
+        $this->search = '';
+        $this->resetPage();
+    }
+
     public function render(): View
     {
         $subs = Subscription::withoutGlobalScope(SchoolScope::class)

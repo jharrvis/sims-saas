@@ -139,7 +139,10 @@ Route::get('/', function () {
 
     $dashData = class_exists(DashboardService::class) ? app(DashboardService::class)->data($user) : null;
 
-    return view('dashboard', $dashData ? ['dash' => $dashData] : []);
+    return view('layouts.app', [
+        'title' => 'Dashboard',
+        'slot' => view('dashboard', $dashData ? ['dash' => $dashData] : []),
+    ]);
 })->name('dashboard')->middleware(['auth', 'mfa']);
 
 // Logout domain sekolah.
@@ -490,8 +493,12 @@ Route::post('/platform/impersonate/stop', function () {
 })->middleware(['auth'])->name('platform.impersonate.stop');
 
 // PWA Siswa & Orang Tua — mobile-first, installable (Dok 07: P-01 s.d. P-06)
+Route::get('/pwa', PwaHome::class)->name('pwa.home')->middleware(['auth', 'mfa', 'pwa.context', 'qr.limit']);
+
 Route::prefix('pwa')->name('pwa.')->group(function (): void {
+
     Route::get('/offline', [PwaController::class, 'offline'])->name('offline');
+    Route::get('/sw.js', [PwaController::class, 'serviceWorker'])->name('service-worker');
 
     Route::middleware('guest')->group(function (): void {
         Route::get('/login', PwaLogin::class)->name('login');
@@ -500,7 +507,6 @@ Route::prefix('pwa')->name('pwa.')->group(function (): void {
 
     Route::middleware(['auth', 'mfa', 'pwa.context', 'qr.limit'])->group(function (): void {
         Route::get('/belum-terhubung', PwaUnlinked::class)->name('unlinked');
-        Route::get('/', PwaHome::class)->name('home');
         Route::get('/nilai', PwaNilai::class)->name('nilai');
         Route::get('/jadwal', PwaJadwal::class)->name('jadwal');
         Route::get('/absensi', PwaAbsensi::class)->name('absensi');

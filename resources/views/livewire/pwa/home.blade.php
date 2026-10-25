@@ -1,198 +1,165 @@
 <div>
     @php
-        $jam = (int) now()->format('H');
-        $salam = $jam < 11 ? 'Selamat pagi' : ($jam < 15 ? 'Selamat siang' : ($jam < 18 ? 'Selamat sore' : 'Selamat malam'));
-        $absTotal = $rekapAbsensi->sum();
-        $absPersen = $absTotal > 0 ? (int) round(($rekapAbsensi['H'] ?? 0) / $absTotal * 100) : 0;
-        $izinSakit = ($rekapAbsensi['I'] ?? 0) + ($rekapAbsensi['S'] ?? 0);
-        $jadwalWarna = ['bg-blue-500', 'bg-purple-400', 'bg-emerald-500'];
+        $hour = (int) now()->format('H');
+        $greeting = $hour < 11 ? 'Selamat pagi' : ($hour < 15 ? 'Selamat siang' : ($hour < 18 ? 'Selamat sore' : 'Selamat malam'));
+        $attendanceTotal = $rekapAbsensi->sum();
+        $attendancePresent = (int) ($rekapAbsensi['H'] ?? 0);
+        $attendancePercentage = $attendanceTotal > 0 ? (int) round($attendancePresent / $attendanceTotal * 100) : 0;
+        $excusedAbsences = (int) (($rekapAbsensi['I'] ?? 0) + ($rekapAbsensi['S'] ?? 0));
+        $displayName = $student?->nama ?? auth()->user()?->name ?? 'Pengguna';
     @endphp
 
-    @if ($role === 'orang-tua')
-        {{-- Hero orang tua (design ortu/index.html): gradasi emerald + lingkaran dekoratif --}}
-        <div class="px-5 pt-12 pb-16 relative overflow-hidden" style="background: linear-gradient(135deg, #059669, #047857)">
-            <div class="absolute top-0 right-0 w-40 h-40 rounded-full bg-white/5 -mr-10 -mt-10"></div>
-            <div class="flex justify-between items-start relative z-10">
-                <div class="min-w-0">
-                    <p class="text-emerald-100 text-sm">{{ $salam }}</p>
-                    <h1 class="text-white text-2xl font-extrabold mt-0.5 truncate">{{ auth()->user()?->name ?? 'Orang Tua' }}</h1>
-                    <p class="text-emerald-100 text-sm mt-1">Orang Tua &bull; {{ $children->count() }} Anak terdaftar</p>
-                </div>
-                <div class="w-12 h-12 rounded-2xl overflow-hidden border-2 border-white/40 bg-white/20 flex items-center justify-center text-white font-extrabold shrink-0">
-                    {{ mb_substr(auth()->user()?->name ?? 'W', 0, 1) }}
-                </div>
+    <div class="screen app-screen pwa-home-screen screen-enter">
+        <div class="mobile-heading">
+            <div class="min-w-0">
+                <span class="overline">{{ $role === 'orang-tua' ? 'PORTAL ORANG TUA' : 'PORTAL SISWA' }}</span>
+                <h1 class="truncate">{{ $greeting }}, {{ $displayName }}</h1>
+                <p>{{ $rombel?->nama ?? 'Kelas belum ditetapkan' }}{{ $student?->nis ? ' · NIS '.$student->nis : '' }}</p>
             </div>
+            <a href="{{ route('pwa.profil') }}" class="avatar" aria-label="Buka profil">
+                @if ($student?->fotoUrl())
+                    <img src="{{ $student->fotoUrl() }}" alt="" class="h-full w-full rounded-[inherit] object-cover">
+                @else
+                    {{ mb_substr($displayName, 0, 1) }}
+                @endif
+            </a>
         </div>
-    @else
-        {{-- Hero siswa (design siswa/index.html): biru + lingkaran dekoratif --}}
-        <div class="bg-[#3c50e0] px-5 pt-12 pb-16 relative overflow-hidden">
-            <div class="absolute top-0 right-0 w-40 h-40 rounded-full bg-white/5 -mr-10 -mt-10"></div>
-            <div class="absolute bottom-0 left-0 w-32 h-32 rounded-full bg-white/5 -ml-10 -mb-10"></div>
-            <div class="flex justify-between items-start relative z-10">
-                <div class="min-w-0">
-                    <p class="text-blue-200 text-sm font-medium">{{ $salam }}</p>
-                    <h1 class="text-white text-2xl font-extrabold mt-0.5 truncate">{{ $student?->nama ?? auth()->user()?->name ?? 'Siswa' }}</h1>
-                    @if ($student)
-                        <p class="text-blue-100 text-sm mt-1">{{ $rombel?->nama ?? 'Belum ada kelas' }} &bull; NIS: {{ $student->nis }}</p>
-                    @endif
-                </div>
-                <div class="w-12 h-12 rounded-2xl overflow-hidden border-2 border-white/40 bg-white/20 flex items-center justify-center text-white font-extrabold shrink-0">
-                    @if ($student?->fotoUrl())
-                        <img src="{{ $student->fotoUrl() }}" alt="" class="w-full h-full object-cover">
-                    @else
-                        {{ mb_substr($student?->nama ?? 'S', 0, 1) }}
-                    @endif
-                </div>
-            </div>
-        </div>
-    @endif
 
-    <div class="px-4 -mt-8 relative z-10 pb-28">
-        @if ($role === 'orang-tua')
-            {{-- Anak Saya (design ortu/index.html + ortu/anak.html) --}}
-            <div id="anak" class="space-y-4 mb-5 scroll-mt-4">
-                <div class="flex items-center justify-between">
-                    <h3 class="font-bold text-slate-800 text-base">Anak Saya</h3>
-                    <span class="text-xs text-slate-400">{{ $children->count() }} anak</span>
+        <section class="performance-hero" aria-labelledby="attendance-summary">
+            <span class="hero-orb one" aria-hidden="true"></span>
+            <span class="hero-orb two" aria-hidden="true"></span>
+            <div class="hero-top">
+                <span id="attendance-summary">Kehadiran bulan ini</span>
+                <span class="semester-pill">{{ $role === 'orang-tua' ? 'Anak aktif' : 'Data terkini' }}</span>
+            </div>
+            <div class="score-layout">
+                <div>
+                    <strong>{{ $attendancePercentage }}%</strong>
+                    <small>{{ $attendancePresent }} hadir dari {{ $attendanceTotal }} catatan</small>
                 </div>
-                @foreach ($children as $child)
-                    @if ($child->id === $student?->id)
-                        <div class="bg-white rounded-2xl shadow-xl border border-primary/20 p-4">
-                            <div class="flex items-center justify-between mb-3">
-                                <div class="flex items-center gap-3 min-w-0">
-                                    <div class="w-11 h-11 rounded-xl overflow-hidden bg-primary/10 text-primary flex items-center justify-center font-extrabold shrink-0">
-                                        @if ($child->fotoUrl())
-                                            <img src="{{ $child->fotoUrl() }}" alt="" class="w-full h-full object-cover">
-                                        @else
-                                            {{ mb_substr($child->nama, 0, 1) }}
-                                        @endif
-                                    </div>
-                                    <div class="min-w-0">
-                                        <p class="font-extrabold text-slate-800 truncate">{{ $child->nama }}</p>
-                                        <p class="text-xs text-slate-500 truncate">{{ $student->school?->nama ?? '' }}{{ $student->school ? ' &bull; ' : '' }}{{ $rombel?->nama ?? 'Belum ada kelas' }} &bull; NIS {{ $child->nis }}</p>
-                                    </div>
-                                </div>
-                                <span class="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full font-bold shrink-0 ml-2">Aktif</span>
-                            </div>
-                            <div class="grid grid-cols-3 gap-2">
-                                <div class="bg-slate-50 rounded-xl p-2.5 text-center">
-                                    <p class="font-extrabold text-primary text-base">{{ $absPersen }}%</p>
-                                    <p class="text-[10px] text-slate-400">Kehadiran</p>
-                                </div>
-                                <div class="bg-slate-50 rounded-xl p-2.5 text-center">
-                                    <p class="font-extrabold text-warning text-base">{{ $izinSakit }}</p>
-                                    <p class="text-[10px] text-slate-400">Izin/Sakit</p>
-                                </div>
-                                <div class="bg-slate-50 rounded-xl p-2.5 text-center">
-                                    @if ($tagihanAktif > 0)
-                                        <p class="font-extrabold text-danger text-base">{{ $tagihanAktif }}</p>
-                                        <p class="text-[10px] text-slate-400">Tagihan</p>
-                                    @else
-                                        <p class="font-extrabold text-success text-sm leading-6">Lunas</p>
-                                        <p class="text-[10px] text-slate-400">Tagihan</p>
-                                    @endif
-                                </div>
-                            </div>
-                            <div class="flex gap-2 mt-3">
-                                <a href="{{ route('pwa.absensi') }}" class="flex-1 py-2 bg-slate-50 border border-slate-200 rounded-xl text-center text-xs font-semibold text-slate-600">Absensi</a>
-                                <a href="{{ route('pwa.nilai') }}" class="flex-1 py-2 bg-slate-50 border border-slate-200 rounded-xl text-center text-xs font-semibold text-slate-600">Nilai</a>
-                                <a href="{{ route('pwa.jadwal') }}" class="flex-1 py-2 bg-slate-50 border border-slate-200 rounded-xl text-center text-xs font-semibold text-slate-600">Jadwal</a>
-                            </div>
-                        </div>
-                    @else
-                        <form method="POST" action="{{ route('pwa.switch-child') }}">
-                            @csrf
-                            <input type="hidden" name="student_id" value="{{ $child->id }}">
-                            <button class="w-full bg-white rounded-2xl shadow-sm border border-slate-100 p-4 flex items-center gap-3 text-left">
-                                <div class="w-11 h-11 rounded-xl overflow-hidden bg-slate-100 text-slate-500 flex items-center justify-center font-extrabold shrink-0">
+                <div class="radial-progress" style="--value: {{ $attendancePercentage }}" aria-label="Kehadiran {{ $attendancePercentage }} persen">
+                    <span>{{ $attendancePercentage }}<small>PERSEN</small></span>
+                </div>
+            </div>
+            <div class="hero-trend">
+                <x-icon name="check-circle" class="h-4 w-4" />
+                <span><strong>{{ $excusedAbsences }}</strong> izin atau sakit pada periode ini</span>
+            </div>
+        </section>
+
+        <div class="stat-grid">
+            <a href="{{ route('pwa.nilai') }}" class="mini-stat">
+                <span class="mini-icon violet"><x-icon name="chart-column" class="h-5 w-5" /></span>
+                <span><strong>Nilai</strong><small>Lihat hasil belajar</small></span>
+                <x-icon name="chevron-right" class="h-4 w-4" />
+            </a>
+            <a href="{{ route('pwa.tagihan') }}" class="mini-stat">
+                <span class="mini-icon {{ $tagihanAktif > 0 ? 'amber' : 'green' }}"><x-icon name="wallet" class="h-5 w-5" /></span>
+                <span><strong>{{ $tagihanAktif > 0 ? $tagihanAktif.' tagihan' : 'Lunas' }}</strong><small>Status keuangan</small></span>
+                <x-icon name="chevron-right" class="h-4 w-4" />
+            </a>
+            <a href="{{ route('pwa.absensi') }}" class="mini-stat">
+                <span class="mini-icon green"><x-icon name="check-circle" class="h-5 w-5" /></span>
+                <span><strong>Absensi</strong><small>Riwayat kehadiran</small></span>
+                <x-icon name="chevron-right" class="h-4 w-4" />
+            </a>
+            <a href="{{ route('pwa.pengumuman') }}" class="mini-stat">
+                <span class="mini-icon blue"><x-icon name="megaphone" class="h-5 w-5" /></span>
+                <span><strong>Pengumuman</strong><small>{{ $pengumuman->count() }} informasi terbaru</small></span>
+                <x-icon name="chevron-right" class="h-4 w-4" />
+            </a>
+        </div>
+
+        @if ($role === 'orang-tua')
+            <section id="anak" class="scroll-mt-24">
+                <div class="section-head">
+                    <h3>Anak Saya</h3>
+                    <span class="pwa-section-meta">{{ $children->count() }} anak</span>
+                </div>
+                <div class="pwa-card-stack">
+                    @foreach ($children as $child)
+                        @if ($child->id === $student?->id)
+                            <article class="surface-card child-card is-active">
+                                <span class="child-avatar">
                                     @if ($child->fotoUrl())
-                                        <img src="{{ $child->fotoUrl() }}" alt="" class="w-full h-full object-cover">
+                                        <img src="{{ $child->fotoUrl() }}" alt="" class="h-full w-full object-cover">
                                     @else
                                         {{ mb_substr($child->nama, 0, 1) }}
                                     @endif
-                                </div>
-                                <span class="flex-1 min-w-0">
-                                    <span class="block font-extrabold text-slate-800 truncate">{{ $child->nama }}</span>
-                                    <span class="text-xs text-slate-400">NIS {{ $child->nis }}</span>
                                 </span>
-                                <x-icon name="chevron-right" class="w-4 h-4 text-slate-300 shrink-0" />
-                            </button>
-                        </form>
-                    @endif
-                @endforeach
-            </div>
-        @else
-            {{-- Statistik cepat (design siswa/index.html) --}}
-            <div class="bg-white rounded-2xl shadow-xl border border-slate-100 p-4 grid grid-cols-3 gap-3 mb-5">
-                <div class="text-center">
-                    <p class="text-2xl font-extrabold text-[#3c50e0]">{{ $absPersen }}%</p>
-                    <p class="text-xs text-slate-500 font-medium mt-0.5">Kehadiran</p>
+                                <span class="child-copy">
+                                    <strong>{{ $child->nama }}</strong>
+                                    <small>{{ $rombel?->nama ?? 'Belum ada kelas' }} · NIS {{ $child->nis }}</small>
+                                </span>
+                                <span class="status-chip info">AKTIF</span>
+                            </article>
+                        @else
+                            <form method="POST" action="{{ route('pwa.switch-child') }}">
+                                @csrf
+                                <input type="hidden" name="student_id" value="{{ $child->id }}">
+                                <button type="submit" class="surface-card child-card">
+                                    <span class="child-avatar">{{ mb_substr($child->nama, 0, 1) }}</span>
+                                    <span class="child-copy">
+                                        <strong>{{ $child->nama }}</strong>
+                                        <small>NIS {{ $child->nis }}</small>
+                                    </span>
+                                    <x-icon name="chevron-right" class="h-4 w-4" />
+                                </button>
+                            </form>
+                        @endif
+                    @endforeach
                 </div>
-                <div class="text-center border-x border-slate-100">
-                    <p class="text-2xl font-extrabold text-warning">{{ $izinSakit }}</p>
-                    <p class="text-xs text-slate-500 font-medium mt-0.5">Izin/Sakit</p>
-                </div>
-                <a href="{{ route('pwa.tagihan') }}" class="text-center block">
-                    <p class="text-2xl font-extrabold {{ $tagihanAktif > 0 ? 'text-danger' : 'text-slate-400' }}">{{ $tagihanAktif }}</p>
-                    <p class="text-xs text-slate-500 font-medium mt-0.5">Tagihan aktif</p>
-                </a>
-            </div>
+            </section>
         @endif
 
-        {{-- Jadwal Hari Ini (design siswa/index.html) --}}
-        <div class="mb-5">
-            <div class="flex justify-between items-center mb-3">
-                <h3 class="font-bold text-slate-800 text-base">Jadwal Hari Ini</h3>
-                <a href="{{ route('pwa.jadwal') }}" class="text-xs text-[#3c50e0] font-semibold">Lihat Semua →</a>
+        <section>
+            <div class="section-head">
+                <h3>Jadwal Hari Ini</h3>
+                <a href="{{ route('pwa.jadwal') }}">Lihat semua</a>
             </div>
-            <div class="space-y-3">
-                @forelse ($jadwalHariIni as $j)
-                    <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 flex items-center gap-4">
-                        <div class="text-center min-w-[52px]">
-                            <p class="text-[10px] text-slate-400 font-medium">Jam ke</p>
-                            <p class="text-lg font-extrabold text-slate-800">{{ $j->jam_ke }}</p>
-                        </div>
-                        <div class="w-1 h-12 rounded-full {{ $jadwalWarna[$loop->index % 3] }} flex-shrink-0"></div>
-                        <div class="flex-1 min-w-0">
-                            <p class="font-bold text-slate-800 text-sm truncate">{{ $j->subject?->nama ?? '—' }}</p>
-                            <p class="text-xs text-slate-500 truncate">{{ $j->employee?->nama }}{{ $j->ruang ? ' · '.$j->ruang : '' }}</p>
-                        </div>
-                    </div>
+            <div class="pwa-card-stack">
+                @forelse ($jadwalHariIni as $schedule)
+                    <a href="{{ route('pwa.jadwal') }}" class="next-class-card">
+                        <span class="class-time"><small>JAM KE</small><strong>{{ $schedule->jam_ke }}</strong></span>
+                        <span class="class-accent" aria-hidden="true"></span>
+                        <span class="class-info">
+                            @if ($loop->first)<span class="live-badge"><i></i>BERIKUTNYA</span>@endif
+                            <h3>{{ $schedule->subject?->nama ?? 'Mata pelajaran' }}</h3>
+                            <p>{{ $schedule->employee?->nama ?: 'Pengajar belum ditetapkan' }}{{ $schedule->ruang ? ' · '.$schedule->ruang : '' }}</p>
+                        </span>
+                        <x-icon name="chevron-right" class="h-4 w-4" />
+                    </a>
                 @empty
-                    <p class="text-xs text-slate-400 italic">Tidak ada jadwal hari ini.</p>
+                    <div class="surface-card pwa-empty-state">
+                        <span class="row-icon violet"><x-icon name="calendar-days" class="h-5 w-5" /></span>
+                        <span><strong>Tidak ada jadwal hari ini</strong><small>Gunakan waktu untuk belajar mandiri atau beristirahat.</small></span>
+                    </div>
                 @endforelse
             </div>
-        </div>
+        </section>
 
-        {{-- Pengumuman (design siswa/index.html) --}}
-        <div>
-            <div class="flex justify-between items-center mb-3">
-                <h3 class="font-bold text-slate-800 text-base">Pengumuman</h3>
-                <a href="{{ route('pwa.pengumuman') }}" class="text-xs text-[#3c50e0] font-semibold">Semua →</a>
+        <section>
+            <div class="section-head">
+                <h3>Pengumuman</h3>
+                <a href="{{ route('pwa.pengumuman') }}">Lihat semua</a>
             </div>
-            @forelse ($pengumuman as $p)
-                @if ($loop->first)
-                    <a href="{{ route('pwa.pengumuman.show', $p) }}" class="block bg-gradient-to-r from-[#3c50e0] to-[#2a3cb0] rounded-2xl p-4 text-white mb-3">
-                        <div class="flex items-start gap-3">
-                            <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center flex-shrink-0">
-                                <x-icon name="megaphone" class="w-5 h-5" />
-                            </div>
-                            <div class="min-w-0">
-                                <p class="text-xs text-blue-200 font-medium">{{ $p->tayang_dari?->locale('id')->isoFormat('D MMM Y') }}</p>
-                                <p class="font-bold text-white mt-1">{{ $p->judul }}</p>
-                                <p class="text-xs text-blue-100 mt-1 line-clamp-2">{{ strip_tags($p->isi) }}</p>
-                            </div>
-                        </div>
+            <div class="surface-card compact-list">
+                @forelse ($pengumuman as $announcement)
+                    <a href="{{ route('pwa.pengumuman.show', $announcement) }}" class="data-row">
+                        <span class="row-icon {{ $announcement->penting ? 'amber' : 'blue' }}"><x-icon name="megaphone" class="h-5 w-5" /></span>
+                        <span>
+                            <strong>{{ $announcement->judul }}</strong>
+                            <small>{{ $announcement->tayang_dari?->locale('id')->isoFormat('D MMMM Y') }} · {{ str(strip_tags($announcement->isi))->limit(70) }}</small>
+                        </span>
+                        @if ($announcement->penting)<span class="status-chip warning">PENTING</span>@endif
                     </a>
-                @else
-                    <a href="{{ route('pwa.pengumuman.show', $p) }}" class="block bg-white rounded-2xl p-4 shadow-sm border border-slate-100 mb-2">
-                        <p class="text-sm font-semibold text-slate-800">{{ $p->judul }}</p>
-                        <p class="text-[11px] text-slate-400 mt-0.5">{{ $p->tayang_dari?->locale('id')->isoFormat('D MMM Y') }}</p>
-                    </a>
-                @endif
-            @empty
-                <p class="text-xs text-slate-400 italic">Belum ada pengumuman.</p>
-            @endforelse
-        </div>
+                @empty
+                    <div class="pwa-empty-state pwa-empty-state-plain">
+                        <span class="row-icon blue"><x-icon name="megaphone" class="h-5 w-5" /></span>
+                        <span><strong>Belum ada pengumuman</strong><small>Informasi baru dari sekolah akan tampil di sini.</small></span>
+                    </div>
+                @endforelse
+            </div>
+        </section>
     </div>
 </div>

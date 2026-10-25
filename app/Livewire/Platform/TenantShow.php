@@ -38,19 +38,23 @@ class TenantShow extends Component
 
     public function mount(int $schoolId): void
     {
+        $this->ensurePlatformPermission('platform.tenant.view');
+
         // Tanpa tenant scope (operator platform) — binding implisit akan 404.
         $this->school = School::withoutGlobalScope(SchoolScope::class)->findOrFail($schoolId);
     }
 
     public function buatLangganan(PlatformService $platform): void
     {
+        $operator = $this->ensurePlatformPermission('platform.tenant.create');
+
         $this->validate([
             'plan_id' => ['required', 'integer', 'exists:plans,id'],
             'periode' => ['required', 'in:bulanan,tahunan'],
         ]);
 
         $plan = Plan::findOrFail($this->plan_id);
-        $platform->createSubscription($this->school, $plan, $this->periode, auth()->user(), $this->trial);
+        $platform->createSubscription($this->school, $plan, $this->periode, $operator, $this->trial);
 
         $this->reset(['plan_id', 'trial']);
         session()->flash('ok', 'Langganan dibuat.');
@@ -58,6 +62,7 @@ class TenantShow extends Component
 
     public function toggleModule(int $moduleId, PlatformService $platform): void
     {
+        $operator = $this->ensurePlatformPermission('platform.module.toggle');
         $tm = TenantModule::withoutGlobalScope(SchoolScope::class)
             ->firstOrCreate(
                 ['school_id' => $this->school->id, 'module_id' => $moduleId],
@@ -72,7 +77,7 @@ class TenantShow extends Component
 
         AuditLog::create([
             'school_id' => $this->school->id,
-            'user_id' => auth()->id(),
+            'user_id' => $operator->id,
             'aksi' => 'platform.module.toggle',
             'model_type' => TenantModule::class,
             'model_id' => (string) $tm->id,
@@ -83,6 +88,8 @@ class TenantShow extends Component
 
     public function tambahOverride(): void
     {
+        $operator = $this->ensurePlatformPermission('platform.tenant.create');
+
         $this->validate([
             'ov_metrik' => ['required', 'string', 'max:50'],
             'ov_alasan' => ['required', 'string', 'max:500'],
@@ -94,7 +101,7 @@ class TenantShow extends Component
             [
                 'batas_custom' => $this->ov_batas !== '' ? (int) $this->ov_batas : null,
                 'alasan' => $this->ov_alasan,
-                'dibuat_oleh' => auth()->id(),
+                'dibuat_oleh' => $operator->id,
             ]
         );
 
@@ -104,6 +111,8 @@ class TenantShow extends Component
 
     public function hapusOverride(int $id): void
     {
+        $this->ensurePlatformPermission('platform.tenant.create');
+
         TenantQuotaOverride::withoutGlobalScope(SchoolScope::class)
             ->where('school_id', $this->school->id)
             ->whereKey($id)
@@ -116,8 +125,7 @@ class TenantShow extends Component
      */
     public function impersonate(): void
     {
-        $operator = auth()->user();
-        abort_unless($operator->hasPermissionTo('platform.tenant.impersonate', 'platform'), 403);
+        $operator = $this->ensurePlatformPermission('platform.tenant.impersonate');
 
         $target = User::whereHas('memberships', fn ($q) => $q->where('school_id', $this->school->id)->aktif())
             // Utamakan admin non-platform; operator sendiri boleh bila memang
@@ -175,5 +183,19 @@ class TenantShow extends Component
             'siswaCount' => Student::withoutGlobalScope(SchoolScope::class)
                 ->where('school_id', $sid)->where('status', 'aktif')->count(),
         ])->layout('layouts.platform', ['title' => 'Detail Tenant']);
+    }
+
+    private function ensurePlatformPermission(string $permission): User
+    {
+        $operator = auth()->user();
+
+        abort_unless(
+            $operator instanceof User
+                && $operator->is_platform
+                && $operator->hasPermissionTo($permission, 'platform'),
+            403,
+        );
+
+        return $operator;
     }
 }

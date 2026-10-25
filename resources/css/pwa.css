@@ -1,63 +1,879 @@
-/* CSS khusus layout PWA — hasil build Vite (menggantikan Tailwind browser CDN).
-   Mewarisi seluruh token design system dari app.css. */
+/*
+ * Mobile/PWA surface.
+ *
+ * The reference stylesheet is the source of truth for the PWA shell, auth
+ * cards, bottom navigation, skeletons, and motion. Tailwind utilities remain
+ * available for existing Livewire views.
+ */
 @import './app.css';
+@import './pwa-reference.css';
 
-/* --- Port dari design/assets/css/style.css --- */
-[x-cloak] { display: none !important; }
-
-/* Custom scrollbar */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-.no-scrollbar::-webkit-scrollbar { display: none; }
-.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-
-/* App shell: full width (tanpa kolom 480px terpusat — tidak ada sisi putih kiri/kanan) */
-.app-shell {
-    max-width: 100%;
-    margin: 0;
-    min-height: 100dvh;
-    background: #f8fafc;
-    position: relative;
+/* PWA body uses Inter, matching the verified previews. */
+body,
+.phone-shell {
+    font-family: var(--font-mobile);
 }
 
-.safe-bottom { padding-bottom: env(safe-area-inset-bottom, 0); }
-.bottom-nav { padding-bottom: calc(0.75rem + env(safe-area-inset-bottom, 0)); }
+/* Keep page content clear of the fixed bottom navigation and iOS safe area. */
+.screen {
+    padding-bottom: calc(110px + env(safe-area-inset-bottom, 0px));
+}
 
-.slide-up { animation: slideUp 0.3s ease-out; }
-@keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+/* PWA is intentionally light-only; the desktop shell owns dark mode. */
+html {
+    background: #e7eaf1;
+}
 
-.offline-banner { display: none; }
+/* Long tables/forms should never create a horizontal page scroll. */
+.pwa-shell {
+    overflow-x: hidden;
+}
 
-/* Print Stylesheet Resmi SIMS (PRD-SIMS-16 Rekomendasi #5) */
+/* Five-item bottom navigation for the student/parent journeys. */
+.bottom-nav.five {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.pwa-main {
+    min-height: calc(100dvh - 72px);
+}
+
+.pwa-body {
+    background: var(--canvas, #e7eaf1);
+}
+
+/* Offline state is driven by the browser network events in layouts/pwa. */
+.offline-banner {
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: 100;
+    padding: 8px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: #fff;
+    background: #172339;
+    font-size: 11px;
+    font-weight: 700;
+    text-align: center;
+}
+
+.offline-banner[hidden],
+.pwa-update-banner[hidden],
+[data-pwa-install][hidden],
+[data-pwa-push-enable][hidden],
+[data-pwa-push-disable][hidden] {
+    display: none !important;
+}
+
+/* PWA forms use the server-side icon component, not demo SVG injection. */
+.bottom-nav a span {
+    line-height: 1;
+}
+
+.pwa-card-stack {
+    display: grid;
+    gap: 10px;
+}
+
+.section-head a,
+.pwa-section-meta {
+    color: var(--primary);
+    font-size: 11px;
+    font-weight: 800;
+    text-decoration: none;
+}
+
+.child-card {
+    width: 100%;
+    min-height: 72px;
+    padding: 13px 14px;
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 11px;
+    color: var(--ink);
+    text-align: left;
+}
+
+.child-card.is-active {
+    border-color: #d9dcff;
+    box-shadow: 0 8px 24px rgb(79 70 229 / 10%);
+}
+
+.child-avatar {
+    width: 44px;
+    height: 44px;
+    overflow: hidden;
+    display: grid;
+    place-items: center;
+    border-radius: 14px;
+    color: var(--primary);
+    background: var(--primary-soft);
+    font-size: 13px;
+    font-weight: 900;
+}
+
+.child-copy {
+    min-width: 0;
+}
+
+.child-copy strong,
+.child-copy small,
+.pwa-empty-state strong,
+.pwa-empty-state small {
+    display: block;
+}
+
+.child-copy strong,
+.pwa-empty-state strong {
+    overflow: hidden;
+    font-size: 12px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.child-copy small,
+.pwa-empty-state small {
+    margin-top: 2px;
+    color: var(--muted);
+    font-size: 9px;
+}
+
+.pwa-empty-state {
+    min-height: 76px;
+    padding: 13px 14px;
+    display: flex;
+    align-items: center;
+    gap: 11px;
+}
+
+.pwa-empty-state-plain {
+    padding-inline: 0;
+}
+
+.pwa-empty-state-centered {
+    justify-content: center;
+    text-align: left;
+}
+
+.pwa-filter-field {
+    margin-bottom: 18px;
+}
+
+.pwa-filter-field .field {
+    appearance: auto;
+}
+
+.pwa-state-card {
+    min-height: 108px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.pwa-state-card strong {
+    display: block;
+    font-size: 14px;
+}
+
+.pwa-state-card p {
+    margin-top: 4px;
+    color: var(--muted);
+    font-size: 11px;
+}
+
+.pwa-inline-alert {
+    margin-top: 12px;
+    padding: 11px 13px;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.pwa-inline-alert.warning {
+    color: var(--amber);
+    border-color: #f7dfb9;
+    background: var(--amber-soft);
+}
+
+.academic-summary.three {
+    grid-template-columns: 1fr 1px 1fr 1px 1fr;
+    gap: 10px;
+    text-align: center;
+}
+
+.academic-summary.three strong {
+    font-size: 19px;
+}
+
+.grade-progress {
+    height: 4px;
+    margin-top: 7px;
+    overflow: hidden;
+    display: block;
+    border-radius: 999px;
+    background: #eef0f5;
+}
+
+.grade-progress i {
+    height: 100%;
+    display: block;
+    border-radius: inherit;
+    background: var(--primary);
+}
+
+.grade-progress i.success {
+    background: var(--green);
+}
+
+.grade-progress i.danger {
+    background: var(--red);
+}
+
+.grade-progress i.muted {
+    background: #a3aabb;
+}
+
+.grade-score small.is-muted {
+    color: var(--muted);
+}
+
+.grade-score small.is-danger {
+    color: var(--red);
+}
+
+.day-tabs {
+    margin-bottom: 6px;
+    padding-bottom: 8px;
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.day-tabs::-webkit-scrollbar {
+    display: none;
+}
+
+.day-tab {
+    min-width: 86px;
+    min-height: 44px;
+    padding: 0 16px;
+    flex: none;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    color: var(--muted);
+    background: #fff;
+    font-size: 11px;
+    font-weight: 800;
+}
+
+.day-tab.active {
+    color: #fff;
+    border-color: var(--primary);
+    background: var(--primary);
+    box-shadow: 0 8px 18px rgb(79 70 229 / 20%);
+}
+
+.schedule-code {
+    color: var(--primary);
+    font-size: 8px;
+    font-weight: 850;
+    letter-spacing: 0.7px;
+}
+
+.schedule-status {
+    color: var(--primary);
+}
+
+.attendance-summary {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.attendance-metric {
+    min-width: 0;
+    padding: 12px 6px;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    text-align: center;
+    background: #fff;
+}
+
+.attendance-metric-icon {
+    width: 32px;
+    height: 32px;
+    margin: 0 auto 6px;
+    display: grid;
+    place-items: center;
+    border-radius: 10px;
+    color: currentColor;
+    background: color-mix(in srgb, currentColor 10%, white);
+}
+
+.attendance-metric strong,
+.attendance-metric small {
+    display: block;
+}
+
+.attendance-metric strong {
+    color: var(--ink);
+    font-size: 18px;
+}
+
+.attendance-metric small {
+    overflow: hidden;
+    color: var(--muted);
+    font-size: 8px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.attendance-date {
+    width: 38px;
+    flex: none;
+    text-align: center;
+}
+
+.attendance-date strong,
+.attendance-date small {
+    display: block;
+}
+
+.attendance-date strong {
+    font-size: 17px;
+}
+
+.attendance-date small {
+    color: var(--muted);
+    font-size: 9px;
+}
+
+.status-chip.success {
+    color: var(--green);
+    background: var(--green-soft);
+}
+
+.status-chip.danger {
+    color: var(--red);
+    background: var(--coral-soft);
+}
+
+.finance-hero-status {
+    position: relative;
+    margin-top: 17px;
+    padding-top: 13px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-top: 1px solid rgb(255 255 255 / 14%);
+    color: rgb(255 255 255 / 82%);
+    font-size: 10px;
+}
+
+.bill-amount {
+    min-width: 72px;
+    text-align: right;
+}
+
+.bill-amount strong,
+.bill-amount small {
+    display: block;
+}
+
+.bill-amount strong {
+    margin-top: 3px;
+    font-size: 10px;
+}
+
+.bill-amount small {
+    color: var(--muted);
+    font-size: 8px;
+}
+
+.pwa-pagination {
+    margin-top: 18px;
+}
+
+.pwa-home-screen .mobile-heading h1 {
+    max-width: min(72vw, 720px);
+}
+
+/* Remaining PWA screens and browser capability prompts. */
+.pwa-install-button {
+    width: 36px;
+    height: 36px;
+}
+
+.pwa-update-banner {
+    position: fixed;
+    right: max(16px, env(safe-area-inset-right, 0px));
+    bottom: calc(84px + env(safe-area-inset-bottom, 0px));
+    left: max(16px, env(safe-area-inset-left, 0px));
+    z-index: 120;
+    max-width: 520px;
+    margin-inline: auto;
+    padding: 12px;
+    display: grid;
+    grid-template-columns: 40px minmax(0, 1fr);
+    align-items: center;
+    gap: 10px;
+    border: 1px solid var(--line);
+    border-radius: 17px;
+    background: var(--surface);
+    box-shadow: 0 18px 48px rgb(15 23 42 / 22%);
+}
+
+.pwa-update-banner strong,
+.pwa-update-banner small {
+    display: block;
+}
+
+.pwa-update-banner strong {
+    font-size: 12px;
+}
+
+.pwa-update-banner small {
+    margin-top: 2px;
+    color: var(--muted);
+    font-size: 9px;
+}
+
+.pwa-update-actions {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.pwa-update-actions button {
+    min-height: 44px;
+    border: 1px solid var(--line);
+    border-radius: 11px;
+    color: var(--ink);
+    background: var(--surface-2);
+    font-size: 11px;
+    font-weight: 800;
+}
+
+.pwa-update-actions button.primary {
+    border-color: var(--primary);
+    color: #fff;
+    background: var(--primary);
+}
+
+.announcement-stack {
+    display: grid;
+    gap: 10px;
+}
+
+.announcement-card {
+    min-height: 92px;
+    padding: 14px;
+    display: grid;
+    grid-template-columns: 42px minmax(0, 1fr) 20px;
+    align-items: center;
+    gap: 11px;
+    border: 1px solid var(--line);
+    border-radius: 17px;
+    color: var(--ink);
+    background: var(--surface);
+    box-shadow: var(--shadow-sm);
+    text-decoration: none;
+    transition: border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.announcement-card:hover,
+.announcement-card:focus-visible {
+    border-color: #cdd3ff;
+    box-shadow: 0 10px 30px rgb(79 70 229 / 11%);
+}
+
+.announcement-card.is-important,
+.announcement-detail.is-important {
+    border-color: #ffd9dc;
+}
+
+.announcement-copy {
+    min-width: 0;
+}
+
+.announcement-copy > strong,
+.announcement-copy > small {
+    display: block;
+}
+
+.announcement-copy > strong {
+    margin-top: 7px;
+    overflow: hidden;
+    font-size: 12px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.announcement-copy > small {
+    margin-top: 3px;
+    overflow: hidden;
+    color: var(--muted);
+    font-size: 10px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.announcement-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.announcement-meta time {
+    color: var(--muted);
+    font-size: 9px;
+}
+
+.status-chip.info {
+    color: var(--primary);
+    background: var(--primary-soft);
+}
+
+.pwa-back-link {
+    min-height: 44px;
+    margin-bottom: 10px;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    color: var(--primary);
+    font-size: 11px;
+    font-weight: 800;
+    text-decoration: none;
+}
+
+.announcement-detail {
+    padding: 20px;
+    border: 1px solid var(--line);
+    border-radius: 21px;
+    background: var(--surface);
+    box-shadow: var(--shadow-sm);
+}
+
+.announcement-detail header {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.announcement-detail-heading {
+    min-width: 0;
+    flex: 1;
+}
+
+.announcement-detail h1 {
+    margin-top: 10px;
+    font-size: clamp(19px, 5vw, 25px);
+    line-height: 1.3;
+    letter-spacing: -.45px;
+}
+
+.announcement-body {
+    margin-top: 20px;
+    padding-top: 18px;
+    border-top: 1px solid var(--line);
+    color: #46546a;
+    font-size: 13px;
+    line-height: 1.75;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+}
+
+.profile-screen {
+    display: grid;
+    gap: 16px;
+}
+
+.profile-screen .page-title,
+.profile-screen .section-head {
+    margin-bottom: 0;
+}
+
+.profile-info-list {
+    padding: 4px 15px;
+}
+
+.profile-info-list > div,
+.settings-row {
+    min-height: 64px;
+    display: grid;
+    grid-template-columns: 40px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 11px;
+    border-bottom: 1px solid var(--line);
+}
+
+.profile-info-list > div:last-child,
+.settings-row:last-child {
+    border-bottom: 0;
+}
+
+.profile-info-list strong,
+.profile-info-list small,
+.settings-row strong,
+.settings-row small {
+    display: block;
+}
+
+.profile-info-list strong,
+.settings-row strong {
+    margin-top: 2px;
+    color: var(--ink);
+    font-size: 11px;
+    line-height: 1.45;
+}
+
+.profile-info-list small,
+.settings-row small {
+    color: var(--muted);
+    font-size: 9px;
+    line-height: 1.45;
+}
+
+.profile-helper {
+    margin-top: 9px;
+    display: flex;
+    align-items: flex-start;
+    gap: 7px;
+    color: var(--muted);
+    font-size: 9px;
+    line-height: 1.5;
+}
+
+.profile-settings-list {
+    padding: 2px 15px;
+}
+
+.profile-text-action {
+    min-width: 52px;
+    min-height: 44px;
+    border: 0;
+    color: var(--primary);
+    background: transparent;
+    font-size: 10px;
+    font-weight: 800;
+}
+
+.profile-text-action.danger {
+    color: var(--red);
+}
+
+.profile-text-action:disabled,
+.settings-button:disabled,
+.profile-logout:disabled {
+    cursor: wait;
+    opacity: .58;
+}
+
+.settings-button {
+    width: 100%;
+    border: 0;
+    color: var(--ink);
+    background: transparent;
+    text-align: left;
+}
+
+.settings-button > svg {
+    color: var(--muted);
+}
+
+.profile-logout {
+    min-height: 50px;
+    margin-top: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.unlinked-screen {
+    min-height: calc(100dvh - 90px);
+    display: grid;
+    place-items: center;
+}
+
+.unlinked-card {
+    width: min(100%, 520px);
+    padding: 28px 22px;
+    text-align: center;
+}
+
+.unlinked-icon,
+.offline-page-icon {
+    width: 72px;
+    height: 72px;
+    margin: 0 auto 16px;
+    display: grid;
+    place-items: center;
+    border-radius: 23px;
+    color: var(--primary);
+    background: var(--primary-soft);
+}
+
+.unlinked-card h1,
+.offline-page h1 {
+    margin-top: 6px;
+    font-size: 22px;
+    letter-spacing: -.5px;
+}
+
+.unlinked-card > p,
+.offline-page > p {
+    max-width: 440px;
+    margin: 8px auto 0;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.65;
+}
+
+.unlinked-steps {
+    margin: 22px 0;
+    display: grid;
+    gap: 8px;
+    text-align: left;
+}
+
+.unlinked-steps > span {
+    min-height: 48px;
+    padding: 8px 11px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-radius: 12px;
+    background: var(--surface-2);
+}
+
+.unlinked-steps strong {
+    width: 28px;
+    height: 28px;
+    display: grid;
+    place-items: center;
+    border-radius: 9px;
+    color: var(--primary);
+    background: var(--primary-soft);
+    font-size: 10px;
+}
+
+.unlinked-steps small {
+    color: var(--ink);
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.offline-page {
+    width: min(calc(100% - 36px), 520px);
+    min-height: 100dvh;
+    margin-inline: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.offline-page .sims-btn {
+    margin-top: 22px;
+}
+
+@media (min-width: 768px) {
+    .pwa-home-screen .stat-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .attendance-summary {
+        gap: 14px;
+    }
+
+    .attendance-metric {
+        padding: 16px 12px;
+    }
+}
+
+@media (max-width: 360px) {
+    .attendance-summary {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .academic-summary.three {
+        grid-template-columns: 1fr;
+    }
+
+    .academic-summary.three .summary-divider {
+        width: 100%;
+        height: 1px;
+    }
+
+    .bill-card {
+        grid-template-columns: 40px minmax(0, 1fr);
+    }
+
+    .bill-amount {
+        grid-column: 2;
+        text-align: left;
+    }
+}
+
+/* Print stylesheet (PRD-SIMS-16 Rekomendasi #5). */
 @media print {
     body {
         background: white !important;
         color: black !important;
         font-size: 11pt;
     }
-    aside, header, nav, .bottom-nav, button:not(.btn-print-keep), [role="dialog"], #offline-banner, .toast-container {
+
+    aside,
+    header,
+    nav,
+    .bottom-nav,
+    button:not(.btn-print-keep),
+    [role='dialog'],
+    [data-pwa-offline],
+    [data-pwa-update],
+    .toast-container,
+    .sims-toast-tray {
         display: none !important;
     }
+
     main {
         overflow: visible !important;
         height: auto !important;
         padding: 0 !important;
         margin: 0 !important;
     }
+
+    .phone-shell,
     .app-shell {
         box-shadow: none !important;
         max-width: 100% !important;
         margin: 0 !important;
     }
+
     table {
         width: 100% !important;
         border-collapse: collapse !important;
     }
-    th, td {
+
+    th,
+    td {
         border: 1px solid #cbd5e1 !important;
         padding: 6px 10px !important;
     }
+
     .print-break {
         page-break-before: always;
     }

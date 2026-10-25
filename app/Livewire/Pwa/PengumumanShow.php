@@ -6,7 +6,6 @@ namespace App\Livewire\Pwa;
 
 use App\Domains\Pwa\Services\PwaContext;
 use App\Models\Announcement;
-use Carbon\Carbon;
 use Illuminate\View\View;
 use Livewire\Component;
 
@@ -15,31 +14,28 @@ use Livewire\Component;
  */
 class PengumumanShow extends Component
 {
-    public Announcement $announcement;
+    public Announcement $item;
 
-    public function mount(Announcement $announcement): void
+    public function mount(int|string $announcement, PwaContext $pwa): void
     {
-        $now = now()->toDateString();
-        /** @var Carbon|null $tayangDari */
-        $tayangDari = $announcement->tayang_dari;
-        /** @var Carbon|null $tayangSampai */
-        $tayangSampai = $announcement->tayang_sampai;
-        $dari = $tayangDari?->toDateString();
-        $sampai = $tayangSampai?->toDateString();
+        $student = $pwa->activeStudent();
+        $rombel = $student?->rombels()
+            ->wherePivot('status', 'aktif')
+            ->latest('class_student.id')
+            ->first();
 
-        $tayang = $announcement->status === 'tayang'
-            && $dari !== null && $dari <= $now
-            && ($sampai === null || $sampai >= $now);
+        $visibleAnnouncement = Announcement::tayang()
+            ->visibleToPwa($pwa->role(), $rombel ? [$rombel->id] : [])
+            ->findOrFail($announcement);
 
-        abort_unless($tayang, 404);
-        $this->announcement = $announcement;
+        $this->item = $visibleAnnouncement;
     }
 
     public function render(PwaContext $pwa): View
     {
         $student = $pwa->activeStudent();
 
-        return view('livewire.pwa.pengumuman-show', ['item' => $this->announcement])
+        return view('livewire.pwa.pengumuman-show', ['item' => $this->item])
             ->layout('layouts.pwa', [
                 'title' => 'Pengumuman',
                 'schoolName' => $student?->school?->nama,
