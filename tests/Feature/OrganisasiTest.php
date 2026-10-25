@@ -2,6 +2,9 @@
 
 declare(strict_types=1);
 
+use App\Livewire\Organisasi\OrganizationForm;
+use App\Livewire\Organisasi\OrganizationIndex;
+use App\Livewire\Organisasi\OrganizationShow;
 use App\Models\Membership;
 use App\Models\Module;
 use App\Models\Organization;
@@ -13,6 +16,7 @@ use App\Tenancy\TenantContext;
 use Database\Seeders\ModuleSeeder;
 use Database\Seeders\PermissionSeeder;
 use Database\Seeders\RoleSeeder;
+use Livewire\Livewire;
 use Spatie\Permission\PermissionRegistrar;
 
 beforeEach(function (): void {
@@ -103,4 +107,25 @@ it('organisasi terisolasi per sekolah', function (): void {
     app(TenantContext::class)->set($other);
 
     expect(Organization::count())->toBe(0);
+});
+
+it('organisasi, form organisasi, dan kelola organisasi memakai design system', function (): void {
+    Livewire::actingAs($this->admin)->test(OrganizationIndex::class)
+        ->assertSee('Organisasi')
+        ->assertSee('management-page-header')
+        ->assertDontSee('<i data-lucide');
+
+    Livewire::actingAs($this->admin)->test(OrganizationForm::class)
+        ->assertSee('Tambah Organisasi')
+        ->assertSee('management-form-card')
+        ->assertDontSee('max-w-3xl')
+        ->assertDontSee('<i data-lucide');
+
+    $organisasi = Organization::create(['nama' => 'OSIS', 'jenis' => 'osis']);
+
+    Livewire::actingAs($this->admin)->test(OrganizationShow::class, ['organization' => $organisasi])
+        ->assertSee('OSIS')
+        ->assertSee('Pengurus')
+        ->assertSee('Kegiatan')
+        ->assertDontSee('<i data-lucide');
 });

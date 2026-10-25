@@ -2,6 +2,9 @@
 
 declare(strict_types=1);
 
+use App\Livewire\Alumni\AlumniForm;
+use App\Livewire\Alumni\AlumniIndex;
+use App\Livewire\Alumni\AlumniShow;
 use App\Models\Alumni;
 use App\Models\Membership;
 use App\Models\Module;
@@ -12,6 +15,7 @@ use App\Tenancy\TenantContext;
 use Database\Seeders\ModuleSeeder;
 use Database\Seeders\PermissionSeeder;
 use Database\Seeders\RoleSeeder;
+use Livewire\Livewire;
 use Spatie\Permission\PermissionRegistrar;
 
 beforeEach(function (): void {
@@ -105,4 +109,25 @@ it('alumni terisolasi per sekolah', function (): void {
     app(TenantContext::class)->set($other);
 
     expect(Alumni::count())->toBe(0);
+});
+
+it('alumni, form alumni, dan detail alumni memakai design system', function (): void {
+    Livewire::actingAs($this->admin)->test(AlumniIndex::class)
+        ->assertSee('Alumni')
+        ->assertSee('management-page-header')
+        ->assertSee('data-table')
+        ->assertDontSee('<i data-lucide');
+
+    Livewire::actingAs($this->admin)->test(AlumniForm::class)
+        ->assertSee('Tambah Alumni')
+        ->assertSee('management-form-card')
+        ->assertDontSee('max-w-3xl')
+        ->assertDontSee('<i data-lucide');
+
+    $alumni = Alumni::create(['nama' => 'Alumni Satu', 'tahun_lulus' => '2025']);
+
+    Livewire::actingAs($this->admin)->test(AlumniShow::class, ['alumni' => $alumni])
+        ->assertSee('Alumni Satu')
+        ->assertSee('Riwayat Karier')
+        ->assertDontSee('<i data-lucide');
 });
