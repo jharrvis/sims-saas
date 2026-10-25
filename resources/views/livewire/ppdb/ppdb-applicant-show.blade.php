@@ -1,70 +1,89 @@
-<div class="max-w-4xl mx-auto space-y-5">
-    @if (session('saved'))
-        <div class="rounded-lg bg-success/10 text-success px-4 py-2.5 text-sm">{{ session('saved') }}</div>
-    @endif
-    @if (session('enrolled'))
-        <div class="rounded-lg bg-success/10 text-success px-4 py-2.5 text-sm">{{ session('enrolled') }}</div>
-    @endif
-
-    <div class="rounded-xl border border-slate-200 bg-white dark:bg-boxdark dark:border-slate-700 p-6">
-        <div class="flex items-start justify-between gap-4">
-            <div>
-                <p class="font-mono text-xs text-slate-500">{{ $applicant->no_pendaftaran }}</p>
-                <h1 class="text-xl font-bold text-slate-800 dark:text-white mt-1">{{ $applicant->nama }}</h1>
-                <p class="text-sm text-slate-500 mt-1">
-                    {{ $applicant->period->nama }} ·
-                    {{ $applicant->jk === 'L' ? 'Laki-laki' : 'Perempuan' }} ·
-                    Asal: {{ $applicant->asal_sekolah ?? '—' }}
-                </p>
+<div class="page-stack">
+    <div class="page-header management-page-header">
+        <div>
+            <a href="{{ route('ppdb.pendaftar.index', ['period' => $applicant->ppdb_period_id]) }}" class="management-back-link">
+                <x-icon name="arrow-left" class="h-4 w-4" /> Kembali ke Daftar Pendaftar
+            </a>
+            <span class="eyebrow">PPDB / Pendaftar</span>
+            <h2 class="management-page-title">{{ $applicant->nama }}</h2>
+            <p>
+                {{ $applicant->no_pendaftaran }} · {{ $applicant->period->nama }} ·
+                {{ $applicant->jk === 'L' ? 'Laki-laki' : 'Perempuan' }} ·
+                Asal: {{ $applicant->asal_sekolah ?? '—' }}
                 @if ($applicant->nama_ortu)
-                    <p class="text-sm text-slate-500">Ortu: {{ $applicant->nama_ortu }} ({{ $applicant->no_hp_ortu ?? '—' }})</p>
+                    · Ortu: {{ $applicant->nama_ortu }} ({{ $applicant->no_hp_ortu ?? '—' }})
                 @endif
-            </div>
-            <span class="inline-flex px-3 py-1.5 rounded-full text-xs font-bold bg-primary/10 text-primary">
-                {{ $applicant->labelStatus() }}
-            </span>
+                <span class="badge badge-blue">{{ $applicant->labelStatus() }}</span>
+            </p>
         </div>
     </div>
 
-    @if ($applicant->selection)
-        <div class="rounded-xl border border-slate-200 bg-white dark:bg-boxdark dark:border-slate-700 p-6">
-            <h2 class="font-semibold text-slate-800 dark:text-white mb-3">Hasil Seleksi</h2>
-            <div class="grid grid-cols-3 gap-4 text-sm">
-                <div>
-                    <p class="text-xs text-slate-500">Nilai Tes</p>
-                    <p class="font-bold">{{ $applicant->selection->nilai_tes ?? '—' }}</p>
-                </div>
-                <div>
-                    <p class="text-xs text-slate-500">Nilai Wawancara</p>
-                    <p class="font-bold">{{ $applicant->selection->nilai_wawancara ?? '—' }}</p>
-                </div>
-                <div>
-                    <p class="text-xs text-slate-500">Nilai Akhir</p>
-                    <p class="font-bold">{{ $applicant->selection->nilai_akhir ?? '—' }}</p>
-                </div>
-            </div>
+    @if (session('saved'))
+        <div class="management-alert management-alert-success" role="status" aria-live="polite">
+            <span>{{ session('saved') }}</span>
+        </div>
+    @endif
+    @if (session('enrolled'))
+        <div class="management-alert management-alert-success" role="status" aria-live="polite">
+            <span>{{ session('enrolled') }}</span>
         </div>
     @endif
 
-    <div class="rounded-xl border border-slate-200 bg-white dark:bg-boxdark dark:border-slate-700 p-6">
-        <h2 class="font-semibold text-slate-800 dark:text-white mb-4">Proses Pendaftaran</h2>
+    @if ($applicant->selection)
+        <section class="card" aria-labelledby="ppdb-seleksi-title">
+            <div class="card-head">
+                <div class="card-title">
+                    <span class="mini-icon blue"><x-icon name="clipboard-list" class="h-[19px] w-[19px]" /></span>
+                    <div>
+                        <h3 id="ppdb-seleksi-title">Hasil Seleksi</h3>
+                        <p>Nilai tes, wawancara, dan nilai akhir.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="info-grid">
+                <div class="info-tile">
+                    <small>Nilai Tes</small>
+                    <strong>{{ $applicant->selection->nilai_tes ?? '—' }}</strong>
+                </div>
+                <div class="info-tile">
+                    <small>Nilai Wawancara</small>
+                    <strong>{{ $applicant->selection->nilai_wawancara ?? '—' }}</strong>
+                </div>
+                <div class="info-tile">
+                    <small>Nilai Akhir</small>
+                    <strong>{{ $applicant->selection->nilai_akhir ?? '—' }}</strong>
+                </div>
+            </div>
+        </section>
+    @endif
 
-        <div class="mb-4">
-            <label for="catatan" class="block mb-1.5 text-sm font-medium text-slate-700 dark:text-slate-300">Catatan</label>
-            <textarea id="catatan" wire:model="catatan" rows="2"
-                      class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-transparent py-2.5 px-4 text-sm outline-none focus:border-primary dark:text-white"></textarea>
+    <section class="card management-form-card" aria-labelledby="ppdb-proses-title">
+        <div class="card-head">
+            <div class="card-title">
+                <span class="mini-icon green"><x-icon name="award" class="h-[19px] w-[19px]" /></span>
+                <div>
+                    <h3 id="ppdb-proses-title">Proses Pendaftaran</h3>
+                    <p>Tombol yang tampil mengikuti status pendaftar saat ini.</p>
+                </div>
+            </div>
         </div>
 
-        <div class="flex flex-wrap gap-2">
+        <div class="form-group">
+            <label for="catatan">Catatan</label>
+            <textarea id="catatan" wire:model="catatan" rows="2" class="textarea-field"></textarea>
+            @error('catatan') <p class="management-field-error" role="alert">{{ $message }}</p> @enderror
+        </div>
+
+        <div class="flex flex-wrap gap-2 mt-5">
             @if ($applicant->status === 'draft')
                 @can('ppdb.pendaftar.update')
-                    <button wire:click="submit" class="px-4 py-2 rounded-lg bg-primary text-sm font-medium text-white hover:bg-blue-700">Kirim Formulir</button>
+                    <button wire:click="submit" class="btn btn-primary">Kirim Formulir</button>
                 @endcan
             @endif
 
             @if ($applicant->status === 'submitted')
                 @can('ppdb.pendaftar.verify')
-                    <button wire:click="verify" class="px-4 py-2 rounded-lg bg-success text-sm font-medium text-white hover:opacity-90">Verifikasi Berkas</button>
+                    <button wire:click="verify" class="btn btn-success">Verifikasi Berkas</button>
                 @endcan
             @endif
 
@@ -73,31 +92,27 @@
                     <div class="flex items-end gap-2 mr-2">
                         <div>
                             <label class="block text-xs text-slate-500 mb-1">Nilai Tes</label>
-                            <input type="number" wire:model="nilai_tes" min="0" max="100" step="0.01" class="w-24 rounded-lg border border-slate-200 dark:border-slate-700 bg-transparent py-2 px-3 text-sm dark:text-white">
+                            <input type="number" wire:model="nilai_tes" min="0" max="100" step="0.01" class="field w-24">
                         </div>
                         <div>
                             <label class="block text-xs text-slate-500 mb-1">Wawancara</label>
-                            <input type="number" wire:model="nilai_wawancara" min="0" max="100" step="0.01" class="w-24 rounded-lg border border-slate-200 dark:border-slate-700 bg-transparent py-2 px-3 text-sm dark:text-white">
+                            <input type="number" wire:model="nilai_wawancara" min="0" max="100" step="0.01" class="field w-24">
                         </div>
-                        <button wire:click="saveSelection" class="px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-800">Simpan</button>
+                        <button wire:click="saveSelection" class="btn btn-outline">Simpan</button>
                     </div>
-                    <button wire:click="accept" wire:confirm="Terima pendaftar ini?" class="px-4 py-2 rounded-lg bg-success text-sm font-medium text-white hover:opacity-90">Terima</button>
-                    <button wire:click="reject" wire:confirm="Tolak pendaftar ini?" class="px-4 py-2 rounded-lg bg-danger text-sm font-medium text-white hover:opacity-90">Tolak</button>
+                    <button wire:click="accept" wire:confirm="Terima pendaftar ini?" class="btn btn-success">Terima</button>
+                    <button wire:click="reject" wire:confirm="Tolak pendaftar ini?" class="btn btn-danger">Tolak</button>
                 @endcan
             @endif
 
             @if ($applicant->status === 'accepted')
                 @can('ppdb.pendaftar.enroll')
                     <button wire:click="enroll" wire:confirm="Proses daftar ulang? Pendaftar akan menjadi data siswa."
-                            class="px-4 py-2 rounded-lg bg-primary text-sm font-medium text-white hover:bg-blue-700">
+                            class="btn btn-primary">
                         Daftar Ulang → Jadi Siswa
                     </button>
                 @endcan
             @endif
         </div>
-    </div>
-
-    <a href="{{ route('ppdb.pendaftar.index', ['period' => $applicant->ppdb_period_id]) }}" class="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-slate-700">
-        ← Kembali ke daftar pendaftar
-    </a>
+    </section>
 </div>

@@ -1,56 +1,65 @@
-<div>
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
-        <div class="flex items-center gap-2">
-            <a href="{{ route('ppdb.index') }}" class="text-sm text-slate-500 hover:text-slate-700">← PPDB</a>
-            <h1 class="text-lg font-bold text-slate-800 dark:text-white">{{ $period->nama }}</h1>
+<div class="page-stack">
+    <div class="page-header management-page-header">
+        <div>
+            <a href="{{ route('ppdb.index') }}" class="management-back-link">
+                <x-icon name="arrow-left" class="h-4 w-4" /> PPDB
+            </a>
+            <span class="eyebrow">PPDB / Pendaftar</span>
+            <h2 class="management-page-title">{{ $period->nama }}</h2>
+            <p>Daftar pendaftar pada periode ini beserta status prosesnya.</p>
         </div>
-        <div class="flex items-center gap-2">
-            <div class="relative">
-                <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
-                <input type="search" wire:model.live.debounce.300ms="search" placeholder="Cari nama / no. daftar…"
-                       aria-label="Cari pendaftar"
-                       class="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-boxdark py-2.5 pl-10 pr-4 text-sm outline-none focus:border-primary dark:text-white">
-            </div>
-            <select wire:model.live="status" aria-label="Filter status"
-                    class="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-boxdark py-2.5 px-3 text-sm outline-none focus:border-primary dark:text-white">
-                <option value="">Semua status</option>
-                @foreach (\App\Models\PpdbApplicant::STATUS as $key => $label)
-                    <option value="{{ $key }}">{{ $label }}</option>
-                @endforeach
-            </select>
+        <div class="page-actions">
             @can('ppdb.pendaftar.create')
-                <a href="{{ route('ppdb.pendaftar.create', ['period' => $period->id]) }}" class="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700">
-                    <i data-lucide="plus" class="w-4 h-4"></i> Daftarkan
+                <a href="{{ route('ppdb.pendaftar.create', ['period' => $period->id]) }}" class="btn btn-primary">
+                    <x-icon name="plus" class="h-4 w-4" /> Daftarkan
                 </a>
             @endcan
         </div>
     </div>
 
-    <div class="rounded-xl border border-slate-200 bg-white shadow-sm dark:bg-boxdark dark:border-slate-700 overflow-hidden">
-        <div class="overflow-x-auto">
-            <table class="w-full">
+    <div class="table-toolbar management-toolbar">
+        <div class="toolbar-left management-filter-group">
+            <label class="field-search management-search-field" for="ppdb-search">
+                <x-icon name="search" class="h-4 w-4" /><span class="sr-only">Cari pendaftar</span>
+                <input id="ppdb-search" type="search" wire:model.live.debounce.300ms="search" placeholder="Cari nama / no. daftar…" autocomplete="off">
+                <span wire:loading wire:target="search" class="management-inline-spinner" aria-hidden="true"></span>
+            </label>
+            <label class="management-filter-field" for="ppdb-status"><span class="sr-only">Filter status</span>
+                <select id="ppdb-status" wire:model.live="status" class="select-field">
+                    <option value="">Semua status</option>
+                    @foreach (\App\Models\PpdbApplicant::STATUS as $key => $label)
+                        <option value="{{ $key }}">{{ $label }}</option>
+                    @endforeach
+                </select>
+            </label>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="table-scroll">
+            <table class="data-table">
                 <thead>
-                    <tr class="border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
-                        <th class="py-3 px-5 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">No. Pendaftaran</th>
-                        <th class="py-3 px-5 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Nama</th>
-                        <th class="py-3 px-5 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Asal Sekolah</th>
-                        <th class="py-3 px-5 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Status</th>
-                        <th class="py-3 px-5 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Aksi</th>
+                    <tr>
+                        <th scope="col">No. Pendaftaran</th>
+                        <th scope="col">Nama</th>
+                        <th scope="col">Asal Sekolah</th>
+                        <th scope="col">Status</th>
+                        <th scope="col" class="text-right">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse ($applicants as $a)
-                        <tr class="border-b border-slate-100 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-800/30">
-                            <td class="py-3 px-5 font-mono text-xs">{{ $a->no_pendaftaran }}</td>
-                            <td class="py-3 px-5 font-medium text-sm text-slate-800 dark:text-white">{{ $a->nama }}</td>
-                            <td class="py-3 px-5 text-sm text-slate-500">{{ $a->asal_sekolah ?? '—' }}</td>
-                            <td class="py-3 px-5">
-                                <span class="inline-flex px-2.5 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary">
+                        <tr wire:key="ppdb-applicant-{{ $a->id }}">
+                            <td class="font-mono text-xs">{{ $a->no_pendaftaran }}</td>
+                            <td class="font-medium">{{ $a->nama }}</td>
+                            <td class="text-slate-500">{{ $a->asal_sekolah ?? '—' }}</td>
+                            <td>
+                                <span class="badge badge-blue">
                                     {{ $a->labelStatus() }}
                                 </span>
                             </td>
-                            <td class="py-3 px-5 text-right">
-                                <a href="{{ route('ppdb.pendaftar.show', $a) }}" class="inline-flex px-3 py-1.5 rounded-lg text-xs font-medium bg-primary/10 text-primary hover:bg-primary/20">
+                            <td class="text-right">
+                                <a href="{{ route('ppdb.pendaftar.show', $a) }}" class="btn btn-sm btn-outline">
                                     Proses
                                 </a>
                             </td>

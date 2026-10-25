@@ -1,24 +1,36 @@
-<div>
-    <div class="flex justify-end mb-5">
-        @can('ppdb.periode.create')
-            <a href="{{ route('ppdb.periode.create') }}" class="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 transition-colors">
-                <i data-lucide="plus" class="w-4 h-4"></i> Buka Periode Baru
-            </a>
-        @endcan
+<div class="page-stack">
+    <div class="page-header management-page-header">
+        <div>
+            <span class="eyebrow">PPDB</span>
+            <h2 class="management-page-title">Periode PPDB</h2>
+            <p>Periode penerimaan peserta didik baru beserta jumlah pendaftar dan kuota.</p>
+        </div>
+        <div class="page-actions">
+            {{-- Route ppdb.periode.create belum ada (pembuatan periode hanya lewat API);
+                tombol hanya tampil bila route itu didaftarkan, agar halaman tidak crash
+                bagi pengguna yang memegang izin ppdb.periode.create. --}}
+            @if (\Illuminate\Support\Facades\Route::has('ppdb.periode.create'))
+                @can('ppdb.periode.create')
+                    <a href="{{ route('ppdb.periode.create') }}" class="btn btn-primary">
+                        <x-icon name="plus" class="h-4 w-4" /> Buka Periode Baru
+                    </a>
+                @endcan
+            @endif
+        </div>
     </div>
 
     <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
         @forelse ($periods as $p)
-            <div class="rounded-xl border border-slate-200 bg-white dark:bg-boxdark dark:border-slate-700 p-5">
+            <article class="card" wire:key="ppdb-period-{{ $p->id }}">
                 <div class="flex items-start justify-between">
                     <div>
-                        <h3 class="font-bold text-slate-800 dark:text-white">{{ $p->nama }}</h3>
+                        <h3 class="font-bold">{{ $p->nama }}</h3>
                         <p class="text-xs text-slate-500 mt-0.5">{{ $p->academicYear->nama }}</p>
                     </div>
                     @if ($p->isOpen())
-                        <span class="inline-flex px-2.5 py-1 rounded-full text-xs font-medium bg-success/10 text-success">Dibuka</span>
+                        <span class="badge badge-green">Dibuka</span>
                     @else
-                        <span class="inline-flex px-2.5 py-1 rounded-full text-xs font-medium bg-slate-500/10 text-slate-500">Ditutup</span>
+                        <span class="badge badge-gray">Ditutup</span>
                     @endif
                 </div>
                 <p class="text-xs text-slate-500 mt-3">
@@ -27,14 +39,14 @@
                     @if ($p->kuota > 0) · Kuota {{ $p->kuota }} @endif
                 </p>
                 <a href="{{ route('ppdb.pendaftar.index', ['period' => $p->id]) }}"
-                   class="block mt-4 py-2 text-center text-xs font-medium rounded-lg bg-primary/10 text-primary hover:bg-primary/20">
+                   class="btn btn-outline mt-4 w-full">
                     Kelola Pendaftar
                 </a>
-            </div>
+            </article>
         @empty
-            <p class="col-span-full py-12 text-center text-sm text-slate-500 dark:text-slate-400">
-                Belum ada periode PPDB.
-            </p>
+            <div class="empty-state col-span-full">
+                <p>Belum ada periode PPDB.</p>
+            </div>
         @endforelse
     </div>
 

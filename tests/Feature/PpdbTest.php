@@ -2,6 +2,9 @@
 
 declare(strict_types=1);
 
+use App\Livewire\Ppdb\PpdbApplicantForm;
+use App\Livewire\Ppdb\PpdbApplicantIndex;
+use App\Livewire\Ppdb\PpdbPeriodIndex;
 use App\Models\AcademicYear;
 use App\Models\Membership;
 use App\Models\Module;
@@ -15,6 +18,7 @@ use App\Tenancy\TenantContext;
 use Database\Seeders\ModuleSeeder;
 use Database\Seeders\PermissionSeeder;
 use Database\Seeders\RoleSeeder;
+use Livewire\Livewire;
 use Spatie\Permission\PermissionRegistrar;
 
 beforeEach(function (): void {
@@ -156,4 +160,21 @@ it('pendaftar terisolasi antar tenant', function (): void {
     $this->actingAs($userB)->getJson('/api/v1/ppdb/pendaftar?ppdb_period_id='.$this->period->id)
         ->assertOk()
         ->assertJsonPath('total', 0);
+});
+
+it('ppdb memakai struktur design system management (Batch 8)', function (): void {
+    Livewire::actingAs($this->admin)->test(PpdbPeriodIndex::class)
+        ->assertSee('Periode PPDB')
+        ->assertSeeHtml('management-page-header')
+        ->assertDontSee('<i data-lucide');
+
+    Livewire::actingAs($this->admin)->test(PpdbApplicantIndex::class, ['period' => $this->period->id])
+        ->assertSee($this->period->nama)
+        ->assertSeeHtml('management-page-header')
+        ->assertDontSee('<i data-lucide');
+
+    Livewire::actingAs($this->admin)->test(PpdbApplicantForm::class, ['period' => $this->period->id])
+        ->assertSee('Daftarkan Pendaftar')
+        ->assertSeeHtml('management-form-card')
+        ->assertDontSee('max-w-3xl');
 });
