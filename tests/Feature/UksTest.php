@@ -2,6 +2,9 @@
 
 declare(strict_types=1);
 
+use App\Livewire\Uks\HealthVisitForm;
+use App\Livewire\Uks\HealthVisitIndex;
+use App\Livewire\Uks\MedicineIndex;
 use App\Models\HealthVisit;
 use App\Models\Medicine;
 use App\Models\Membership;
@@ -14,6 +17,7 @@ use App\Tenancy\TenantContext;
 use Database\Seeders\ModuleSeeder;
 use Database\Seeders\PermissionSeeder;
 use Database\Seeders\RoleSeeder;
+use Livewire\Livewire;
 use Spatie\Permission\PermissionRegistrar;
 
 beforeEach(function (): void {
@@ -120,4 +124,22 @@ it('data uks terisolasi per sekolah', function (): void {
 
     expect(HealthVisit::count())->toBe(0)
         ->and(Medicine::count())->toBe(0);
+});
+
+it('kunjungan, form kunjungan, dan obat uks memakai design system', function (): void {
+    Livewire::actingAs($this->admin)->test(HealthVisitIndex::class)
+        ->assertSee('Kunjungan UKS')
+        ->assertSee('data-table')
+        ->assertDontSee('<i data-lucide');
+
+    Livewire::actingAs($this->admin)->test(HealthVisitForm::class)
+        ->assertSee('Catat Kunjungan')
+        ->assertSee('management-form-card')
+        ->assertDontSee('max-w-3xl')
+        ->assertDontSee('<i data-lucide');
+
+    Livewire::actingAs($this->admin)->test(MedicineIndex::class)
+        ->assertSee('Obat UKS')
+        ->assertSee('management-page-header')
+        ->assertDontSee('<i data-lucide');
 });

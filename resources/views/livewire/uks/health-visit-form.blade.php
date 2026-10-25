@@ -1,66 +1,85 @@
-<div class="max-w-3xl">
-    <form wire:submit="save" class="rounded-xl border border-slate-200 bg-white dark:bg-boxdark dark:border-slate-700 p-5 sm:p-6 space-y-5">
-        <div class="grid sm:grid-cols-2 gap-4">
-            <div>
-                <label for="siswa" class="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1.5">Siswa <span class="text-danger">*</span></label>
-                <input id="siswa" type="search" wire:model.live.debounce.300ms="searchSiswa" placeholder="Cari nama…"
-                       class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 py-2.5 px-3.5 text-sm outline-none focus:border-primary dark:text-white">
-                <select wire:model="student_id" aria-label="Pilih siswa"
-                        class="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 py-2.5 px-3 text-sm dark:text-white">
+<div class="page-stack">
+    <div class="page-header management-page-header">
+        <div>
+            <span class="eyebrow">Operasional / UKS</span>
+            <h2 class="management-page-title">{{ $isEdit ? 'Ubah Kunjungan' : 'Catat Kunjungan' }}</h2>
+            <p>Kunjungan siswa ke UKS beserta keluhan, diagnosa, dan tindakannya.</p>
+        </div>
+        <div class="page-actions">
+            <a href="{{ route('uks.index') }}" class="back-link">← Kunjungan UKS</a>
+        </div>
+    </div>
+
+    <section class="card management-form-card" aria-labelledby="kunjungan-form-title">
+        <div class="card-head">
+            <div class="card-title">
+                <span class="mini-icon blue"><x-icon name="heart-pulse" class="h-[19px] w-[19px]" /></span>
+                <div>
+                    <h3 id="kunjungan-form-title">Data Kunjungan</h3>
+                    <p>Tindakan dan rujukan dicatat untuk tindak lanjut petugas UKS.</p>
+                </div>
+            </div>
+        </div>
+
+        <form wire:submit="save" class="form-grid management-form-grid">
+            <div class="form-group">
+                <label for="siswa">Siswa <span class="required">*</span></label>
+                <input id="siswa" type="search" wire:model.live.debounce.300ms="searchSiswa" placeholder="Cari nama…" class="field">
+                <select wire:model="student_id" aria-label="Pilih siswa" class="select-field mt-1">
                     <option value="">— Pilih siswa —</option>
                     @foreach ($siswaList as $s)
                         <option value="{{ $s->id }}">{{ $s->nama }} · {{ $s->nis }}</option>
                     @endforeach
                 </select>
-                @error('student_id') <p class="text-xs text-danger mt-1">{{ $message }}</p> @enderror
+                @error('student_id') <p class="management-field-error" role="alert">{{ $message }}</p> @enderror
             </div>
-            <div>
-                <label for="tgl" class="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1.5">Waktu Kunjungan <span class="text-danger">*</span></label>
-                <input id="tgl" type="datetime-local" wire:model="tgl"
-                       class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 py-2.5 px-3.5 text-sm outline-none focus:border-primary dark:text-white">
+            <div class="form-group">
+                <label for="tgl">Waktu Kunjungan <span class="required">*</span></label>
+                <input id="tgl" type="datetime-local" wire:model="tgl" class="field">
+                @error('tgl') <p class="management-field-error" role="alert">{{ $message }}</p> @enderror
             </div>
-            <div class="sm:col-span-2">
-                <label for="keluhan" class="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1.5">Keluhan <span class="text-danger">*</span></label>
-                <textarea id="keluhan" wire:model="keluhan" rows="3"
-                          class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 py-2.5 px-3.5 text-sm outline-none focus:border-primary dark:text-white"></textarea>
-                @error('keluhan') <p class="text-xs text-danger mt-1">{{ $message }}</p> @enderror
+            <div class="form-group management-field-span">
+                <label for="keluhan">Keluhan <span class="required">*</span></label>
+                <textarea id="keluhan" wire:model="keluhan" rows="3" class="field"></textarea>
+                @error('keluhan') <p class="management-field-error" role="alert">{{ $message }}</p> @enderror
             </div>
-            <div>
-                <label for="diagnosa" class="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1.5">Diagnosa</label>
-                <input id="diagnosa" type="text" wire:model="diagnosa" maxlength="200"
-                       class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 py-2.5 px-3.5 text-sm outline-none focus:border-primary dark:text-white">
+            <div class="form-group">
+                <label for="diagnosa">Diagnosa</label>
+                <input id="diagnosa" type="text" wire:model="diagnosa" maxlength="200" class="field">
+                @error('diagnosa') <p class="management-field-error" role="alert">{{ $message }}</p> @enderror
             </div>
-            <div>
-                <label for="tindakan" class="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1.5">Tindakan</label>
-                <input id="tindakan" type="text" wire:model="tindakan" maxlength="2000"
-                       class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 py-2.5 px-3.5 text-sm outline-none focus:border-primary dark:text-white">
+            <div class="form-group">
+                <label for="tindakan">Tindakan</label>
+                <input id="tindakan" type="text" wire:model="tindakan" maxlength="2000" class="field">
+                @error('tindakan') <p class="management-field-error" role="alert">{{ $message }}</p> @enderror
             </div>
-            <div>
-                <label for="suhu" class="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1.5">Suhu Tubuh (°C)</label>
-                <input id="suhu" type="number" wire:model="suhu" min="30" max="45" step="0.1"
-                       class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 py-2.5 px-3.5 text-sm outline-none focus:border-primary dark:text-white">
+            <div class="form-group">
+                <label for="suhu">Suhu Tubuh (°C)</label>
+                <input id="suhu" type="number" wire:model="suhu" min="30" max="45" step="0.1" class="field">
+                @error('suhu') <p class="management-field-error" role="alert">{{ $message }}</p> @enderror
             </div>
-            <div>
-                <label for="td" class="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1.5">Tekanan Darah</label>
-                <input id="td" type="text" wire:model="tekanan_darah" maxlength="20" placeholder="120/80"
-                       class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 py-2.5 px-3.5 text-sm outline-none focus:border-primary dark:text-white">
+            <div class="form-group">
+                <label for="td">Tekanan Darah</label>
+                <input id="td" type="text" wire:model="tekanan_darah" maxlength="20" placeholder="120/80" class="field">
+                @error('tekanan_darah') <p class="management-field-error" role="alert">{{ $message }}</p> @enderror
             </div>
-            <div class="sm:col-span-2">
-                <label for="rujukan" class="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1.5">Rujukan</label>
-                <select id="rujukan" wire:model="rujukan"
-                        class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 py-2.5 px-3 text-sm dark:text-white">
+            <div class="form-group management-field-span">
+                <label for="rujukan">Rujukan</label>
+                <select id="rujukan" wire:model="rujukan" class="select-field">
                     @foreach (\App\Models\HealthVisit::RUJUKAN as $key => $label)
                         <option value="{{ $key }}">{{ $label }}</option>
                     @endforeach
                 </select>
+                @error('rujukan') <p class="management-field-error" role="alert">{{ $message }}</p> @enderror
             </div>
-        </div>
 
-        <div class="flex items-center gap-3 pt-2">
-            <button type="submit" class="rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-white hover:bg-primary/90">
-                {{ $isEdit ? 'Simpan Perubahan' : 'Catat Kunjungan' }}
-            </button>
-            <a href="{{ route('uks.index') }}" class="text-sm text-slate-500 hover:text-primary">Batal</a>
-        </div>
-    </form>
+            <div class="form-actions management-field-span">
+                <button type="submit" class="btn btn-primary" wire:loading.attr="disabled" wire:target="save">
+                    <span wire:loading.remove wire:target="save">{{ $isEdit ? 'Simpan Perubahan' : 'Catat Kunjungan' }}</span>
+                    <span wire:loading wire:target="save">Menyimpan...</span>
+                </button>
+                <a href="{{ route('uks.index') }}" class="btn btn-outline">Batal</a>
+            </div>
+        </form>
+    </section>
 </div>

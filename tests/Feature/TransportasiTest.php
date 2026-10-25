@@ -2,6 +2,9 @@
 
 declare(strict_types=1);
 
+use App\Livewire\Transportasi\RouteForm;
+use App\Livewire\Transportasi\RouteIndex;
+use App\Livewire\Transportasi\RouteShow;
 use App\Models\Membership;
 use App\Models\Module;
 use App\Models\School;
@@ -13,6 +16,7 @@ use App\Tenancy\TenantContext;
 use Database\Seeders\ModuleSeeder;
 use Database\Seeders\PermissionSeeder;
 use Database\Seeders\RoleSeeder;
+use Livewire\Livewire;
 use Spatie\Permission\PermissionRegistrar;
 
 beforeEach(function (): void {
@@ -107,4 +111,25 @@ it('rute terisolasi per sekolah', function (): void {
     app(TenantContext::class)->set($other);
 
     expect(TransportRoute::count())->toBe(0);
+});
+
+it('rute, form rute, dan kelola rute memakai design system', function (): void {
+    Livewire::actingAs($this->admin)->test(RouteIndex::class)
+        ->assertSee('Rute Antar-Jemput')
+        ->assertSee('management-page-header')
+        ->assertDontSee('<i data-lucide');
+
+    Livewire::actingAs($this->admin)->test(RouteForm::class)
+        ->assertSee('Tambah Rute')
+        ->assertSee('management-form-card')
+        ->assertDontSee('max-w-3xl')
+        ->assertDontSee('<i data-lucide');
+
+    $route = TransportRoute::create(['nama' => 'Rute Utara', 'kapasitas' => 20]);
+
+    Livewire::actingAs($this->admin)->test(RouteShow::class, ['route' => $route])
+        ->assertSee('Rute Utara')
+        ->assertSee('Titik Penjemputan')
+        ->assertSee('Penumpang')
+        ->assertDontSee('<i data-lucide');
 });

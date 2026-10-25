@@ -1,71 +1,79 @@
-<div>
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
-        <div class="flex items-center gap-2">
-            <div class="relative">
-                <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
-                <input type="search" wire:model.live.debounce.300ms="search" placeholder="Cari nama siswa…"
-                       aria-label="Cari kunjungan"
-                       class="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-boxdark py-2.5 pl-10 pr-4 text-sm outline-none focus:border-primary dark:text-white">
-            </div>
-            <select wire:model.live="rujukan" aria-label="Filter rujukan"
-                    class="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-boxdark py-2.5 px-3 text-sm outline-none focus:border-primary dark:text-white">
-                <option value="">Semua</option>
-                @foreach (\App\Models\HealthVisit::RUJUKAN as $key => $label)
-                    <option value="{{ $key }}">{{ $label }}</option>
-                @endforeach
-            </select>
+<div class="page-stack">
+    <div class="page-header management-page-header">
+        <div>
+            <span class="eyebrow">Operasional / UKS</span>
+            <h2 class="management-page-title">Kunjungan UKS</h2>
+            <p>Kunjungan siswa ke UKS beserta keluhan dan rujukannya.</p>
         </div>
-        <div class="flex items-center gap-2">
+        <div class="page-actions">
             @can('uks.obat')
-                <a href="{{ route('uks.obat') }}"
-                   class="inline-flex items-center gap-2 rounded-lg border border-slate-200 dark:border-slate-700 px-4 py-2.5 text-sm font-semibold text-slate-600 dark:text-slate-300 hover:border-primary hover:text-primary">
-                    <i data-lucide="pill" class="w-4 h-4"></i> Obat
+                <a href="{{ route('uks.obat') }}" class="btn btn-outline">
+                    <x-icon name="pill" class="h-4 w-4" /> Obat
                 </a>
             @endcan
             @can('uks.create')
-                <a href="{{ route('uks.create') }}"
-                   class="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary/90">
-                    <i data-lucide="plus" class="w-4 h-4"></i> Catat Kunjungan
+                <a href="{{ route('uks.create') }}" class="btn btn-primary">
+                    <x-icon name="plus" class="h-4 w-4" /> Catat Kunjungan
                 </a>
             @endcan
         </div>
     </div>
 
-    <div class="rounded-xl border border-slate-200 bg-white dark:bg-boxdark dark:border-slate-700 overflow-hidden">
-        <table class="w-full text-sm">
-            <thead>
-                <tr class="bg-slate-50 dark:bg-slate-800 text-left">
-                    <th class="px-4 py-2.5 font-semibold text-slate-600 dark:text-slate-300">Waktu</th>
-                    <th class="px-4 py-2.5 font-semibold text-slate-600 dark:text-slate-300">Siswa</th>
-                    <th class="px-4 py-2.5 font-semibold text-slate-600 dark:text-slate-300">Keluhan</th>
-                    <th class="px-4 py-2.5 font-semibold text-slate-600 dark:text-slate-300">Rujukan</th>
-                    <th class="px-4 py-2.5"></th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse ($items as $item)
-                    <tr class="border-t border-slate-100 dark:border-slate-700">
-                        <td class="px-4 py-2.5 text-slate-600 dark:text-slate-300">{{ $item->tgl->format('d M Y H:i') }}</td>
-                        <td class="px-4 py-2.5 font-semibold text-slate-800 dark:text-white">{{ $item->student->nama }}</td>
-                        <td class="px-4 py-2.5 text-slate-600 dark:text-slate-300">{{ \Illuminate\Support\Str::limit($item->keluhan, 60) }}</td>
-                        <td class="px-4 py-2.5">
-                            @if ($item->rujukan !== 'tidak')
-                                <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-danger/10 text-danger">{{ \App\Models\HealthVisit::RUJUKAN[$item->rujukan] }}</span>
-                            @else
-                                <span class="text-xs text-slate-400">—</span>
-                            @endif
-                        </td>
-                        <td class="px-4 py-2.5 text-right">
-                            @can('uks.update')
-                                <a href="{{ route('uks.edit', $item) }}" class="text-xs font-semibold text-primary hover:underline">Ubah</a>
-                            @endcan
-                        </td>
+    <div class="table-toolbar management-toolbar">
+        <div class="toolbar-left management-filter-group">
+            <label class="field-search management-search-field" for="kunjungan-search">
+                <x-icon name="search" class="h-4 w-4" /><span class="sr-only">Cari kunjungan</span>
+                <input id="kunjungan-search" type="search" wire:model.live.debounce.300ms="search" placeholder="Cari nama siswa…" autocomplete="off">
+                <span wire:loading wire:target="search" class="management-inline-spinner" aria-hidden="true"></span>
+            </label>
+            <label class="management-filter-field" for="kunjungan-rujukan"><span class="sr-only">Filter rujukan</span>
+                <select id="kunjungan-rujukan" wire:model.live="rujukan" class="select-field">
+                    <option value="">Semua</option>
+                    @foreach (\App\Models\HealthVisit::RUJUKAN as $key => $label)
+                        <option value="{{ $key }}">{{ $label }}</option>
+                    @endforeach
+                </select>
+            </label>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="table-scroll">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th scope="col">Waktu</th>
+                        <th scope="col">Siswa</th>
+                        <th scope="col">Keluhan</th>
+                        <th scope="col">Rujukan</th>
+                        <th scope="col"></th>
                     </tr>
-                @empty
-                    <tr><td colspan="5" class="px-4 py-8 text-center text-slate-500">Belum ada kunjungan.</td></tr>
-                @endforelse
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @forelse ($items as $item)
+                        <tr wire:key="kunjungan-{{ $item->id }}">
+                            <td class="text-slate-600 dark:text-slate-300">{{ $item->tgl->format('d M Y H:i') }}</td>
+                            <td class="font-semibold">{{ $item->student->nama }}</td>
+                            <td class="text-slate-600 dark:text-slate-300">{{ \Illuminate\Support\Str::limit($item->keluhan, 60) }}</td>
+                            <td>
+                                @if ($item->rujukan !== 'tidak')
+                                    <span class="badge badge-red">{{ \App\Models\HealthVisit::RUJUKAN[$item->rujukan] }}</span>
+                                @else
+                                    <span class="text-xs text-slate-400">—</span>
+                                @endif
+                            </td>
+                            <td class="text-right">
+                                @can('uks.update')
+                                    <a href="{{ route('uks.edit', $item) }}" class="text-xs font-semibold text-primary hover:underline">Ubah</a>
+                                @endcan
+                            </td>
+                        </tr>
+                    @empty
+                        <tr><td colspan="5" class="py-8 text-center text-slate-500">Belum ada kunjungan.</td></tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <div class="mt-5">{{ $items->links() }}</div>

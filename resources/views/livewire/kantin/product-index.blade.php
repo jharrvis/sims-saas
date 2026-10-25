@@ -1,75 +1,98 @@
-<div>
-    @if (session('ok'))
-        <div class="mb-4 rounded-lg bg-success/10 text-success px-4 py-2.5 text-sm">{{ session('ok') }}</div>
-    @endif
-
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
-        <div class="flex items-center gap-2">
-            <div class="relative">
-                <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
-                <input type="search" wire:model.live.debounce.300ms="search" placeholder="Cari produk…"
-                       aria-label="Cari produk"
-                       class="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-boxdark py-2.5 pl-10 pr-4 text-sm outline-none focus:border-primary dark:text-white">
-            </div>
+<div class="page-stack">
+    <div class="page-header management-page-header">
+        <div>
+            <span class="eyebrow">Operasional / Kantin</span>
+            <h2 class="management-page-title">Produk Kantin</h2>
+            <p>Produk yang dijual di kasir beserta harga dan stoknya.</p>
+        </div>
+        <div class="page-actions">
             @can('kantin.kasir')
-                <a href="{{ route('kantin.kasir') }}"
-                   class="inline-flex items-center gap-2 rounded-lg border border-slate-200 dark:border-slate-700 px-4 py-2.5 text-sm font-semibold text-slate-600 dark:text-slate-300 hover:border-primary hover:text-primary">
-                    <i data-lucide="shopping-cart" class="w-4 h-4"></i> Kasir
+                <a href="{{ route('kantin.kasir') }}" class="btn btn-outline">
+                    <x-icon name="shopping-cart" class="h-4 w-4" /> Kasir
                 </a>
-                <a href="{{ route('kantin.transaksi') }}"
-                   class="inline-flex items-center gap-2 rounded-lg border border-slate-200 dark:border-slate-700 px-4 py-2.5 text-sm font-semibold text-slate-600 dark:text-slate-300 hover:border-primary hover:text-primary">
-                    <i data-lucide="receipt" class="w-4 h-4"></i> Riwayat
+                <a href="{{ route('kantin.transaksi') }}" class="btn btn-outline">
+                    <x-icon name="receipt" class="h-4 w-4" /> Riwayat
                 </a>
             @endcan
+            @can('kantin.produk')
+                <button wire:click="$set('showForm', true)" class="btn btn-primary">
+                    <x-icon name="plus" class="h-4 w-4" /> Tambah Produk
+                </button>
+            @endcan
         </div>
-        @can('kantin.produk')
-            <button wire:click="$set('showForm', true)" class="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary/90">
-                <i data-lucide="plus" class="w-4 h-4"></i> Tambah Produk
-            </button>
-        @endcan
+    </div>
+
+    @if (session('ok'))
+        <div class="management-alert management-alert-success" role="status" aria-live="polite">
+            <span>{{ session('ok') }}</span>
+        </div>
+    @endif
+
+    <div class="table-toolbar management-toolbar">
+        <div class="toolbar-left management-filter-group">
+            <label class="field-search management-search-field" for="produk-search">
+                <x-icon name="search" class="h-4 w-4" /><span class="sr-only">Cari produk</span>
+                <input id="produk-search" type="search" wire:model.live.debounce.300ms="search" placeholder="Cari produk…" autocomplete="off">
+                <span wire:loading wire:target="search" class="management-inline-spinner" aria-hidden="true"></span>
+            </label>
+        </div>
     </div>
 
     @if ($showForm)
         @can('kantin.produk')
-            <form wire:submit="save" class="rounded-xl border border-slate-200 bg-white dark:bg-boxdark dark:border-slate-700 p-5 mb-5 grid sm:grid-cols-4 gap-4">
-                <div>
-                    <label class="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1.5">Nama <span class="text-danger">*</span></label>
-                    <input type="text" wire:model="nama" maxlength="150"
-                           class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 py-2.5 px-3.5 text-sm outline-none focus:border-primary dark:text-white">
-                    @error('nama') <p class="text-xs text-danger mt-1">{{ $message }}</p> @enderror
+            <section class="card management-form-card" aria-labelledby="produk-form-title">
+                <div class="card-head">
+                    <div class="card-title">
+                        <span class="mini-icon blue"><x-icon name="store" class="h-[19px] w-[19px]" /></span>
+                        <div>
+                            <h3 id="produk-form-title">Tambah / Ubah Produk</h3>
+                            <p>Harga dan stok tampil di kasir setelah disimpan.</p>
+                        </div>
+                    </div>
                 </div>
-                <div>
-                    <label class="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1.5">Kategori</label>
-                    <input type="text" wire:model="kategori" maxlength="100"
-                           class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 py-2.5 px-3.5 text-sm outline-none focus:border-primary dark:text-white">
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1.5">Harga (Rp)</label>
-                    <input type="number" wire:model="harga" min="0"
-                           class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 py-2.5 px-3.5 text-sm outline-none focus:border-primary dark:text-white">
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1.5">Stok</label>
-                    <input type="number" wire:model="stok" min="0"
-                           class="w-full rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800 py-2.5 px-3.5 text-sm outline-none focus:border-primary dark:text-white">
-                </div>
-                <div class="sm:col-span-4 flex items-center gap-3">
-                    <button type="submit" class="rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary/90">Simpan</button>
-                    <button type="button" wire:click="$set('showForm', false)" class="text-sm text-slate-500 hover:text-primary">Batal</button>
-                </div>
-            </form>
+
+                <form wire:submit="save" class="form-grid management-form-grid">
+                    <div class="form-group">
+                        <label for="produk-nama">Nama <span class="required">*</span></label>
+                        <input id="produk-nama" type="text" wire:model="nama" maxlength="150" class="field">
+                        @error('nama') <p class="management-field-error" role="alert">{{ $message }}</p> @enderror
+                    </div>
+                    <div class="form-group">
+                        <label for="produk-kategori">Kategori</label>
+                        <input id="produk-kategori" type="text" wire:model="kategori" maxlength="100" class="field">
+                        @error('kategori') <p class="management-field-error" role="alert">{{ $message }}</p> @enderror
+                    </div>
+                    <div class="form-group">
+                        <label for="produk-harga">Harga (Rp)</label>
+                        <input id="produk-harga" type="number" wire:model="harga" min="0" class="field">
+                        @error('harga') <p class="management-field-error" role="alert">{{ $message }}</p> @enderror
+                    </div>
+                    <div class="form-group">
+                        <label for="produk-stok">Stok</label>
+                        <input id="produk-stok" type="number" wire:model="stok" min="0" class="field">
+                        @error('stok') <p class="management-field-error" role="alert">{{ $message }}</p> @enderror
+                    </div>
+                    <div class="form-actions management-field-span">
+                        <button type="submit" class="btn btn-primary" wire:loading.attr="disabled" wire:target="save">
+                            <span wire:loading.remove wire:target="save">Simpan</span>
+                            <span wire:loading wire:target="save">Menyimpan...</span>
+                        </button>
+                        <button type="button" wire:click="$set('showForm', false)" class="btn btn-outline">Batal</button>
+                    </div>
+                </form>
+            </section>
         @endcan
     @endif
 
     <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
         @forelse ($items as $item)
-            <div class="rounded-xl border border-slate-200 bg-white dark:bg-boxdark dark:border-slate-700 p-4 {{ $item->aktif ? '' : 'opacity-60' }}">
+            <article class="card {{ $item->aktif ? '' : 'opacity-60' }}" wire:key="produk-{{ $item->id }}">
                 <div class="flex items-start justify-between gap-2">
                     <div>
-                        <h3 class="font-semibold text-slate-800 dark:text-white">{{ $item->nama }}</h3>
+                        <h3 class="font-semibold">{{ $item->nama }}</h3>
                         <p class="text-xs text-slate-500 mt-0.5">Rp {{ number_format((float) $item->harga, 0, ',', '.') }}@if($item->kategori) · {{ $item->kategori }}@endif</p>
                     </div>
-                    <span class="shrink-0 text-sm font-bold px-2.5 py-1 rounded-lg {{ $item->stok <= 0 ? 'bg-danger/10 text-danger' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300' }}">
+                    <span class="badge shrink-0 {{ $item->stok <= 0 ? 'badge-red' : 'badge-gray' }}">
                         {{ $item->stok }}
                     </span>
                 </div>
@@ -81,10 +104,10 @@
                         </button>
                     </div>
                 @endcan
-            </div>
+            </article>
         @empty
-            <div class="col-span-full rounded-xl border border-dashed border-slate-300 dark:border-slate-600 p-10 text-center text-sm text-slate-500">
-                Belum ada produk.
+            <div class="empty-state col-span-full">
+                <p>Belum ada produk.</p>
             </div>
         @endforelse
     </div>

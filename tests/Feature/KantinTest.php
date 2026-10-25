@@ -2,6 +2,9 @@
 
 declare(strict_types=1);
 
+use App\Livewire\Kantin\Kasir;
+use App\Livewire\Kantin\ProductIndex;
+use App\Livewire\Kantin\TransactionIndex;
 use App\Models\CanteenProduct;
 use App\Models\CanteenTransaction;
 use App\Models\Membership;
@@ -13,6 +16,7 @@ use App\Tenancy\TenantContext;
 use Database\Seeders\ModuleSeeder;
 use Database\Seeders\PermissionSeeder;
 use Database\Seeders\RoleSeeder;
+use Livewire\Livewire;
 use Spatie\Permission\PermissionRegistrar;
 
 beforeEach(function (): void {
@@ -96,4 +100,22 @@ it('produk kantin terisolasi per sekolah', function (): void {
 
     expect(CanteenProduct::count())->toBe(0)
         ->and(CanteenTransaction::count())->toBe(0);
+});
+
+it('kasir, produk, dan transaksi kantin memakai design system', function (): void {
+    Livewire::actingAs($this->admin)->test(Kasir::class)
+        ->assertSee('Kasir')
+        ->assertSee('management-page-header')
+        ->assertSee('Keranjang')
+        ->assertDontSee('<i data-lucide');
+
+    Livewire::actingAs($this->admin)->test(ProductIndex::class)
+        ->assertSee('Produk Kantin')
+        ->assertSee('management-page-header')
+        ->assertDontSee('<i data-lucide');
+
+    Livewire::actingAs($this->admin)->test(TransactionIndex::class)
+        ->assertSee('Riwayat Transaksi')
+        ->assertSee('data-table')
+        ->assertDontSee('<i data-lucide');
 });
