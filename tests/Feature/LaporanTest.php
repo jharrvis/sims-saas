@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Domains\Laporan\Services\ReportService;
+use App\Livewire\Laporan\ReportIndex;
 use App\Models\AcademicYear;
 use App\Models\Attendance;
 use App\Models\Employee;
@@ -15,6 +16,7 @@ use App\Tenancy\TenantContext;
 use Database\Seeders\ModuleSeeder;
 use Database\Seeders\PermissionSeeder;
 use Database\Seeders\RoleSeeder;
+use Livewire\Livewire;
 use Spatie\Permission\PermissionRegistrar;
 
 beforeEach(function (): void {
@@ -115,4 +117,11 @@ it('API laporan mengembalikan kolom dan baris', function (): void {
     $this->actingAs($this->admin)->getJson('/api/v1/laporan?type=siswa')
         ->assertOk()
         ->assertJsonPath('columns.0', 'NIS');
+});
+
+it('laporan memakai struktur design system management (Batch 6)', function (): void {
+    Livewire::actingAs($this->admin)->test(ReportIndex::class)
+        ->assertSee('Filter Laporan')
+        ->assertSeeHtml('management-page-header')
+        ->assertDontSee('<i data-lucide');
 });

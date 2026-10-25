@@ -1,14 +1,33 @@
-<div>
+<div class="page-stack">
+    <div class="page-header management-page-header">
+        <div>
+            <span class="eyebrow">Informasi &amp; Sistem / Laporan</span>
+            <h2 class="management-page-title">Laporan</h2>
+            <p>Pilih jenis laporan dan filter, lalu tampilkan atau ekspor ke CSV.</p>
+        </div>
+    </div>
+
     @if (session('ok'))
-        <div class="mb-4 rounded-lg bg-success/10 text-success px-4 py-2.5 text-sm">{{ session('ok') }}</div>
+        <div class="management-alert management-alert-success" role="status" aria-live="polite">
+            <span>{{ session('ok') }}</span>
+        </div>
     @endif
 
-    <div class="rounded-xl border border-slate-200 bg-white dark:bg-boxdark dark:border-slate-700 p-5 mb-5">
-        <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div>
-                <label for="type" class="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1.5">Jenis Laporan</label>
-                <select id="type" wire:model.live="type"
-                        class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 py-2.5 px-3 text-sm outline-none focus:border-primary dark:text-white">
+    <section class="card management-form-card" aria-labelledby="laporan-filter-title">
+        <div class="card-head">
+            <div class="card-title">
+                <span class="mini-icon blue"><x-icon name="file-text" class="h-[19px] w-[19px]" /></span>
+                <div>
+                    <h3 id="laporan-filter-title">Filter Laporan</h3>
+                    <p>Filter berubah mengikuti jenis laporan yang dipilih.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-grid management-form-grid">
+            <div class="form-group">
+                <label for="type">Jenis Laporan</label>
+                <select id="type" wire:model.live="type" class="select-field">
                     @foreach ($types as $key => $label)
                         <option value="{{ $key }}">{{ $label }}</option>
                     @endforeach
@@ -16,18 +35,16 @@
             </div>
 
             @if (in_array($type, ['siswa', 'guru']))
-                <div>
-                    <label for="q" class="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1.5">Cari nama</label>
-                    <input id="q" type="search" wire:model="q" placeholder="Nama…"
-                           class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 py-2.5 px-3.5 text-sm outline-none focus:border-primary dark:text-white">
+                <div class="form-group">
+                    <label for="q">Cari nama</label>
+                    <input id="q" type="search" wire:model="q" placeholder="Nama…" class="field">
                 </div>
             @endif
 
             @if ($type === 'siswa')
-                <div>
-                    <label for="status" class="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1.5">Status</label>
-                    <select id="status" wire:model="status"
-                            class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 py-2.5 px-3 text-sm outline-none focus:border-primary dark:text-white">
+                <div class="form-group">
+                    <label for="status">Status</label>
+                    <select id="status" wire:model="status" class="select-field">
                         <option value="">Semua</option>
                         <option value="aktif">Aktif</option>
                         <option value="nonaktif">Nonaktif</option>
@@ -38,23 +55,20 @@
             @endif
 
             @if (in_array($type, ['mutasi', 'absensi']))
-                <div>
-                    <label for="dari" class="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1.5">Dari tanggal</label>
-                    <input id="dari" type="date" wire:model="dari"
-                           class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 py-2.5 px-3.5 text-sm outline-none focus:border-primary dark:text-white">
+                <div class="form-group">
+                    <label for="dari">Dari tanggal</label>
+                    <input id="dari" type="date" wire:model="dari" class="field">
                 </div>
-                <div>
-                    <label for="sampai" class="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1.5">Sampai tanggal</label>
-                    <input id="sampai" type="date" wire:model="sampai"
-                           class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 py-2.5 px-3.5 text-sm outline-none focus:border-primary dark:text-white">
+                <div class="form-group">
+                    <label for="sampai">Sampai tanggal</label>
+                    <input id="sampai" type="date" wire:model="sampai" class="field">
                 </div>
             @endif
 
             @if ($type === 'nilai')
-                <div>
-                    <label for="semester" class="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1.5">Semester</label>
-                    <select id="semester" wire:model="semesterId"
-                            class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 py-2.5 px-3 text-sm outline-none focus:border-primary dark:text-white">
+                <div class="form-group">
+                    <label for="semester">Semester</label>
+                    <select id="semester" wire:model="semesterId" class="select-field">
                         <option value="">Semua</option>
                         @foreach ($semesters as $s)
                             <option value="{{ $s->id }}">{{ $s->nama }}</option>
@@ -64,49 +78,49 @@
             @endif
         </div>
 
-        <div class="flex flex-wrap items-center gap-3 mt-4">
-            <button wire:click="generate" class="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary/90">
-                <i data-lucide="bar-chart-3" class="w-4 h-4"></i> Tampilkan
+        <div class="flex flex-wrap items-center gap-3 mt-5">
+            <button wire:click="generate" class="btn btn-primary">
+                <x-icon name="bar-chart-3" class="h-4 w-4" /> Tampilkan
             </button>
             @can('laporan.export')
-                <button wire:click="export" class="inline-flex items-center gap-2 rounded-lg border border-slate-200 dark:border-slate-700 px-4 py-2.5 text-sm font-semibold text-slate-600 dark:text-slate-300 hover:border-primary hover:text-primary">
-                    <i data-lucide="download" class="w-4 h-4"></i> Ekspor CSV
+                <button wire:click="export" class="btn btn-outline">
+                    <x-icon name="download" class="h-4 w-4" /> Ekspor CSV
                 </button>
             @endcan
             <a href="{{ route('bantuan.show', 'laporan') }}" class="ml-auto text-xs text-slate-400 hover:text-primary inline-flex items-center gap-1">
-                <i data-lucide="circle-help" class="w-3.5 h-3.5"></i> Bantuan
+                <x-icon name="circle-help" class="h-4 w-4" /> Bantuan
             </a>
         </div>
-    </div>
+    </section>
 
     @if ($report)
-        <div class="rounded-xl border border-slate-200 bg-white dark:bg-boxdark dark:border-slate-700 overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="w-full text-sm">
+        <div class="card">
+            <div class="table-scroll">
+                <table class="data-table">
                     <thead>
-                        <tr class="bg-slate-50 dark:bg-slate-800 text-left">
+                        <tr>
                             @foreach ($report['columns'] as $col)
-                                <th class="px-4 py-2.5 font-semibold text-slate-600 dark:text-slate-300 whitespace-nowrap">{{ $col }}</th>
+                                <th scope="col">{{ $col }}</th>
                             @endforeach
                         </tr>
                     </thead>
                     <tbody>
                         @forelse ($report['rows'] as $row)
-                            <tr class="border-t border-slate-100 dark:border-slate-700">
+                            <tr wire:key="laporan-{{ $loop->index }}">
                                 @foreach ($row as $cell)
-                                    <td class="px-4 py-2.5 text-slate-600 dark:text-slate-300 whitespace-nowrap">{{ $cell }}</td>
+                                    <td>{{ $cell }}</td>
                                 @endforeach
                             </tr>
                         @empty
-                            <tr><td colspan="{{ count($report['columns']) }}" class="px-4 py-8 text-center text-slate-500">Tidak ada data untuk filter ini.</td></tr>
+                            <tr><td colspan="{{ count($report['columns']) }}" class="py-8 text-center text-slate-500">Tidak ada data untuk filter ini.</td></tr>
                         @endforelse
                     </tbody>
                 </table>
             </div>
         </div>
     @else
-        <div class="rounded-xl border border-dashed border-slate-300 dark:border-slate-600 p-10 text-center text-sm text-slate-500">
-            Pilih jenis laporan lalu klik <strong>Tampilkan</strong>.
+        <div class="empty-state">
+            <p>Pilih jenis laporan lalu klik <strong>Tampilkan</strong>.</p>
         </div>
     @endif
 </div>

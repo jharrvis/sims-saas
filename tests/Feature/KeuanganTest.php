@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Domains\Keuangan\Services\KeuanganService;
+use App\Livewire\Keuangan\InvoiceIndex;
 use App\Models\FeeType;
 use App\Models\Invoice;
 use App\Models\Membership;
@@ -16,6 +17,7 @@ use App\Tenancy\TenantContext;
 use Database\Seeders\ModuleSeeder;
 use Database\Seeders\PermissionSeeder;
 use Database\Seeders\RoleSeeder;
+use Livewire\Livewire;
 use Spatie\Permission\PermissionRegistrar;
 
 beforeEach(function (): void {
@@ -131,4 +133,12 @@ it('ringkasan dan tunggakan terhitung benar', function (): void {
     $this->actingAs($this->admin)->getJson('/api/v1/keuangan/laporan/tunggakan')
         ->assertOk()
         ->assertJsonPath('total', 1);
+});
+
+it('daftar tagihan memakai struktur design system management (Batch 6)', function (): void {
+    Livewire::actingAs($this->admin)->test(InvoiceIndex::class)
+        ->assertSee('Daftar Tagihan')
+        ->assertSeeHtml('management-page-header')
+        ->assertSee('Belum Lunas')
+        ->assertDontSee('<i data-lucide');
 });

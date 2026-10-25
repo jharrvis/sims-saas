@@ -1,96 +1,110 @@
-<div>
-    @if (session('generated'))
-        <div class="mb-4 rounded-lg bg-success/10 text-success px-4 py-2.5 text-sm">{{ session('generated') }}</div>
-    @endif
-
-    <div class="grid sm:grid-cols-4 gap-4 mb-5">
-        @php
-            $cards = [
-                ['Total Tagihan', $summary['total_tagihan']],
-                ['Terkumpul', $summary['terkumpul']],
-                ['Tunggakan', $summary['tunggakan']],
-            ];
-        @endphp
-        @foreach ($cards as [$label, $nilai])
-            <div class="rounded-xl border border-slate-200 bg-white dark:bg-boxdark dark:border-slate-700 p-4">
-                <p class="text-xs text-slate-500">{{ $label }}</p>
-                <p class="text-lg font-bold text-slate-800 dark:text-white mt-1">Rp {{ number_format($nilai, 0, ',', '.') }}</p>
-            </div>
-        @endforeach
-        <div class="rounded-xl border border-danger/30 bg-red-50 dark:bg-red-900/20 p-4">
-            <p class="text-xs text-slate-500">Belum Lunas</p>
-            <p class="text-lg font-bold text-danger mt-1">{{ $summary['jumlah_unpaid'] }} tagihan</p>
+<div class="page-stack">
+    <div class="page-header management-page-header">
+        <div>
+            <span class="eyebrow">Keuangan / Tagihan</span>
+            <h2 class="management-page-title">Daftar Tagihan</h2>
+            <p>Ringkasan dan daftar tagihan siswa, termasuk tunggakan dan tagihan yang belum lunas.</p>
         </div>
     </div>
 
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
-        <div class="flex items-center gap-2">
-            <div class="relative">
-                <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
-                <input type="search" wire:model.live.debounce.300ms="search" placeholder="Cari siswa…"
-                       aria-label="Cari tagihan"
-                       class="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-boxdark py-2.5 pl-10 pr-4 text-sm outline-none focus:border-primary dark:text-white">
-            </div>
-            <select wire:model.live="status" aria-label="Filter status"
-                    class="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-boxdark py-2.5 px-3 text-sm outline-none focus:border-primary dark:text-white">
-                <option value="">Semua status</option>
-                @foreach (\App\Models\Invoice::STATUS as $key => $label)
-                    <option value="{{ $key }}">{{ $label }}</option>
-                @endforeach
-            </select>
+    @if (session('generated'))
+        <div class="management-alert management-alert-success" role="status" aria-live="polite">
+            <span>{{ session('generated') }}</span>
         </div>
-        @can('keuangan.tagihan.generate')
-            <form wire:submit="generate" class="flex items-center gap-2">
-                <select wire:model="feeTypeId" aria-label="Jenis tagihan" required
-                        class="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-boxdark py-2.5 px-3 text-sm dark:text-white">
-                    <option value="">— Jenis —</option>
-                    @foreach ($feeTypes as $f)
-                        <option value="{{ $f->id }}">{{ $f->nama }} — Rp {{ number_format($f->nominal, 0, ',', '.') }}</option>
+    @endif
+
+    <div class="stats-grid management-summary-stats">
+        <article class="card stat-card">
+            <div class="stat-top"><span class="mini-icon blue"><x-icon name="wallet" class="h-5 w-5" /></span><span class="badge badge-blue">Tagihan</span></div>
+            <div class="stat-value">Rp {{ number_format($summary['total_tagihan'], 0, ',', '.') }}</div>
+            <div class="stat-caption">Total Tagihan</div>
+        </article>
+        <article class="card stat-card">
+            <div class="stat-top"><span class="mini-icon green"><x-icon name="check-circle" class="h-5 w-5" /></span><span class="badge badge-green">Masuk</span></div>
+            <div class="stat-value">Rp {{ number_format($summary['terkumpul'], 0, ',', '.') }}</div>
+            <div class="stat-caption">Terkumpul</div>
+        </article>
+        <article class="card stat-card">
+            <div class="stat-top"><span class="mini-icon orange"><x-icon name="clock" class="h-5 w-5" /></span><span class="badge badge-orange">Sisa</span></div>
+            <div class="stat-value">Rp {{ number_format($summary['tunggakan'], 0, ',', '.') }}</div>
+            <div class="stat-caption">Tunggakan</div>
+        </article>
+        <article class="card stat-card">
+            <div class="stat-top"><span class="mini-icon red"><x-icon name="alert-triangle" class="h-5 w-5" /></span><span class="badge badge-red">Perhatian</span></div>
+            <div class="stat-value">{{ $summary['jumlah_unpaid'] }} tagihan</div>
+            <div class="stat-caption">Belum Lunas</div>
+        </article>
+    </div>
+
+    <div class="table-toolbar management-toolbar">
+        <div class="toolbar-left management-filter-group">
+            <label class="field-search management-search-field" for="tagihan-search">
+                <x-icon name="search" class="h-4 w-4" /><span class="sr-only">Cari tagihan</span>
+                <input id="tagihan-search" type="search" wire:model.live.debounce.300ms="search" placeholder="Cari siswa…" autocomplete="off">
+                <span wire:loading wire:target="search" class="management-inline-spinner" aria-hidden="true"></span>
+            </label>
+            <label class="management-filter-field" for="tagihan-status"><span class="sr-only">Filter status</span>
+                <select id="tagihan-status" wire:model.live="status" class="select-field">
+                    <option value="">Semua status</option>
+                    @foreach (\App\Models\Invoice::STATUS as $key => $label)
+                        <option value="{{ $key }}">{{ $label }}</option>
                     @endforeach
                 </select>
+            </label>
+        </div>
+        @can('keuangan.tagihan.generate')
+            <form wire:submit="generate" class="toolbar-right management-directory-actions">
+                <label class="management-filter-field" for="tagihan-jenis"><span class="sr-only">Jenis tagihan</span>
+                    <select id="tagihan-jenis" wire:model="feeTypeId" required class="select-field">
+                        <option value="">— Jenis —</option>
+                        @foreach ($feeTypes as $f)
+                            <option value="{{ $f->id }}">{{ $f->nama }} — Rp {{ number_format($f->nominal, 0, ',', '.') }}</option>
+                        @endforeach
+                    </select>
+                </label>
                 <input type="text" wire:model="periodeLabel" placeholder="Periode (2026-07)" required aria-label="Periode"
-                       class="w-36 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-boxdark py-2.5 px-3 text-sm dark:text-white">
-                <button type="submit" class="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700">
-                    <i data-lucide="plus" class="w-4 h-4"></i> Generate
+                       class="field w-36">
+                <button type="submit" class="btn btn-primary">
+                    <x-icon name="plus" class="h-4 w-4" /> Generate
                 </button>
             </form>
         @endcan
     </div>
 
-    <div class="rounded-xl border border-slate-200 bg-white shadow-sm dark:bg-boxdark dark:border-slate-700 overflow-hidden">
-        <div class="overflow-x-auto">
-            <table class="w-full">
+    <div class="card">
+        <div class="table-scroll">
+            <table class="data-table">
                 <thead>
-                    <tr class="border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
-                        <th class="py-3 px-5 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">No. Invoice</th>
-                        <th class="py-3 px-5 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Siswa</th>
-                        <th class="py-3 px-5 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Periode</th>
-                        <th class="py-3 px-5 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Nominal</th>
-                        <th class="py-3 px-5 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Sisa</th>
-                        <th class="py-3 px-5 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Status</th>
-                        <th class="py-3 px-5 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Aksi</th>
+                    <tr>
+                        <th scope="col">No. Invoice</th>
+                        <th scope="col">Siswa</th>
+                        <th scope="col">Periode</th>
+                        <th scope="col" class="text-right">Nominal</th>
+                        <th scope="col" class="text-right">Sisa</th>
+                        <th scope="col">Status</th>
+                        <th scope="col" class="text-right">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse ($invoices as $inv)
-                        <tr class="border-b border-slate-100 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-800/30">
-                            <td class="py-3 px-5 font-mono text-xs">{{ $inv->no_invoice }}</td>
-                            <td class="py-3 px-5">
-                                <div class="font-medium text-sm text-slate-800 dark:text-white">{{ $inv->student->nama }}</div>
+                        <tr wire:key="invoice-{{ $inv->id }}">
+                            <td class="font-mono text-xs">{{ $inv->no_invoice }}</td>
+                            <td>
+                                <div class="font-medium">{{ $inv->student->nama }}</div>
                                 <div class="text-xs text-slate-500">{{ $inv->feeType->nama }}</div>
                             </td>
-                            <td class="py-3 px-5 text-sm">{{ $inv->periode_label }}</td>
-                            <td class="py-3 px-5 text-right text-sm">Rp {{ number_format($inv->nominal, 0, ',', '.') }}</td>
-                            <td class="py-3 px-5 text-right text-sm font-semibold {{ $inv->sisa() > 0 ? 'text-danger' : 'text-success' }}">
+                            <td>{{ $inv->periode_label }}</td>
+                            <td class="text-right">Rp {{ number_format($inv->nominal, 0, ',', '.') }}</td>
+                            <td class="text-right font-semibold {{ $inv->sisa() > 0 ? 'text-danger' : 'text-success' }}">
                                 Rp {{ number_format($inv->sisa(), 0, ',', '.') }}
                             </td>
-                            <td class="py-3 px-5">
-                                <span class="inline-flex px-2.5 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary">
+                            <td>
+                                <span class="badge badge-blue">
                                     {{ $inv->labelStatus() }}
                                 </span>
                             </td>
-                            <td class="py-3 px-5 text-right">
-                                <a href="{{ route('keuangan.show', $inv) }}" class="inline-flex px-3 py-1.5 rounded-lg text-xs font-medium bg-primary/10 text-primary hover:bg-primary/20">
+                            <td class="text-right">
+                                <a href="{{ route('keuangan.show', $inv) }}" class="btn btn-sm btn-outline">
                                     Bayar
                                 </a>
                             </td>
