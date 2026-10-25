@@ -66,6 +66,22 @@ class StudentIndex extends Component
         $this->resetSelection();
     }
 
+    /**
+     * Pembaruan properti langsung (mis. ->set('showTrashed', true)) tidak
+     * melewati toggleTrashed(), jadi otorisasi harus ditegakkan di sini:
+     * membuka tampilan sampah membutuhkan permission siswa.delete.
+     * Menutup sampah (false) tidak membutuhkan permission.
+     */
+    public function updatingShowTrashed(bool $value): void
+    {
+        if ($value) {
+            $this->authorize('siswa.delete');
+            $this->resetPage();
+            $this->resetSelection();
+            $this->bulkAksi = '';
+        }
+    }
+
     public function updatedSelectAll(): void
     {
         $this->selected = $this->selectAll ? $this->pageIds : [];
@@ -283,6 +299,12 @@ class StudentIndex extends Component
 
     public function render(): View
     {
+        // Pertahanan lapis kedua: state sampah tidak boleh dirender untuk
+        // pengguna tanpa permission delete, apa pun jalurnya sampai ke sini.
+        if ($this->showTrashed && ! auth()->user()?->can('siswa.delete')) {
+            abort(403);
+        }
+
         $tahunAktifId = AcademicYear::where('aktif', true)->value('id');
 
         $students = Student::query()

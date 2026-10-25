@@ -118,6 +118,29 @@ it('pengguna view-only tidak dapat membuka sampah melalui aksi langsung', functi
         ->assertForbidden();
 });
 
+it('pembaruan properti showTrashed langsung menolak pengguna view-only', function (): void {
+    Livewire::actingAs($this->viewer)
+        ->test(StudentIndex::class)
+        ->set('showTrashed', true)
+        ->assertForbidden();
+});
+
+it('data terhapus tidak terlihat bagi view-only, terlihat bagi pemegang delete di mode sampah', function (): void {
+    Student::where('nama', 'Siswa A1')->firstOrFail()->delete();
+
+    Livewire::actingAs($this->viewer)
+        ->test(StudentIndex::class)
+        ->assertSee('Siswa A2')
+        ->assertDontSee('Siswa A1');
+
+    Livewire::actingAs($this->admin)
+        ->test(StudentIndex::class)
+        ->call('toggleTrashed')
+        ->assertSet('showTrashed', true)
+        ->assertSee('Siswa A1')
+        ->assertDontSee('Siswa A2');
+});
+
 it('pengguna view-only hanya melihat aksi massal export', function (): void {
     Livewire::actingAs($this->viewer)
         ->test(StudentIndex::class)

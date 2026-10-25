@@ -142,6 +142,29 @@ it('membuka mode sampah langsung menolak pengguna view-only', function (): void 
         ->assertForbidden();
 });
 
+it('pembaruan properti showTrashed langsung menolak pengguna view-only', function (): void {
+    Livewire::actingAs($this->viewer)
+        ->test(EmployeeIndex::class)
+        ->set('showTrashed', true)
+        ->assertForbidden();
+});
+
+it('data terhapus tidak terlihat bagi view-only, terlihat bagi pemegang delete di mode sampah', function (): void {
+    $this->guruSatu->delete();
+
+    Livewire::actingAs($this->viewer)
+        ->test(EmployeeIndex::class)
+        ->assertSee('Pegawai Dua')
+        ->assertDontSee('Guru Satu');
+
+    Livewire::actingAs($this->admin)
+        ->test(EmployeeIndex::class)
+        ->call('toggleTrashed')
+        ->assertSet('showTrashed', true)
+        ->assertSee('Guru Satu')
+        ->assertDontSee('Pegawai Dua');
+});
+
 it('aksi simpan form baru menolak pengguna tanpa permission guru.create', function (): void {
     Livewire::actingAs($this->viewer)
         ->test(EmployeeForm::class)
@@ -233,13 +256,12 @@ it('daftar guru mengabaikan data milik sekolah lain', function (): void {
         ->assertSee('Guru Satu')
         ->assertDontSee('Guru Sekolah Lain');
 
-    try {
-        Livewire::actingAs($this->admin)
-            ->test(EmployeeIndex::class)
-            ->call('delete', $asing->id);
-    } catch (Throwable) {
-        // SchoolScope melempar 404: baris memang tidak terjangkau dari tenant ini.
-    }
+    // SchoolScope membuat baris tenant lain tidak terjangkau: delete harus
+    // menjawab 404 secara eksplisit, bukan lolos hijau karena exception lain.
+    Livewire::actingAs($this->admin)
+        ->test(EmployeeIndex::class)
+        ->call('delete', $asing->id)
+        ->assertNotFound();
 
     $masihAda = Employee::withoutGlobalScope(SchoolScope::class)
         ->withTrashed()

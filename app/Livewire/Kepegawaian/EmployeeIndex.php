@@ -51,6 +51,20 @@ class EmployeeIndex extends Component
         $this->resetPage();
     }
 
+    /**
+     * Pembaruan properti langsung (mis. ->set('showTrashed', true)) tidak
+     * melewati toggleTrashed(), jadi otorisasi harus ditegakkan di sini:
+     * membuka tampilan sampah membutuhkan permission guru.delete.
+     * Menutup sampah (false) tidak membutuhkan permission.
+     */
+    public function updatingShowTrashed(bool $value): void
+    {
+        if ($value) {
+            $this->authorize('guru.delete');
+            $this->resetPage();
+        }
+    }
+
     public function toggleTrashed(): void
     {
         $this->authorize('guru.delete');
@@ -106,6 +120,12 @@ class EmployeeIndex extends Component
 
     public function render(): View
     {
+        // Pertahanan lapis kedua: state sampah tidak boleh dirender untuk
+        // pengguna tanpa permission delete, apa pun jalurnya sampai ke sini.
+        if ($this->showTrashed && ! auth()->user()?->can('guru.delete')) {
+            abort(403);
+        }
+
         $employees = Employee::query()
             ->when($this->showTrashed, fn ($q) => $q->onlyTrashed())
             ->when($this->search !== '', fn ($q) => $q->where(function ($w): void {
