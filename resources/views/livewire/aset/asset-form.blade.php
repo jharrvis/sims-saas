@@ -1,73 +1,93 @@
-<div class="max-w-3xl">
-    <form wire:submit="save" class="rounded-xl border border-slate-200 bg-white dark:bg-boxdark dark:border-slate-700 p-5 sm:p-6 space-y-5">
-        <div class="grid sm:grid-cols-2 gap-4">
-            <div>
-                <label for="kode" class="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1.5">Kode <span class="text-danger">*</span></label>
-                <input id="kode" type="text" wire:model="kode" maxlength="50"
-                       class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 py-2.5 px-3.5 text-sm outline-none focus:border-primary dark:text-white">
-                @error('kode') <p class="text-xs text-danger mt-1">{{ $message }}</p> @enderror
-            </div>
-            <div>
-                <label for="nama" class="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1.5">Nama <span class="text-danger">*</span></label>
-                <input id="nama" type="text" wire:model="nama" maxlength="200"
-                       class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 py-2.5 px-3.5 text-sm outline-none focus:border-primary dark:text-white">
-                @error('nama') <p class="text-xs text-danger mt-1">{{ $message }}</p> @enderror
-            </div>
-            <div>
-                <label for="kategori" class="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1.5">Kategori</label>
-                <select id="kategori" wire:model="asset_category_id"
-                        class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 py-2.5 px-3 text-sm dark:text-white">
-                    <option value="">— Baru (isi di bawah) —</option>
-                    @foreach ($categories as $c)
-                        <option value="{{ $c->id }}">{{ $c->nama }}</option>
-                    @endforeach
-                </select>
-            </div>
-            <div>
-                <label for="kondisi" class="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1.5">Kondisi</label>
-                <select id="kondisi" wire:model="kondisi"
-                        class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 py-2.5 px-3 text-sm dark:text-white">
-                    @foreach (\App\Models\Asset::KONDISI as $key => $label)
-                        <option value="{{ $key }}">{{ $label }}</option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="sm:col-span-2 rounded-lg bg-slate-50 dark:bg-slate-800 p-3">
-                <p class="text-xs font-semibold text-slate-500 mb-2">Atau buat kategori baru:</p>
-                <div class="grid sm:grid-cols-2 gap-3">
-                    <input type="text" wire:model="new_kategori_kode" maxlength="30" placeholder="Kode kategori (mis. ELK)"
-                           class="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 py-2.5 px-3.5 text-sm outline-none focus:border-primary dark:text-white">
-                    <input type="text" wire:model="new_kategori_nama" maxlength="150" placeholder="Nama kategori (mis. Elektronik)"
-                           class="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 py-2.5 px-3.5 text-sm outline-none focus:border-primary dark:text-white">
+<div class="page-stack">
+    <div class="page-header management-page-header">
+        <div>
+            <a href="{{ route('aset.index') }}" class="management-back-link">
+                <x-icon name="arrow-left" class="h-4 w-4" /> Kembali ke Data Aset
+            </a>
+            <span class="eyebrow">Operasional / Inventaris</span>
+            <h2 class="management-page-title">{{ $isEdit ? 'Ubah Aset' : 'Tambah Aset' }}</h2>
+            <p>Data inventaris beserta kategori, lokasi, dan sumber dananya.</p>
+        </div>
+    </div>
+
+    <form wire:submit="save" class="management-form-stack">
+        <section class="card management-form-card" aria-labelledby="aset-form-title">
+            <div class="card-head">
+                <div class="card-title">
+                    <span class="mini-icon blue"><x-icon name="package" class="h-[19px] w-[19px]" /></span>
+                    <div>
+                        <h3 id="aset-form-title">Data Aset</h3>
+                        <p>Kode, nama, dan detail perolehan aset.</p>
+                    </div>
                 </div>
             </div>
-            <div>
-                <label for="lokasi" class="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1.5">Lokasi</label>
-                <input id="lokasi" type="text" wire:model="lokasi" maxlength="150" placeholder="Ruang Guru, Lab Komputer…"
-                       class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 py-2.5 px-3.5 text-sm outline-none focus:border-primary dark:text-white">
-            </div>
-            <div>
-                <label for="sumber" class="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1.5">Sumber Dana</label>
-                <input id="sumber" type="text" wire:model="sumber_dana" maxlength="100" placeholder="BOS, Hibah…"
-                       class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 py-2.5 px-3.5 text-sm outline-none focus:border-primary dark:text-white">
-            </div>
-            <div>
-                <label for="tglbeli" class="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1.5">Tanggal Beli</label>
-                <input id="tglbeli" type="date" wire:model="tgl_beli"
-                       class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 py-2.5 px-3.5 text-sm outline-none focus:border-primary dark:text-white">
-            </div>
-            <div>
-                <label for="harga" class="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1.5">Harga Beli (Rp)</label>
-                <input id="harga" type="number" wire:model="harga_beli" min="0"
-                       class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 py-2.5 px-3.5 text-sm outline-none focus:border-primary dark:text-white">
-            </div>
-        </div>
 
-        <div class="flex items-center gap-3 pt-2">
-            <button type="submit" class="rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-white hover:bg-primary/90">
-                {{ $isEdit ? 'Simpan Perubahan' : 'Tambah Aset' }}
-            </button>
-            <a href="{{ route('aset.index') }}" class="text-sm text-slate-500 hover:text-primary">Batal</a>
-        </div>
+            <div class="form-grid management-form-grid">
+                <div class="form-group">
+                    <label for="kode">Kode <span class="required">*</span></label>
+                    <input id="kode" type="text" wire:model="kode" maxlength="50" class="field">
+                    @error('kode') <p class="management-field-error" role="alert">{{ $message }}</p> @enderror
+                </div>
+                <div class="form-group">
+                    <label for="nama">Nama <span class="required">*</span></label>
+                    <input id="nama" type="text" wire:model="nama" maxlength="200" class="field">
+                    @error('nama') <p class="management-field-error" role="alert">{{ $message }}</p> @enderror
+                </div>
+                <div class="form-group">
+                    <label for="kategori">Kategori</label>
+                    <select id="kategori" wire:model="asset_category_id" class="select-field">
+                        <option value="">— Baru (isi di bawah) —</option>
+                        @foreach ($categories as $c)
+                            <option value="{{ $c->id }}">{{ $c->nama }}</option>
+                        @endforeach
+                    </select>
+                    @error('asset_category_id') <p class="management-field-error" role="alert">{{ $message }}</p> @enderror
+                </div>
+                <div class="form-group">
+                    <label for="kondisi">Kondisi</label>
+                    <select id="kondisi" wire:model="kondisi" class="select-field">
+                        @foreach (\App\Models\Asset::KONDISI as $key => $label)
+                            <option value="{{ $key }}">{{ $label }}</option>
+                        @endforeach
+                    </select>
+                    @error('kondisi') <p class="management-field-error" role="alert">{{ $message }}</p> @enderror
+                </div>
+                <div class="form-group management-field-span rounded-lg border border-slate-200 dark:border-slate-700 p-3">
+                    <p class="text-xs font-semibold text-slate-500 mb-2">Atau buat kategori baru:</p>
+                    <div class="grid sm:grid-cols-2 gap-3">
+                        <input type="text" wire:model="new_kategori_kode" maxlength="30" placeholder="Kode kategori (mis. ELK)" aria-label="Kode kategori baru" class="field">
+                        <input type="text" wire:model="new_kategori_nama" maxlength="150" placeholder="Nama kategori (mis. Elektronik)" aria-label="Nama kategori baru" class="field">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="lokasi">Lokasi</label>
+                    <input id="lokasi" type="text" wire:model="lokasi" maxlength="150" placeholder="Ruang Guru, Lab Komputer…" class="field">
+                    @error('lokasi') <p class="management-field-error" role="alert">{{ $message }}</p> @enderror
+                </div>
+                <div class="form-group">
+                    <label for="sumber">Sumber Dana</label>
+                    <input id="sumber" type="text" wire:model="sumber_dana" maxlength="100" placeholder="BOS, Hibah…" class="field">
+                    @error('sumber_dana') <p class="management-field-error" role="alert">{{ $message }}</p> @enderror
+                </div>
+                <div class="form-group">
+                    <label for="tglbeli">Tanggal Beli</label>
+                    <input id="tglbeli" type="date" wire:model="tgl_beli" class="field">
+                    @error('tgl_beli') <p class="management-field-error" role="alert">{{ $message }}</p> @enderror
+                </div>
+                <div class="form-group">
+                    <label for="harga">Harga Beli (Rp)</label>
+                    <input id="harga" type="number" wire:model="harga_beli" min="0" class="field">
+                    @error('harga_beli') <p class="management-field-error" role="alert">{{ $message }}</p> @enderror
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <a href="{{ route('aset.index') }}" class="btn btn-outline">Batal</a>
+                <button type="submit" class="btn btn-primary" wire:loading.attr="disabled" wire:target="save">
+                    <span wire:loading.remove wire:target="save">{{ $isEdit ? 'Simpan Perubahan' : 'Tambah Aset' }}</span>
+                    <span wire:loading wire:target="save">Menyimpan...</span>
+                </button>
+            </div>
+        </section>
     </form>
 </div>

@@ -1,114 +1,132 @@
-<div>
-    @if (session('ok'))
-        <div class="mb-4 rounded-lg bg-success/10 text-success px-4 py-2.5 text-sm">{{ session('ok') }}</div>
-    @endif
-
-    <div class="mb-5">
-        <a href="{{ route('aset.index') }}" class="text-sm text-slate-500 hover:text-primary">← Semua Aset</a>
-    </div>
-
-    <div class="rounded-xl border border-slate-200 bg-white dark:bg-boxdark dark:border-slate-700 p-5 mb-5">
-        <div class="flex items-start justify-between gap-3">
-            <div>
-                <h2 class="text-lg font-bold text-slate-800 dark:text-white">{{ $asset->nama }}</h2>
-                <p class="text-sm text-slate-500 mt-1">
-                    {{ $asset->kode }} · {{ $asset->category->nama }}
-                    @if ($asset->lokasi) · Lokasi: {{ $asset->lokasi }} @endif
-                </p>
-                <p class="text-sm text-slate-500 mt-0.5">
-                    Kondisi: <span class="font-semibold">{{ \App\Models\Asset::KONDISI[$asset->kondisi] }}</span>
-                    @if ($asset->harga_beli) · Rp {{ number_format((float) $asset->harga_beli, 0, ',', '.') }} @endif
-                </p>
-            </div>
+<div class="page-stack">
+    <div class="page-header management-page-header">
+        <div>
+            <a href="{{ route('aset.index') }}" class="management-back-link">
+                <x-icon name="arrow-left" class="h-4 w-4" /> Kembali ke Data Aset
+            </a>
+            <span class="eyebrow">Operasional / Inventaris</span>
+            <h2 class="management-page-title">{{ $asset->nama }}</h2>
+            <p>
+                {{ $asset->kode }} · {{ $asset->category->nama }}
+                @if ($asset->lokasi) · Lokasi: {{ $asset->lokasi }} @endif
+                · Kondisi: <strong>{{ \App\Models\Asset::KONDISI[$asset->kondisi] }}</strong>
+                @if ($asset->harga_beli) · Rp {{ number_format((float) $asset->harga_beli, 0, ',', '.') }} @endif
+            </p>
+        </div>
+        <div class="page-actions">
             @can('aset.mutasi')
-                <button wire:click="$set('showForm', true)" class="shrink-0 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary/90">
+                <button wire:click="$set('showForm', true)" class="btn btn-primary">
                     Catat Mutasi
                 </button>
             @endcan
         </div>
     </div>
 
+    @if (session('ok'))
+        <div class="management-alert management-alert-success" role="status" aria-live="polite">
+            <span>{{ session('ok') }}</span>
+        </div>
+    @endif
+
     @if ($showForm)
         @can('aset.mutasi')
-            <form wire:submit="simpanMutasi" class="rounded-xl border border-slate-200 bg-white dark:bg-boxdark dark:border-slate-700 p-5 mb-5 grid sm:grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1.5">Jenis Mutasi</label>
-                    <select wire:model.live="jenis"
-                            class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 py-2.5 px-3 text-sm dark:text-white">
-                        @foreach (['pindah' => 'Pindah Lokasi', 'kondisi' => 'Ubah Kondisi', 'keluar' => 'Barang Keluar'] as $key => $label)
-                            <option value="{{ $key }}">{{ $label }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1.5">Tanggal</label>
-                    <input type="date" wire:model="tgl"
-                           class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 py-2.5 px-3.5 text-sm outline-none focus:border-primary dark:text-white">
-                </div>
-                @if ($jenis === 'pindah')
-                    <div>
-                        <label class="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1.5">Dari</label>
-                        <input type="text" wire:model="dari" maxlength="150" value="{{ $asset->lokasi }}"
-                               class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 py-2.5 px-3.5 text-sm outline-none focus:border-primary dark:text-white">
+            <section class="card management-form-card" aria-labelledby="mutasi-form-title">
+                <div class="card-head">
+                    <div class="card-title">
+                        <span class="mini-icon blue"><x-icon name="package" class="h-[19px] w-[19px]" /></span>
+                        <div>
+                            <h3 id="mutasi-form-title">Catat Mutasi</h3>
+                            <p>Pindah lokasi, ubah kondisi, atau barang keluar.</p>
+                        </div>
                     </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1.5">Ke (lokasi baru)</label>
-                        <input type="text" wire:model="ke" maxlength="150"
-                               class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 py-2.5 px-3.5 text-sm outline-none focus:border-primary dark:text-white">
-                    </div>
-                @elseif ($jenis === 'kondisi')
-                    <div>
-                        <label class="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1.5">Kondisi Baru</label>
-                        <select wire:model="ke"
-                                class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 py-2.5 px-3 text-sm dark:text-white">
-                            @foreach (\App\Models\Asset::KONDISI as $key => $label)
+                </div>
+
+                <form wire:submit="simpanMutasi" class="form-grid management-form-grid">
+                    <div class="form-group">
+                        <label for="mutasi-jenis">Jenis Mutasi</label>
+                        <select id="mutasi-jenis" wire:model.live="jenis" class="select-field">
+                            @foreach (['pindah' => 'Pindah Lokasi', 'kondisi' => 'Ubah Kondisi', 'keluar' => 'Barang Keluar'] as $key => $label)
                                 <option value="{{ $key }}">{{ $label }}</option>
                             @endforeach
                         </select>
                     </div>
-                @endif
-                <div class="sm:col-span-2">
-                    <label class="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1.5">Catatan</label>
-                    <input type="text" wire:model="catatan" maxlength="2000"
-                           class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 py-2.5 px-3.5 text-sm outline-none focus:border-primary dark:text-white">
-                </div>
-                <div class="sm:col-span-2 flex items-center gap-3">
-                    <button type="submit" class="rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary/90">Simpan</button>
-                    <button type="button" wire:click="$set('showForm', false)" class="text-sm text-slate-500 hover:text-primary">Batal</button>
-                </div>
-            </form>
+                    <div class="form-group">
+                        <label for="mutasi-tgl">Tanggal</label>
+                        <input id="mutasi-tgl" type="date" wire:model="tgl" class="field">
+                    </div>
+                    @if ($jenis === 'pindah')
+                        <div class="form-group">
+                            <label for="mutasi-dari">Dari</label>
+                            <input id="mutasi-dari" type="text" wire:model="dari" maxlength="150" value="{{ $asset->lokasi }}" class="field">
+                        </div>
+                        <div class="form-group">
+                            <label for="mutasi-ke">Ke (lokasi baru)</label>
+                            <input id="mutasi-ke" type="text" wire:model="ke" maxlength="150" class="field">
+                        </div>
+                    @elseif ($jenis === 'kondisi')
+                        <div class="form-group">
+                            <label for="mutasi-kondisi">Kondisi Baru</label>
+                            <select id="mutasi-kondisi" wire:model="ke" class="select-field">
+                                @foreach (\App\Models\Asset::KONDISI as $key => $label)
+                                    <option value="{{ $key }}">{{ $label }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    @endif
+                    <div class="form-group management-field-span">
+                        <label for="mutasi-catatan">Catatan</label>
+                        <input id="mutasi-catatan" type="text" wire:model="catatan" maxlength="2000" class="field">
+                    </div>
+                    <div class="form-actions management-field-span">
+                        <button type="submit" class="btn btn-primary" wire:loading.attr="disabled" wire:target="simpanMutasi">
+                            <span wire:loading.remove wire:target="simpanMutasi">Simpan</span>
+                            <span wire:loading wire:target="simpanMutasi">Menyimpan...</span>
+                        </button>
+                        <button type="button" wire:click="$set('showForm', false)" class="btn btn-outline">Batal</button>
+                    </div>
+                </form>
+            </section>
         @endcan
     @endif
 
-    <div class="rounded-xl border border-slate-200 bg-white dark:bg-boxdark dark:border-slate-700 overflow-hidden">
-        <div class="px-4 py-3 border-b border-slate-100 dark:border-slate-700 font-semibold text-slate-800 dark:text-white text-sm">
-            Riwayat Mutasi
+    <section class="card" aria-labelledby="mutasi-riwayat-title">
+        <div class="card-head">
+            <div class="card-title">
+                <span class="mini-icon green"><x-icon name="scroll-text" class="h-[19px] w-[19px]" /></span>
+                <div>
+                    <h3 id="mutasi-riwayat-title">Riwayat Mutasi</h3>
+                    <p>Perpindahan dan perubahan kondisi aset.</p>
+                </div>
+            </div>
         </div>
-        <table class="w-full text-sm">
-            <thead>
-                <tr class="bg-slate-50 dark:bg-slate-800 text-left">
-                    <th class="px-4 py-2.5 font-semibold text-slate-600 dark:text-slate-300">Tanggal</th>
-                    <th class="px-4 py-2.5 font-semibold text-slate-600 dark:text-slate-300">Jenis</th>
-                    <th class="px-4 py-2.5 font-semibold text-slate-600 dark:text-slate-300">Dari → Ke</th>
-                    <th class="px-4 py-2.5 font-semibold text-slate-600 dark:text-slate-300">Catatan</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse ($mutations as $m)
-                    <tr class="border-t border-slate-100 dark:border-slate-700">
-                        <td class="px-4 py-2.5 text-slate-600 dark:text-slate-300">{{ $m->tgl?->format('d M Y') ?? '—' }}</td>
-                        <td class="px-4 py-2.5 font-semibold text-slate-800 dark:text-white">{{ \App\Models\AssetMutation::JENIS[$m->jenis] }}</td>
-                        <td class="px-4 py-2.5 text-slate-600 dark:text-slate-300">
-                            {{ $m->jenis === 'kondisi' && $m->ke ? (\App\Models\Asset::KONDISI[$m->ke] ?? $m->ke) : ($m->dari ?? '—').' → '.($m->ke ?? '—') }}
-                        </td>
-                        <td class="px-4 py-2.5 text-slate-600 dark:text-slate-300">{{ $m->catatan ?? '—' }}</td>
+
+        <div class="table-scroll">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th scope="col">Tanggal</th>
+                        <th scope="col">Jenis</th>
+                        <th scope="col">Dari → Ke</th>
+                        <th scope="col">Catatan</th>
                     </tr>
-                @empty
-                    <tr><td colspan="4" class="px-4 py-8 text-center text-slate-500">Belum ada mutasi.</td></tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
+                </thead>
+                <tbody>
+                    @forelse ($mutations as $m)
+                        <tr wire:key="mutasi-{{ $m->id }}">
+                            <td class="text-slate-600 dark:text-slate-300">{{ $m->tgl?->format('d M Y') ?? '—' }}</td>
+                            <td class="font-semibold">{{ \App\Models\AssetMutation::JENIS[$m->jenis] }}</td>
+                            <td class="text-slate-600 dark:text-slate-300">
+                                {{ $m->jenis === 'kondisi' && $m->ke ? (\App\Models\Asset::KONDISI[$m->ke] ?? $m->ke) : ($m->dari ?? '—').' → '.($m->ke ?? '—') }}
+                            </td>
+                            <td class="text-slate-600 dark:text-slate-300">{{ $m->catatan ?? '—' }}</td>
+                        </tr>
+                    @empty
+                        <tr><td colspan="4" class="py-8 text-center text-slate-500">Belum ada mutasi.</td></tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </section>
 
     <div class="mt-5">{{ $mutations->links() }}</div>
 </div>

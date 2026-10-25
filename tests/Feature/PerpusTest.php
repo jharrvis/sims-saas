@@ -2,6 +2,9 @@
 
 declare(strict_types=1);
 
+use App\Livewire\Perpus\BookForm;
+use App\Livewire\Perpus\BookIndex;
+use App\Livewire\Perpus\LoanIndex;
 use App\Models\Book;
 use App\Models\BookLoan;
 use App\Models\Membership;
@@ -14,6 +17,7 @@ use App\Tenancy\TenantContext;
 use Database\Seeders\ModuleSeeder;
 use Database\Seeders\PermissionSeeder;
 use Database\Seeders\RoleSeeder;
+use Livewire\Livewire;
 use Spatie\Permission\PermissionRegistrar;
 
 beforeEach(function (): void {
@@ -104,4 +108,21 @@ it('buku terisolasi per sekolah', function (): void {
 
     expect(Book::count())->toBe(0);
     expect(BookLoan::count())->toBe(0);
+});
+
+it('perpus memakai struktur design system management (Batch 9)', function (): void {
+    Livewire::actingAs($this->admin)->test(BookIndex::class)
+        ->assertSee('Katalog Buku')
+        ->assertSeeHtml('management-page-header')
+        ->assertDontSee('<i data-lucide');
+
+    Livewire::actingAs($this->admin)->test(BookForm::class)
+        ->assertSee('Tambah Buku')
+        ->assertSeeHtml('management-form-card')
+        ->assertDontSee('max-w-3xl');
+
+    Livewire::actingAs($this->admin)->test(LoanIndex::class)
+        ->assertSee('Peminjaman Buku')
+        ->assertSeeHtml('management-page-header')
+        ->assertDontSee('<i data-lucide');
 });

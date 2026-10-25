@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use App\Livewire\Aset\AssetForm;
+use App\Livewire\Aset\AssetIndex;
 use App\Models\Asset;
 use App\Models\AssetCategory;
 use App\Models\Membership;
@@ -13,6 +15,7 @@ use App\Tenancy\TenantContext;
 use Database\Seeders\ModuleSeeder;
 use Database\Seeders\PermissionSeeder;
 use Database\Seeders\RoleSeeder;
+use Livewire\Livewire;
 use Spatie\Permission\PermissionRegistrar;
 
 beforeEach(function (): void {
@@ -115,4 +118,16 @@ it('aset terisolasi per sekolah', function (): void {
 
     expect(Asset::count())->toBe(0)
         ->and(AssetCategory::count())->toBe(0);
+});
+
+it('aset memakai struktur design system management (Batch 9)', function (): void {
+    Livewire::actingAs($this->admin)->test(AssetIndex::class)
+        ->assertSee('Data Aset')
+        ->assertSeeHtml('management-page-header')
+        ->assertDontSee('<i data-lucide');
+
+    Livewire::actingAs($this->admin)->test(AssetForm::class)
+        ->assertSee('Tambah Aset')
+        ->assertSeeHtml('management-form-card')
+        ->assertDontSee('max-w-3xl');
 });
