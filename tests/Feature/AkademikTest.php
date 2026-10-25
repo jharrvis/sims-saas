@@ -13,6 +13,7 @@ use App\Models\Attendance;
 use App\Models\Employee;
 use App\Models\Membership;
 use App\Models\Rombel;
+use App\Models\Schedule;
 use App\Models\School;
 use App\Models\Student;
 use App\Models\Subject;
@@ -207,4 +208,90 @@ it('presensi, input nilai, dan leger memakai struktur design system management (
         ->assertSee('Leger Nilai')
         ->assertSeeHtml('management-page-header')
         ->assertDontSee('<i data-lucide');
+});
+
+it('jadwal tanpa izin create ditolak 403 saat save (perbaikan QA P0)', function (): void {
+    $viewOnly = User::create([
+        'username' => 'akdview', 'name' => 'View Only', 'phone' => '628990000201',
+    ]);
+    Membership::create(['user_id' => $viewOnly->id, 'school_id' => $this->school->id, 'status' => 'aktif']);
+    $viewOnly->assignRole('kepala-sekolah');
+
+    Livewire::actingAs($viewOnly)->test(ScheduleForm::class)
+        ->set('rombel_id', $this->rombel->id)
+        ->set('academic_year_id', $this->ta->id)
+        ->set('subject_id', $this->mapel->id)
+        ->set('employee_id', $this->guru->id)
+        ->call('save')
+        ->assertForbidden();
+});
+
+it('jadwal dengan foreign key sekolah lain ditolak validasi (perbaikan QA P0)', function (): void {
+    $sekolahLain = School::create([
+        'nama' => 'Sekolah Lain', 'slug' => 'lain-'.uniqid(), 'jenjang' => 'SMA',
+        'status' => 'aktif', 'status_langganan' => 'active',
+    ]);
+    $taLain = AcademicYear::create([
+        'school_id' => $sekolahLain->id, 'nama' => '2026/2027', 'aktif' => true,
+        'tgl_mulai' => '2026-07-01', 'tgl_selesai' => '2027-06-30',
+    ]);
+    $rombelLain = Rombel::create([
+        'school_id' => $sekolahLain->id, 'academic_year_id' => $taLain->id,
+        'tingkat' => '10', 'nama' => 'X-9', 'kapasitas' => 36,
+    ]);
+    $mapelLain = Subject::create([
+        'school_id' => $sekolahLain->id, 'kode' => 'BIO', 'nama' => 'Biologi', 'kelompok' => 'wajib',
+    ]);
+    $guruLain = Employee::create([
+        'school_id' => $sekolahLain->id, 'nama' => 'Guru Lain',
+        'jenis' => 'guru_mapel', 'status_kepegawaian' => 'pns',
+    ]);
+
+    Livewire::actingAs($this->admin)->test(ScheduleForm::class)
+        ->set('rombel_id', $rombelLain->id)
+        ->set('academic_year_id', $taLain->id)
+        ->set('subject_id', $mapelLain->id)
+        ->set('employee_id', $guruLain->id)
+        ->call('save')
+        ->assertHasErrors(['rombel_id', 'academic_year_id', 'subject_id', 'employee_id']);
+
+    $this->assertDatabaseMissing('schedules', ['rombel_id' => $rombelLain->id]);
+});
+
+it('jadwal sekolah sendiri tetap bisa dibuat (perbaikan QA P0)', function (): void {
+    Livewire::actingAs($this->admin)->test(ScheduleForm::class)
+        ->set('rombel_id', $this->rombel->id)
+        ->set('academic_year_id', $this->ta->id)
+        ->set('hari', 'senin')
+        ->set('jam_ke', 1)
+        ->set('subject_id', $this->mapel->id)
+        ->set('employee_id', $this->guru->id)
+        ->call('save')
+        ->assertRedirect(route('jadwal.index', ['rombel' => $this->rombel->id]));
+
+    $this->assertDatabaseHas('schedules', [
+        'school_id' => $this->school->id, 'rombel_id' => $this->rombel->id,
+    ]);
+});
+
+it('perbaikan QA visual: tombol massal absensi wrap, input 44px, tombol hapus jadwal 44px', function (): void {
+    $siswa = Student::create([
+        'nis' => 'AKD1', 'nama' => 'Siswa Absen', 'jk' => 'L',
+    ]);
+    $siswa->rombels()->attach($this->rombel->id, [
+        'academic_year_id' => $this->ta->id, 'status' => 'aktif',
+    ]);
+
+    Livewire::actingAs($this->admin)->test(AttendanceIndex::class)
+        ->assertSeeHtml('flex flex-wrap gap-2')
+        ->assertSeeHtml('field min-h-11');
+
+    Schedule::create([
+        'rombel_id' => $this->rombel->id, 'academic_year_id' => $this->ta->id,
+        'hari' => 'senin', 'jam_ke' => 1, 'subject_id' => $this->mapel->id,
+        'employee_id' => $this->guru->id,
+    ]);
+
+    Livewire::actingAs($this->admin)->test(ScheduleIndex::class)
+        ->assertSeeHtml('min-h-11 px-3 text-[11px]');
 });

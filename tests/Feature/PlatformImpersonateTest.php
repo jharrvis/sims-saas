@@ -76,6 +76,11 @@ it('operator berizin bisa impersonate admin sekolah', function (): void {
     $operator = opImpersonate();
     [$school, $admin] = sekolahDenganAdmin('SDN Impersonate');
 
+    RoleSeeder::seedForSchool($school->id);
+    app(PermissionRegistrar::class)->setPermissionsTeamId($school->id);
+    $admin->assignRole('superadmin');
+    app(PermissionRegistrar::class)->setPermissionsTeamId(0);
+
     Livewire::actingAs($operator)
         ->test(TenantShow::class, ['schoolId' => $school->id])
         ->call('impersonate')
@@ -116,6 +121,11 @@ it('operator peran ganda bisa impersonate dirinya sebagai admin sekolah', functi
         'status' => 'aktif', 'status_langganan' => 'trialing',
     ]);
     Membership::create(['user_id' => $operator->id, 'school_id' => $school->id, 'status' => 'aktif']);
+
+    RoleSeeder::seedForSchool($school->id);
+    app(PermissionRegistrar::class)->setPermissionsTeamId($school->id);
+    $operator->assignRole('superadmin');
+    app(PermissionRegistrar::class)->setPermissionsTeamId(0);
 
     Livewire::actingAs($operator)
         ->test(TenantShow::class, ['schoolId' => $school->id])
@@ -180,4 +190,27 @@ it('operator tanpa membership impersonate admin meski ada member non-admin ber-i
         ->assertRedirect(route('dashboard'));
 
     expect(auth()->id())->toBe($admin->id);
+});
+
+it('sekolah hanya berisi staf non-admin tidak bisa di-impersonate (perbaikan QA P1)', function (): void {
+    $operator = opImpersonate();
+    $school = School::create([
+        'nama' => 'SDN Staf Saja', 'slug' => 'sdn-staf-saja-'.uniqid(),
+        'jenjang' => 'SD', 'status' => 'aktif', 'status_langganan' => 'trialing',
+    ]);
+    $guru = User::create([
+        'username' => 'guru'.random_int(1000, 9999), 'name' => 'Guru Mapel',
+        'phone' => '62895'.random_int(1000000, 9999999),
+    ]);
+    Membership::create(['user_id' => $guru->id, 'school_id' => $school->id, 'status' => 'aktif']);
+
+    RoleSeeder::seedForSchool($school->id);
+    app(PermissionRegistrar::class)->setPermissionsTeamId($school->id);
+    $guru->assignRole('guru-mapel');
+    app(PermissionRegistrar::class)->setPermissionsTeamId(0);
+
+    Livewire::actingAs($operator)
+        ->test(TenantShow::class, ['schoolId' => $school->id])
+        ->call('impersonate')
+        ->assertNotFound();
 });

@@ -25,12 +25,12 @@
             <form wire:submit="simpan" class="mt-4 space-y-4 max-w-md">
                 <div class="form-group">
                     <label for="pw-baru">Password baru (min. 8 karakter)</label>
-                    <input id="pw-baru" type="password" wire:model="password" autocomplete="new-password" class="field">
+                    <input id="pw-baru" type="password" wire:model="password" autocomplete="new-password" class="field min-h-11">
                     @error('password') <p class="management-field-error" role="alert">{{ $message }}</p> @enderror
                 </div>
                 <div class="form-group">
                     <label for="pw-konfirmasi">Konfirmasi password</label>
-                    <input id="pw-konfirmasi" type="password" wire:model="password_confirmation" autocomplete="new-password" class="field">
+                    <input id="pw-konfirmasi" type="password" wire:model="password_confirmation" autocomplete="new-password" class="field min-h-11">
                 </div>
                 <button type="submit" wire:loading.attr="disabled" class="btn btn-primary" wire:target="simpan">
                     <x-icon name="key-round" class="w-4 h-4" />

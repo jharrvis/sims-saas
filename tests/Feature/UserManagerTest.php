@@ -249,3 +249,8 @@ it('pengguna, form pengguna, peran, dan form peran memakai design system', funct
         ->assertDontSee('max-w-3xl')
         ->assertDontSee('<i data-lucide');
 });
+
+it('perbaikan QA visual: tombol pilih/kosongkan grup peran 44px', function (): void {
+    Livewire::actingAs($this->admin)->test(PeranForm::class)
+        ->assertSeeHtml('px-3 min-h-11 inline-flex items-center rounded text-[11px]');
+});

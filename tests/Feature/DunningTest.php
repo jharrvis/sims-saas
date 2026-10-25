@@ -195,3 +195,24 @@ it('halaman langganan memakai design system', function (): void {
 
     app(TenantContext::class)->clear();
 });
+
+it('bayar tanpa izin langganan.bayar ditolak 403 sebelum guard status (perbaikan QA P0)', function (): void {
+    ['school' => $school, 'sub' => $sub, 'admin' => $admin] = dunningSetup();
+
+    app(TenantContext::class)->set($school);
+
+    $inv = BillingInvoice::create([
+        'school_id' => $school->id, 'subscription_id' => $sub->id,
+        'nomor' => 'INV-QA-'.uniqid(),
+        'nama_sekolah_snapshot' => $school->nama,
+        'periode_dari' => now()->startOfMonth(), 'periode_sampai' => now()->endOfMonth(),
+        'jatuh_tempo' => now()->addDays(7),
+        'subtotal' => 100000, 'total' => 100000, 'status' => 'paid',
+    ]);
+
+    Livewire::actingAs($admin)->test(Index::class)
+        ->call('bayar', $inv->id)
+        ->assertForbidden();
+
+    app(TenantContext::class)->clear();
+});

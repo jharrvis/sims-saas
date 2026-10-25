@@ -30,4 +30,21 @@ class AcademicYear extends Model
             'aktif' => 'boolean',
         ];
     }
+
+    /**
+     * Apakah tahun ajaran masih terbuka untuk perubahan data (US-026).
+     *
+     * Satu-satunya penanda buka/tutup yang ada di skema adalah flag aktif:
+     * tidak ada kolom/status "ditutup". Tahun ajaran aktif berarti terbuka;
+     * tanpa id, id tak ditemukan, atau tahun ajaran tidak aktif berarti
+     * tertutup. Kueri terskop tenant lewat SchoolScope.
+     */
+    public static function masihTerbuka(?int $id): bool
+    {
+        if ($id === null) {
+            return false;
+        }
+
+        return static::whereKey($id)->where('aktif', true)->exists();
+    }
 }

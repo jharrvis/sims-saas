@@ -56,7 +56,7 @@
                                                 @endif
                                                 @can('jadwal.delete')
                                                     <button wire:click="deleteEntry({{ $entry->id }})" wire:confirm="Hapus jadwal ini?"
-                                                            class="mt-1 text-[11px] text-danger hover:underline">Hapus</button>
+                                                            class="mt-1 inline-flex items-center min-h-11 px-3 text-[11px] font-medium text-danger hover:underline">Hapus</button>
                                                 @endcan
                                             </div>
                                         @endif

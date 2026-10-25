@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Livewire\Kesiswaan;
 
 use App\Domains\Kesiswaan\Services\StudentPhotoService;
-use App\Domains\Pengaturan\Services\WebhookService;
 use App\Domains\Platform\Services\QuotaService;
 use App\Models\AcademicYear;
 use App\Models\Student;
@@ -91,10 +90,17 @@ class StudentForm extends Component
 
     public function save(): void
     {
+        $this->authorize($this->student?->exists ? 'siswa.update' : 'siswa.create');
+
         $this->validate();
 
         // US-026: arsip read-only — tolak bila tahun ajaran aktif sudah ditutup.
         $taId = AcademicYear::where('aktif', true)->value('id');
+        if ($taId === null) {
+            $this->addError('nama', 'Tidak ada tahun ajaran aktif.');
+
+            return;
+        }
         if (! AcademicYear::masihTerbuka($taId)) {
             $this->addError('nama', 'Tahun ajaran aktif sudah ditutup — data siswa bersifat arsip read-only.');
 
@@ -142,12 +148,11 @@ class StudentForm extends Component
         if ($this->student?->exists) {
             $this->student->update($data);
         } else {
-            $student = Student::create($data);
-
-            // US-112: webhook keluar — siswa baru.
-            WebhookService::fire('siswa_baru', (int) $student->school_id, [
-                'student_id' => $student->id,
-            ]);
+            Student::create($data);
+            // US-112 (webhook keluar siswa_baru) adalah story Fase 2 yang
+            // belum dibangun — tidak ada WebhookService di codebase, dan
+            // pemanggilan sebelumnya membuat setiap tambah siswa fatal.
+            // Panggilan dihapus sampai fitur webhook Fase 2 diimplementasi.
         }
 
         if ($newFotoPath || ($this->hapusFoto && $this->student?->exists)) {

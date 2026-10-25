@@ -18,6 +18,8 @@ class Index extends Component
 {
     public function bayar(int $invoiceId, MidtransService $midtrans): void
     {
+        $this->authorize('langganan.bayar');
+
         $invoice = BillingInvoice::whereKey($invoiceId)->firstOrFail();
 
         abort_unless(in_array($invoice->status, ['issued', 'overdue'], true), 422);

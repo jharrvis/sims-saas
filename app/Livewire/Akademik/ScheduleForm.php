@@ -10,6 +10,7 @@ use App\Models\Employee;
 use App\Models\Rombel;
 use App\Models\Schedule;
 use App\Models\Subject;
+use App\Tenancy\TenantContext;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Livewire\Component;
@@ -48,19 +49,23 @@ class ScheduleForm extends Component
      */
     protected function rules(): array
     {
+        $schoolId = app(TenantContext::class)->requireSchoolId();
+
         return [
-            'rombel_id' => ['required', 'integer', 'exists:rombels,id'],
-            'academic_year_id' => ['required', 'integer', 'exists:academic_years,id'],
+            'rombel_id' => ['required', 'integer', Rule::exists('rombels', 'id')->where('school_id', $schoolId)],
+            'academic_year_id' => ['required', 'integer', Rule::exists('academic_years', 'id')->where('school_id', $schoolId)],
             'hari' => ['required', Rule::in(Schedule::HARIS)],
             'jam_ke' => ['required', 'integer', 'min:1', 'max:15'],
-            'subject_id' => ['required', 'integer', 'exists:subjects,id'],
-            'employee_id' => ['required', 'integer', 'exists:employees,id'],
+            'subject_id' => ['required', 'integer', Rule::exists('subjects', 'id')->where('school_id', $schoolId)],
+            'employee_id' => ['required', 'integer', Rule::exists('employees', 'id')->where('school_id', $schoolId)],
             'ruang' => ['nullable', 'string', 'max:30'],
         ];
     }
 
     public function save(ScheduleConflictService $conflict): void
     {
+        $this->authorize('jadwal.create');
+
         $data = $this->validate();
 
         $this->conflicts = $conflict->check([

@@ -123,3 +123,11 @@ it('profil, tahun ajaran, modul, dan keamanan memakai design system', function (
         ->assertSee('Password Akun')
         ->assertDontSee('<i data-lucide');
 });
+
+it('perbaikan QA visual: switch modul 44px dan input password 44px', function (): void {
+    Livewire::actingAs($this->admin)->test(ModuleIndex::class)
+        ->assertSeeHtml('inline-flex items-center h-11 px-1');
+
+    Livewire::actingAs($this->admin)->test(Keamanan::class)
+        ->assertSeeHtml('field min-h-11');
+});

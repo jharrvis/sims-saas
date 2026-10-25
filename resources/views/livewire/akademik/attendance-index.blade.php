@@ -24,7 +24,7 @@
                 </select>
             </label>
             <label class="management-filter-field" for="absensi-tanggal"><span class="sr-only">Tanggal</span>
-                <input id="absensi-tanggal" type="date" wire:model.live="tanggal" class="field">
+                <input id="absensi-tanggal" type="date" wire:model.live="tanggal" class="field min-h-11">
             </label>
             @if ($locked)
                 <span class="inline-flex items-center gap-1.5 text-xs font-medium text-slate-500">
@@ -37,7 +37,7 @@
     @if ($rombelId && $students->isNotEmpty())
         @can('absensi.create')
             @if (! $locked)
-                <div class="flex gap-2">
+                <div class="flex flex-wrap gap-2">
                     @foreach (['H' => 'Hadir', 'I' => 'Izin', 'S' => 'Sakit', 'A' => 'Alpa'] as $kode => $label)
                         <button wire:click="markAll('{{ $kode }}')" class="btn btn-outline">
                             Semua {{ $label }}
@@ -81,7 +81,7 @@
                                 <td>
                                     <input type="text" wire:model="notes.{{ $s->id }}" @disabled($locked) placeholder="—"
                                            aria-label="Keterangan {{ $s->nama }}"
-                                           class="field">
+                                           class="field min-h-11">
                                 </td>
                             </tr>
                         @endforeach

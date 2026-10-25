@@ -75,10 +75,10 @@
                             </div>
                             <div class="flex items-center gap-1 shrink-0">
                                 <button type="button" wire:click="pilihGrup('{{ $grup['key'] }}')"
-                                        class="px-2 py-1 rounded text-[11px] font-medium text-primary hover:bg-primary/10"
+                                        class="px-3 min-h-11 inline-flex items-center rounded text-[11px] font-medium text-primary hover:bg-primary/10"
                                         aria-label="Pilih semua {{ $grup['label'] }}">Pilih</button>
                                 <button type="button" wire:click="kosongkanGrup('{{ $grup['key'] }}')"
-                                        class="px-2 py-1 rounded text-[11px] font-medium text-slate-500 hover:bg-slate-500/10"
+                                        class="px-3 min-h-11 inline-flex items-center rounded text-[11px] font-medium text-slate-500 hover:bg-slate-500/10"
                                         aria-label="Kosongkan {{ $grup['label'] }}">Kosongkan</button>
                             </div>
                         </div>

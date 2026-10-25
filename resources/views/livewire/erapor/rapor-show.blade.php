@@ -17,7 +17,7 @@
     </div>
 
     {{-- Kertas rapor: dipertahankan persis sebagai dokumen cetak (bukan chrome aplikasi). --}}
-    <div id="rapor" class="bg-white text-slate-800 rounded-xl border border-slate-200 p-6 sm:p-10 max-w-4xl mx-auto print:border-0 print:rounded-none print:max-w-none print:p-0">
+    <div id="rapor" class="bg-white text-slate-800 rounded-xl border border-slate-200 p-6 sm:p-10 max-w-4xl mx-auto overflow-x-auto print:overflow-visible print:border-0 print:rounded-none print:max-w-none print:p-0">
         {{-- Kop sekolah --}}
         <div class="text-center border-b-4 border-double border-slate-800 pb-4 mb-6">
             <h1 class="text-xl font-extrabold uppercase">{{ $rapor['sekolah']->nama ?? 'Sekolah' }}</h1>

@@ -3,7 +3,10 @@
 declare(strict_types=1);
 
 use App\Livewire\Kesiswaan\StudentForm;
+use App\Models\AcademicYear;
+use App\Models\Membership;
 use App\Models\School;
+use App\Models\User;
 use App\Tenancy\TenantContext;
 use Database\Seeders\PermissionSeeder;
 use Database\Seeders\RoleSeeder;
@@ -20,6 +23,12 @@ beforeEach(function (): void {
     RoleSeeder::seedForSchool($this->school->id);
     app(TenantContext::class)->set($this->school);
     app(PermissionRegistrar::class)->setPermissionsTeamId($this->school->id);
+
+    $this->admin = User::create([
+        'username' => 'formadmin', 'name' => 'Admin Form', 'phone' => '628990000101',
+    ]);
+    Membership::create(['user_id' => $this->admin->id, 'school_id' => $this->school->id, 'status' => 'aktif']);
+    $this->admin->assignRole('admin-sekolah');
 });
 
 afterEach(function (): void {
@@ -55,11 +64,43 @@ it('dropdown agama berisi 6 agama resmi Indonesia', function (): void {
 });
 
 it('agama di luar daftar resmi ditolak saat simpan', function (): void {
-    Livewire::test(StudentForm::class)
+    Livewire::actingAs($this->admin)->test(StudentForm::class)
         ->set('nis', '9901')
         ->set('nama', 'Siswa Agama')
         ->set('jk', 'L')
         ->set('agama', 'Atheis')
         ->call('save')
         ->assertHasErrors(['agama']);
+});
+
+it('pengguna view-only tidak bisa simpan form siswa (perbaikan QA P0)', function (): void {
+    $viewOnly = User::create([
+        'username' => 'formview', 'name' => 'View Only', 'phone' => '628990000102',
+    ]);
+    Membership::create(['user_id' => $viewOnly->id, 'school_id' => $this->school->id, 'status' => 'aktif']);
+    $viewOnly->assignRole('kepala-sekolah');
+
+    Livewire::actingAs($viewOnly)->test(StudentForm::class)
+        ->set('nis', '9902')
+        ->set('nama', 'Siswa View')
+        ->set('jk', 'L')
+        ->call('save')
+        ->assertForbidden();
+});
+
+it('submit valid berhasil setelah otorisasi dan tahun ajaran aktif (perbaikan QA P0)', function (): void {
+    AcademicYear::create([
+        'nama' => '2026/2027', 'aktif' => true,
+        'tgl_mulai' => '2026-07-01', 'tgl_selesai' => '2027-06-30',
+    ]);
+
+    Livewire::actingAs($this->admin)->test(StudentForm::class)
+        ->set('nis', '9903')
+        ->set('nama', 'Siswa Valid')
+        ->set('jk', 'L')
+        ->set('agama', 'Islam')
+        ->call('save')
+        ->assertRedirect(route('siswa.index'));
+
+    $this->assertDatabaseHas('students', ['nis' => '9903', 'school_id' => $this->school->id]);
 });
