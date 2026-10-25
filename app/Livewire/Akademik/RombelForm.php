@@ -51,19 +51,23 @@ class RombelForm extends Component
         $schoolId = app(TenantContext::class)->requireSchoolId();
 
         return [
-            'academic_year_id' => ['required', 'integer', 'exists:academic_years,id'],
+            'academic_year_id' => ['required', 'integer', Rule::exists('academic_years', 'id')->where('school_id', $schoolId)],
             'tingkat' => ['required', 'string', 'max:10'],
             'nama' => ['required', 'string', 'max:50', Rule::unique('rombels')->where(
                 fn ($q) => $q->where('school_id', $schoolId)
                     ->where('academic_year_id', $this->academic_year_id)
             )->ignore($this->rombel?->id)],
             'kapasitas' => ['required', 'integer', 'min:1', 'max:100'],
-            'wali_kelas_id' => ['nullable', 'integer', 'exists:employees,id'],
+            'wali_kelas_id' => ['nullable', 'integer', Rule::exists('employees', 'id')->where('school_id', $schoolId)],
         ];
     }
 
     public function save(): void
     {
+        // Authorization berjalan sebelum validasi: route middleware hanya
+        // melindungi GET, bukan aksi Livewire.
+        $this->authorize($this->rombel?->exists ? 'kelas.update' : 'kelas.create');
+
         $this->validate();
 
         $data = [

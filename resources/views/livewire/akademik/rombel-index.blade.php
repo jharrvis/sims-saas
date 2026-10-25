@@ -1,57 +1,123 @@
-<div>
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
-        <div class="flex items-center gap-2">
-            <select wire:model.live="academicYearId" aria-label="Tahun ajaran"
-                    class="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-boxdark py-2.5 px-3 text-sm outline-none focus:border-primary dark:text-white">
-                @foreach ($tahunAjaran as $ta)
-                    <option value="{{ $ta->id }}">{{ $ta->nama }}</option>
-                @endforeach
-            </select>
-            <div class="relative">
-                <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
-                <input type="search" wire:model.live.debounce.300ms="search" placeholder="Cari kelas…"
-                       aria-label="Cari kelas"
-                       class="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-boxdark py-2.5 pl-10 pr-4 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary dark:text-white">
+<div class="page-stack">
+    @if (session('sukses'))
+        <div class="management-alert management-alert-success" role="status" aria-live="polite">
+            <x-icon name="check-circle" class="h-5 w-5" />
+            <span>{{ session('sukses') }}</span>
+        </div>
+    @endif
+
+    <div class="page-header management-page-header">
+        <div>
+            <span class="eyebrow">Akademik / Data Kelas</span>
+            <h2 class="management-page-title">Data Kelas</h2>
+            <p>Kelola rombel, wali kelas, dan jumlah siswa per kelas dalam satu direktori.</p>
+        </div>
+        <div class="page-actions">
+            @if (\Illuminate\Support\Facades\Route::has('kelas.kenaikan') && auth()->user()?->can('kelas.promote'))
+                <a href="{{ route('kelas.kenaikan') }}" class="btn btn-outline">
+                    <x-icon name="arrow-up-right" class="h-4 w-4" /> Kenaikan Kelas
+                </a>
+            @endif
+            @can('kelas.create')
+                <a href="{{ route('kelas.create') }}" class="btn btn-primary">
+                    <x-icon name="plus" class="h-4 w-4" /> Tambah Kelas
+                </a>
+            @endcan
+        </div>
+    </div>
+
+    <div class="stats-grid management-summary-stats">
+        <article class="card stat-card">
+            <div class="stat-top"><span class="mini-icon blue"><x-icon name="school" class="h-5 w-5" /></span><span class="badge badge-blue">Terdaftar</span></div>
+            <div class="stat-value">{{ number_format($stats['total'], 0, ',', '.') }}</div>
+            <div class="stat-caption">Total kelas</div>
+            <div class="stat-footer"><span class="stat-note">Seluruh tahun ajaran</span></div>
+        </article>
+        <article class="card stat-card">
+            <div class="stat-top"><span class="mini-icon green"><x-icon name="users" class="h-5 w-5" /></span><span class="badge badge-green">Siswa</span></div>
+            <div class="stat-value">{{ number_format($stats['siswa'], 0, ',', '.') }}</div>
+            <div class="stat-caption">Siswa aktif di kelas</div>
+            <div class="stat-footer"><span class="stat-note">Penempatan aktif</span></div>
+        </article>
+        <article class="card stat-card">
+            <div class="stat-top"><span class="mini-icon orange"><x-icon name="user-x" class="h-5 w-5" /></span><span class="badge badge-orange">Tanpa wali</span></div>
+            <div class="stat-value">{{ number_format($stats['tanpaWali'], 0, ',', '.') }}</div>
+            <div class="stat-caption">Kelas tanpa wali kelas</div>
+            <div class="stat-footer"><span class="stat-note">Perlu penunjukan wali</span></div>
+        </article>
+        <article class="card stat-card">
+            <div class="stat-top"><span class="mini-icon purple"><x-icon name="check-circle" class="h-5 w-5" /></span><span class="badge badge-purple">Penuh</span></div>
+            <div class="stat-value">{{ number_format($stats['penuh'], 0, ',', '.') }}</div>
+            <div class="stat-caption">Kelas mencapai kapasitas</div>
+            <div class="stat-footer"><span class="stat-note">Siswa &ge; kapasitas</span></div>
+        </article>
+    </div>
+
+    <section class="card management-table-card" aria-labelledby="rombel-list-title">
+        <div class="card-head management-table-heading">
+            <div class="card-title">
+                <span class="mini-icon blue"><x-icon name="school" class="h-[19px] w-[19px]" /></span>
+                <div>
+                    <h3 id="rombel-list-title">Direktori Kelas</h3>
+                    <p>{{ number_format($rombels->total(), 0, ',', '.') }} data sesuai filter</p>
+                </div>
             </div>
         </div>
-        @can('kelas.create')
-            <a href="{{ route('kelas.create') }}" class="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 transition-colors">
-                <i data-lucide="plus" class="w-4 h-4"></i> Tambah Kelas
-            </a>
-        @endcan
-    </div>
 
-    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        @forelse ($rombels as $rombel)
-            <div class="rounded-xl border border-slate-200 bg-white dark:bg-boxdark dark:border-slate-700 p-5">
-                <div class="flex items-start justify-between">
-                    <div>
-                        <h3 class="font-bold text-slate-800 dark:text-white">{{ $rombel->nama }}</h3>
-                        <p class="text-xs text-slate-500 mt-0.5">Tingkat {{ $rombel->tingkat }} · {{ $rombel->academicYear->nama }}</p>
-                    </div>
-                    <span class="inline-flex px-2.5 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary">
-                        {{ $rombel->siswa_count }}/{{ $rombel->kapasitas }}
-                    </span>
-                </div>
-                <p class="text-xs text-slate-500 mt-3 flex items-center gap-1.5">
-                    <i data-lucide="user" class="w-3.5 h-3.5"></i>
-                    Wali kelas: {{ $rombel->waliKelas?->nama ?? '—' }}
-                </p>
-                <div class="flex gap-2 mt-4">
-                    <a href="{{ route('kelas.show', $rombel) }}" class="flex-1 py-2 text-center text-xs font-medium rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800">Lihat Siswa</a>
-                    @can('kelas.update')
-                        <a href="{{ route('kelas.edit', $rombel) }}" class="flex-1 py-2 text-center text-xs font-medium rounded-lg bg-primary/10 text-primary hover:bg-primary/20">Ubah</a>
-                    @endcan
-                </div>
+        <div class="table-toolbar management-toolbar">
+            <div class="toolbar-left management-filter-group">
+                <label class="field-search management-search-field" for="rombel-search">
+                    <x-icon name="search" class="h-4 w-4" /><span class="sr-only">Cari kelas</span>
+                    <input id="rombel-search" type="search" wire:model.live.debounce.300ms="search" placeholder="Cari nama kelas..." autocomplete="off">
+                    <span wire:loading wire:target="search" class="management-inline-spinner" aria-hidden="true"></span>
+                </label>
+                <label class="management-filter-field" for="rombel-tingkat"><span class="sr-only">Filter tingkat</span><select id="rombel-tingkat" wire:model.live="tingkat" class="select-field"><option value="">Semua tingkat</option>@foreach ($tingkatList as $t)<option value="{{ $t }}">Tingkat {{ $t }}</option>@endforeach</select></label>
+                <label class="management-filter-field" for="rombel-tahun"><span class="sr-only">Filter tahun ajaran</span><select id="rombel-tahun" wire:model.live="academicYearId" class="select-field"><option value="">Semua tahun ajaran</option>@foreach ($tahunAjaran as $ta)<option value="{{ $ta->id }}">{{ $ta->nama }}</option>@endforeach</select></label>
             </div>
-        @empty
-            <p class="col-span-full py-12 text-center text-sm text-slate-500 dark:text-slate-400">
-                Tidak ada data kelas.
-            </p>
-        @endforelse
-    </div>
 
-    @if ($rombels->hasPages())
-        <div class="mt-4">{{ $rombels->links() }}</div>
-    @endif
+            <div class="toolbar-right management-directory-actions">
+                @if ($search !== '' || $tingkat !== '' || $academicYearId !== $tahunAktifId)
+                    <button type="button" wire:click="resetFilters" wire:loading.attr="disabled" wire:target="resetFilters" class="btn btn-outline btn-sm">
+                        <x-icon name="undo-2" class="h-4 w-4" /> Reset filter
+                    </button>
+                @endif
+            </div>
+        </div>
+
+        <div class="table-scroll" wire:loading.class="management-content-loading" wire:target="search,tingkat,academicYearId,resetFilters">
+            <table class="data-table management-data-table">
+                <thead>
+                    <tr>
+                        <th scope="col">Kelas</th>
+                        <th scope="col">Tingkat</th>
+                        <th scope="col">Tahun Ajaran</th>
+                        <th scope="col">Wali Kelas</th>
+                        <th scope="col">Siswa</th>
+                        <th scope="col" class="management-actions-heading">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse ($rombels as $rombel)
+                        <tr wire:key="rombel-directory-{{ $rombel->id }}">
+                            <td><strong>{{ $rombel->nama }}</strong></td>
+                            <td>{{ $rombel->tingkat }}</td>
+                            <td>{{ $rombel->academicYear?->nama ?? '—' }}</td>
+                            <td>{{ $rombel->waliKelas?->nama ?? '—' }}</td>
+                            <td><span class="management-reference">{{ $rombel->siswa_count }}/{{ $rombel->kapasitas }}</span></td>
+                            <td>
+                                <div class="row-actions management-row-actions">
+                                    @can('kelas.view')<a href="{{ route('kelas.show', $rombel) }}" class="table-action" aria-label="Lihat {{ $rombel->nama }}" title="Lihat siswa"><x-icon name="eye" class="h-4 w-4" /></a>@endcan
+                                    @can('kelas.update')<a href="{{ route('kelas.edit', $rombel) }}" class="table-action" aria-label="Ubah {{ $rombel->nama }}" title="Ubah data"><x-icon name="pencil" class="h-4 w-4" /></a>@endcan
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr><td colspan="6"><div class="empty-state"><div class="empty-symbol"><x-icon name="school" class="h-7 w-7" /></div><h3>Kelas tidak ditemukan</h3><p>Ubah kata kunci atau filter untuk melihat kelas lainnya.</p>@if ($search !== '' || $tingkat !== '' || $academicYearId !== $tahunAktifId)<button type="button" wire:click="resetFilters" class="btn btn-soft btn-sm">Reset filter</button>@endif</div></td></tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+
+        @if ($rombels->hasPages())<div class="management-pagination">{{ $rombels->links() }}</div>@endif
+    </section>
 </div>

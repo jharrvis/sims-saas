@@ -18,6 +18,8 @@ class RombelShow extends Component
 
     public string $searchSiswa = '';
 
+    public string $searchAnggota = '';
+
     public function mount(Rombel $rombel): void
     {
         $this->rombel = $rombel->load(['waliKelas:id,nama', 'academicYear:id,nama']);
@@ -46,6 +48,8 @@ class RombelShow extends Component
         ]);
 
         $this->rombel->load('students');
+
+        session()->flash('sukses', "Siswa {$student->nama} ditempatkan ke kelas {$this->rombel->nama}.");
     }
 
     public function removeStudent(int $studentId): void
@@ -57,25 +61,38 @@ class RombelShow extends Component
             ->where('student_id', $studentId)
             ->where('academic_year_id', $this->rombel->academic_year_id)
             ->update(['status' => 'pindah']);
+
+        session()->flash('sukses', 'Siswa dikeluarkan dari kelas '.$this->rombel->nama.'.');
     }
 
     public function render(): View
     {
+        // ID anggota penuh (tanpa filter pencarian) untuk mengecualikan calon:
+        // memakai daftar anggota yang sudah terfilter akan membuat anggota
+        // muncul kembali sebagai calon saat pencarian anggota tidak cocok.
+        $anggotaIds = $this->rombel->students()
+            ->wherePivot('academic_year_id', $this->rombel->academic_year_id)
+            ->wherePivot('status', 'aktif')
+            ->pluck('students.id')
+            ->all();
+
         $siswa = $this->rombel->students()
             ->wherePivot('academic_year_id', $this->rombel->academic_year_id)
             ->wherePivot('status', 'aktif')
+            ->when($this->searchAnggota !== '', fn ($q) => $q->where('nama', 'like', '%'.$this->searchAnggota.'%'))
             ->orderBy('nama')
             ->get();
 
         $calon = Student::where('status', 'aktif')
             ->where('nama', 'like', '%'.$this->searchSiswa.'%')
-            ->whereNotIn('id', $siswa->pluck('id'))
+            ->whereNotIn('id', $anggotaIds)
             ->orderBy('nama')
             ->limit(10)
             ->get();
 
         return view('livewire.akademik.rombel-show', [
             'siswa' => $siswa,
+            'jumlahAnggota' => count($anggotaIds),
             'calon' => $calon,
         ])->layout('layouts.app', ['title' => 'Kelas '.$this->rombel->nama]);
     }

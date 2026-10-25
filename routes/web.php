@@ -235,7 +235,7 @@ Route::middleware(['auth', 'mfa'])->group(function (): void {
     Route::prefix('kelas')->name('kelas.')->group(function (): void {
         Route::get('/', RombelIndex::class)->name('index')->middleware('permission:kelas.view');
         if (class_exists(PromoteStudents::class)) {
-            Route::get('/kenaikan', PromoteStudents::class)->name('kenaikan')->middleware('permission:kelas.kelola');
+            Route::get('/kenaikan', PromoteStudents::class)->name('kenaikan')->middleware('permission:kelas.promote');
         }
         Route::get('/tambah', RombelForm::class)->name('create')->middleware('permission:kelas.create');
         Route::get('/{rombel}/ubah', RombelForm::class)->name('edit')->middleware('permission:kelas.update');

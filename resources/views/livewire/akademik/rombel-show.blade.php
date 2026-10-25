@@ -1,75 +1,128 @@
-<div class="max-w-5xl mx-auto space-y-5">
-    <div class="rounded-xl border border-slate-200 bg-white dark:bg-boxdark dark:border-slate-700 p-6">
-        <div class="flex items-start justify-between gap-4">
-            <div>
-                <h1 class="text-xl font-bold text-slate-800 dark:text-white">{{ $rombel->nama }}</h1>
-                <p class="text-sm text-slate-500 mt-1">
-                    Tingkat {{ $rombel->tingkat }} · {{ $rombel->academicYear->nama }} ·
-                    Wali kelas: {{ $rombel->waliKelas?->nama ?? '—' }} ·
-                    Kapasitas {{ $rombel->kapasitas }}
-                </p>
-            </div>
+<div class="page-stack">
+    @if (session('sukses'))
+        <div class="management-alert management-alert-success" role="status" aria-live="polite">
+            <x-icon name="check-circle" class="h-5 w-5" />
+            <span>{{ session('sukses') }}</span>
+        </div>
+    @endif
+
+    <div class="page-header management-page-header">
+        <div>
+            <span class="eyebrow">Akademik / Data Kelas</span>
+            <h2 class="management-page-title">Kelas {{ $rombel->nama }}</h2>
+            <p>Tingkat {{ $rombel->tingkat }} · {{ $rombel->academicYear?->nama ?? '—' }} · Wali kelas: {{ $rombel->waliKelas?->nama ?? '—' }} · Kapasitas {{ $rombel->kapasitas }}</p>
+        </div>
+        <div class="page-actions">
+            <a href="{{ route('kelas.index') }}" class="btn btn-outline">
+                <x-icon name="arrow-left" class="h-4 w-4" /> Kembali ke daftar kelas
+            </a>
             @can('kelas.update')
-                <a href="{{ route('kelas.edit', $rombel) }}" class="inline-flex items-center gap-2 rounded-lg border border-slate-200 dark:border-slate-700 px-4 py-2 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-800">
-                    <i data-lucide="pencil" class="w-4 h-4"></i> Ubah
+                <a href="{{ route('kelas.edit', $rombel) }}" class="btn btn-primary">
+                    <x-icon name="pencil" class="h-4 w-4" /> Ubah
                 </a>
             @endcan
         </div>
     </div>
 
-    <div class="rounded-xl border border-slate-200 bg-white dark:bg-boxdark dark:border-slate-700 p-6">
-        <h2 class="font-semibold text-slate-800 dark:text-white mb-4">Siswa ({{ $siswa->count() }})</h2>
-        @if ($siswa->isEmpty())
-            <p class="text-sm text-slate-500">Belum ada siswa di kelas ini.</p>
-        @else
-            <ul class="divide-y divide-slate-100 dark:divide-slate-700/50">
-                @foreach ($siswa as $s)
-                    <li class="py-2.5 flex items-center justify-between">
-                        <div>
-                            <p class="font-medium text-slate-800 dark:text-white text-sm">{{ $s->nama }}</p>
-                            <p class="text-xs text-slate-500">NIS {{ $s->nis }}</p>
-                        </div>
-                        @can('kelas.update')
-                            <button wire:click="removeStudent({{ $s->id }})" wire:confirm="Keluarkan {{ $s->nama }} dari kelas ini?"
-                                    class="p-2 rounded-lg text-danger hover:bg-red-50 dark:hover:bg-red-900/20" aria-label="Keluarkan {{ $s->nama }}">
-                                <i data-lucide="user-minus" class="w-4 h-4"></i>
-                            </button>
-                        @endcan
-                    </li>
-                @endforeach
-            </ul>
-        @endif
-    </div>
+    <section class="card management-table-card" aria-labelledby="rombel-member-title">
+        <div class="card-head management-table-heading">
+            <div class="card-title">
+                <span class="mini-icon blue"><x-icon name="users" class="h-[19px] w-[19px]" /></span>
+                <div>
+                    <h3 id="rombel-member-title">Anggota Kelas</h3>
+                    <p>{{ number_format($jumlahAnggota, 0, ',', '.') }} siswa aktif</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-toolbar management-toolbar">
+            <div class="toolbar-left management-filter-group">
+                <label class="field-search management-search-field" for="rombel-member-search">
+                    <x-icon name="search" class="h-4 w-4" /><span class="sr-only">Cari anggota kelas</span>
+                    <input id="rombel-member-search" type="search" wire:model.live.debounce.300ms="searchAnggota" placeholder="Cari nama siswa..." autocomplete="off">
+                    <span wire:loading wire:target="searchAnggota" class="management-inline-spinner" aria-hidden="true"></span>
+                </label>
+            </div>
+        </div>
+
+        <div class="table-scroll" wire:loading.class="management-content-loading" wire:target="searchAnggota,assignStudent,removeStudent">
+            <table class="data-table management-data-table">
+                <thead>
+                    <tr>
+                        <th scope="col">Nama Siswa</th>
+                        <th scope="col">NIS</th>
+                        <th scope="col" class="management-actions-heading">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse ($siswa as $s)
+                        <tr wire:key="rombel-member-{{ $s->id }}">
+                            <td><strong>{{ $s->nama }}</strong></td>
+                            <td><span class="management-reference">{{ $s->nis }}</span></td>
+                            <td>
+                                <div class="row-actions management-row-actions">
+                                    @can('kelas.update')
+                                        <button type="button" wire:click="removeStudent({{ $s->id }})" wire:confirm="Keluarkan {{ $s->nama }} dari kelas ini?" wire:loading.attr="disabled" wire:target="removeStudent({{ $s->id }})" class="table-action danger" aria-label="Keluarkan {{ $s->nama }}" title="Keluarkan dari kelas"><x-icon name="user-minus" class="h-4 w-4" /></button>
+                                    @endcan
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr><td colspan="3"><div class="empty-state"><div class="empty-symbol"><x-icon name="users" class="h-7 w-7" /></div><h3>{{ $searchAnggota !== '' ? 'Siswa tidak ditemukan' : 'Belum ada siswa di kelas ini' }}</h3><p>{{ $searchAnggota !== '' ? 'Ubah kata kunci untuk melihat anggota lainnya.' : 'Tempatkan siswa dari daftar di bawah.' }}</p></div></td></tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </section>
 
     @can('kelas.update')
-        <div class="rounded-xl border border-slate-200 bg-white dark:bg-boxdark dark:border-slate-700 p-6">
-            <h2 class="font-semibold text-slate-800 dark:text-white mb-4">Tempatkan Siswa</h2>
-            <div class="relative mb-4 max-w-sm">
-                <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
-                <input type="search" wire:model.live.debounce.300ms="searchSiswa" placeholder="Cari siswa…"
-                       aria-label="Cari siswa untuk ditempatkan"
-                       class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-transparent py-2.5 pl-10 pr-4 text-sm outline-none focus:border-primary dark:text-white">
+        <section class="card management-table-card" aria-labelledby="rombel-candidate-title">
+            <div class="card-head management-table-heading">
+                <div class="card-title">
+                    <span class="mini-icon green"><x-icon name="user-plus" class="h-[19px] w-[19px]" /></span>
+                    <div>
+                        <h3 id="rombel-candidate-title">Tempatkan Siswa</h3>
+                        <p>Cari siswa aktif yang belum berada di kelas ini</p>
+                    </div>
+                </div>
             </div>
-            <ul class="divide-y divide-slate-100 dark:divide-slate-700/50">
-                @forelse ($calon as $c)
-                    <li class="py-2.5 flex items-center justify-between">
-                        <div>
-                            <p class="font-medium text-slate-800 dark:text-white text-sm">{{ $c->nama }}</p>
-                            <p class="text-xs text-slate-500">NIS {{ $c->nis }}</p>
-                        </div>
-                        <button wire:click="assignStudent({{ $c->id }})"
-                                class="px-3 py-1.5 rounded-lg text-xs font-medium bg-primary/10 text-primary hover:bg-primary/20">
-                            Tempatkan
-                        </button>
-                    </li>
-                @empty
-                    <li class="py-4 text-sm text-slate-500">Ketik nama siswa untuk mencari.</li>
-                @endforelse
-            </ul>
-        </div>
+            <div class="table-toolbar management-toolbar">
+                <div class="toolbar-left management-filter-group">
+                    <label class="field-search management-search-field" for="rombel-candidate-search">
+                        <x-icon name="search" class="h-4 w-4" /><span class="sr-only">Cari siswa untuk ditempatkan</span>
+                        <input id="rombel-candidate-search" type="search" wire:model.live.debounce.300ms="searchSiswa" placeholder="Cari siswa..." autocomplete="off">
+                        <span wire:loading wire:target="searchSiswa" class="management-inline-spinner" aria-hidden="true"></span>
+                    </label>
+                </div>
+            </div>
+            <div class="table-scroll" wire:loading.class="management-content-loading" wire:target="searchSiswa,assignStudent">
+                <table class="data-table management-data-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Nama Siswa</th>
+                            <th scope="col">NIS</th>
+                            <th scope="col" class="management-actions-heading">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse ($calon as $c)
+                            <tr wire:key="rombel-candidate-{{ $c->id }}">
+                                <td><strong>{{ $c->nama }}</strong></td>
+                                <td><span class="management-reference">{{ $c->nis }}</span></td>
+                                <td>
+                                    <div class="row-actions management-row-actions">
+                                        <button type="button" wire:click="assignStudent({{ $c->id }})" wire:loading.attr="disabled" wire:target="assignStudent({{ $c->id }})" class="btn btn-soft btn-sm">
+                                            <x-icon name="plus" class="h-4 w-4" /> Tempatkan
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr><td colspan="3"><div class="empty-state"><div class="empty-symbol"><x-icon name="search" class="h-7 w-7" /></div><h3>Ketik nama siswa untuk mencari</h3><p>Hanya siswa aktif yang belum berada di kelas ini yang ditampilkan.</p></div></td></tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </section>
     @endcan
-
-    <a href="{{ route('kelas.index') }}" class="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-slate-700 dark:hover:text-slate-300">
-        ← Kembali ke daftar kelas
-    </a>
 </div>
