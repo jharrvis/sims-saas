@@ -1529,3 +1529,199 @@
 .management-form-card .toggle-row {
     min-height: 44px;
 }
+
+/*
+ * Pusat Bantuan (/bantuan): tipografi artikel markdown.
+ *
+ * Artikel dirender dari docs/bantuan/*.md lewat HelpController. Class
+ * `prose` Tailwind Typography TIDAK terpasang di proyek ini (tidak ada
+ * @tailwindcss/typography di package.json, tidak ada rule .prose di CSS
+ * hasil build), jadi gaya artikel didefinisikan eksplisit di sini dengan
+ * token desain yang sama (DM Sans / Plus Jakarta Sans, --ink, --muted,
+ * --line, --blue, --blue-tint) agar tidak bergantung pada plugin.
+ */
+.help-content {
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--muted);
+    max-width: 75ch;
+    overflow-wrap: anywhere;
+}
+
+.help-content h1,
+.help-content h2,
+.help-content h3,
+.help-content h4 {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    color: var(--ink);
+    letter-spacing: -0.02em;
+    line-height: 1.35;
+}
+
+.help-content h1 {
+    font-size: 24px;
+    font-weight: 800;
+    margin: 0 0 16px;
+}
+
+.help-content h2 {
+    font-size: 18px;
+    font-weight: 800;
+    margin: 32px 0 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--line);
+}
+
+.help-content h3 {
+    font-size: 16px;
+    font-weight: 800;
+    margin: 24px 0 8px;
+}
+
+.help-content h4 {
+    font-size: 14px;
+    font-weight: 800;
+    margin: 20px 0 8px;
+}
+
+.help-content p,
+.help-content ul,
+.help-content ol,
+.help-content blockquote,
+.help-content pre,
+.help-content table,
+.help-content hr {
+    margin: 0 0 12px;
+}
+
+.help-content > *:first-child {
+    margin-top: 0;
+}
+
+.help-content strong {
+    color: var(--ink);
+    font-weight: 700;
+}
+
+.help-content a {
+    color: var(--blue);
+    text-decoration: none;
+}
+
+.help-content a:hover {
+    text-decoration: underline;
+}
+
+.help-content ul {
+    list-style: disc;
+    padding-left: 20px;
+}
+
+.help-content ol {
+    list-style: decimal;
+    padding-left: 20px;
+}
+
+.help-content li {
+    margin: 4px 0;
+}
+
+.help-content li > ul,
+.help-content li > ol {
+    margin: 4px 0;
+}
+
+.help-content blockquote {
+    border-left: 4px solid var(--blue);
+    background: var(--blue-tint);
+    padding: 10px 16px;
+    border-radius: 0 12px 12px 0;
+    color: var(--ink);
+}
+
+.help-content blockquote p {
+    margin: 0;
+}
+
+.help-content code {
+    font-size: 13px;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    padding: 2px 6px;
+    border-radius: 6px;
+    overflow-wrap: anywhere;
+}
+
+.help-content pre {
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 16px;
+    overflow-x: auto;
+}
+
+.help-content pre code {
+    background: none;
+    border: 0;
+    padding: 0;
+}
+
+.help-content hr {
+    border: 0;
+    border-top: 1px solid var(--line);
+    margin: 24px 0;
+}
+
+.help-content table {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    font-size: 13px;
+    border-collapse: collapse;
+    color: var(--muted);
+}
+
+.help-content th {
+    background: var(--surface-2);
+    color: var(--ink);
+    font-weight: 700;
+    text-align: left;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--line);
+    white-space: nowrap;
+}
+
+.help-content td {
+    padding: 10px 12px;
+    border-top: 1px solid var(--line);
+    vertical-align: top;
+}
+
+.dark .help-content {
+    color: #cbd5e1;
+}
+
+.dark .help-content h1,
+.dark .help-content h2,
+.dark .help-content h3,
+.dark .help-content h4,
+.dark .help-content strong,
+.dark .help-content blockquote {
+    color: #ffffff;
+}
+
+.dark .help-content h2,
+.dark .help-content hr,
+.dark .help-content th,
+.dark .help-content td,
+.dark .help-content code,
+.dark .help-content pre {
+    border-color: #2c3d58;
+}
+
+.dark .help-content code,
+.dark .help-content pre,
+.dark .help-content th,
+.dark .help-content blockquote {
+    background: #1d2b43;
+}
