@@ -45,6 +45,29 @@
         </section>
     @endif
 
+    @if ($student)
+        <section aria-labelledby="qr-absensi-title">
+            <div class="section-head">
+                <h2 id="qr-absensi-title">QR Absensi</h2>
+                <span class="pwa-section-meta">{{ $student->nis ? 'Tunjukkan ke scanner di sekolah' : 'NIS belum tersedia' }}</span>
+            </div>
+            @if ($student->nis)
+                <div class="surface-card text-center">
+                    <div class="bg-white p-4 rounded-2xl inline-block">
+                        {!! \App\Domains\Pwa\Services\QrLoginService::qrSvg($student->nis, 220) !!}
+                    </div>
+                    <p><strong>{{ $student->nama }} · NIS {{ $student->nis }}</strong></p>
+                    <p class="profile-helper">Pindai kode ini dengan scanner absensi sekolah. Kode berisi NIS siswa dan bukan token login.</p>
+                </div>
+            @else
+                <div class="surface-card">
+                    <p><strong>QR belum tersedia.</strong></p>
+                    <p class="profile-helper">NIS siswa belum diisi. Minta admin sekolah melengkapi data siswa agar QR absensi dapat ditampilkan.</p>
+                </div>
+            @endif
+        </section>
+    @endif
+
     @if ($role === 'orang-tua' && $children->count() > 1)
         <section aria-labelledby="child-profile-title">
             <div class="section-head">

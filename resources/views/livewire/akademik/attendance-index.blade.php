@@ -34,6 +34,29 @@
         </div>
     </div>
 
+    @if ($rombelId)
+        @can('absensi.create')
+            @if (! $locked)
+                <div class="card">
+                    <div class="flex flex-wrap items-end gap-2">
+                        <label class="management-filter-field flex-1" for="absensi-scan"><span class="sr-only">Pindai NIS siswa</span>
+                            <input id="absensi-scan" type="text" wire:model.live="scanNis" wire:keydown.enter="scanSiswa"
+                                   placeholder="Pindai barcode / ketik NIS lalu Enter" autofocus
+                                   aria-label="Pindai NIS siswa" class="field min-h-11 w-full">
+                        </label>
+                        <button wire:click="scanSiswa" class="btn btn-primary">Tandai Hadir</button>
+                    </div>
+                    <p class="text-xs text-slate-500 mt-2">Pindai QR dari profil PWA siswa (berisi NIS), atau ketik NIS lalu tekan Enter. Siswa ditandai Hadir dan tetap perlu disimpan dengan tombol Simpan Absensi.</p>
+                </div>
+            @endif
+            @if ($scanPesan)
+                <div class="management-alert {{ $scanBerhasil ? 'management-alert-success' : 'management-alert-warning' }}" role="status" aria-live="polite">
+                    <span>{{ $scanPesan }}</span>
+                </div>
+            @endif
+        @endcan
+    @endif
+
     @if ($rombelId && $students->isNotEmpty())
         @can('absensi.create')
             @if (! $locked)

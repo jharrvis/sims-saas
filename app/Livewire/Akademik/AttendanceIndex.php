@@ -30,6 +30,12 @@ class AttendanceIndex extends Component
 
     public bool $locked = false;
 
+    public string $scanNis = '';
+
+    public ?string $scanPesan = null;
+
+    public bool $scanBerhasil = false;
+
     public function mount(): void
     {
         $this->tanggal = now()->toDateString();
@@ -55,6 +61,8 @@ class AttendanceIndex extends Component
         $this->marks = [];
         $this->notes = [];
         $this->locked = false;
+        $this->scanPesan = null;
+        $this->scanBerhasil = false;
 
         if (! $this->rombelId || $this->tanggal === '') {
             return;
@@ -82,6 +90,59 @@ class AttendanceIndex extends Component
         foreach ($this->students() as $s) {
             $this->marks[$s->id] = $status;
         }
+    }
+
+    /**
+     * Pindai NIS (dari QR profil PWA siswa, dibaca barcode scanner sebagai
+     * ketikan + Enter) lalu tandai siswa tersebut Hadir di rombel yang
+     * sedang dipilih. Hanya menandai di formulir — tetap perlu Simpan.
+     */
+    public function scanSiswa(): void
+    {
+        $this->authorize('absensi.create');
+
+        $nis = trim($this->scanNis);
+        $this->scanNis = '';
+        $this->scanPesan = null;
+        $this->scanBerhasil = false;
+
+        if ($nis === '') {
+            return;
+        }
+
+        if ($this->locked) {
+            $this->scanPesan = 'Absensi sudah dikunci, tidak bisa diubah lagi.';
+
+            return;
+        }
+
+        if (! $this->rombelId) {
+            $this->scanPesan = 'Pilih kelas dulu sebelum memindai.';
+
+            return;
+        }
+
+        $siswa = Student::where('nis', $nis)->first();
+
+        if ($siswa === null) {
+            $this->scanPesan = "NIS {$nis} tidak ditemukan di sekolah ini.";
+
+            return;
+        }
+
+        if (! $this->students()->contains('id', $siswa->id)) {
+            $rombelAktif = $siswa->rombels()->wherePivot('status', 'aktif')->orderBy('nama')->first();
+            $this->scanPesan = "NIS {$nis} ({$siswa->nama}) terdaftar di kelas ".($rombelAktif?->nama ?? 'lain').', bukan kelas yang sedang dipilih.';
+
+            return;
+        }
+
+        $sebelumnya = $this->marks[$siswa->id] ?? null;
+        $this->marks[$siswa->id] = 'H';
+        $this->scanBerhasil = true;
+        $this->scanPesan = $sebelumnya !== null && $sebelumnya !== 'H'
+            ? "{$siswa->nama} diubah dari ".(Attendance::STATUS[$sebelumnya] ?? $sebelumnya).' menjadi Hadir (belum tersimpan — tekan Simpan Absensi).'
+            : "{$siswa->nama} ditandai Hadir (belum tersimpan — tekan Simpan Absensi).";
     }
 
     public function save(PushService $push): void
