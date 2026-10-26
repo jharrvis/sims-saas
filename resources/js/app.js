@@ -6,6 +6,37 @@
  * contains demo data or role detection.
  */
 
+import { createIcons, icons } from 'lucide';
+
+/**
+ * Ikon Lucide: elemen <i data-lucide> hanya berubah menjadi SVG setelah
+ * createIcons() dipanggil. Paket lucide terpasang tapi tidak pernah
+ * diinisialisasi, sehingga semua ikon (kartu bantuan, QR, auth) tampil
+ * kosong. Dijalankan sekali saat muat dan diulang setiap Livewire selesai
+ * me-render ulang DOM (morph), karena morph mengembalikan elemen <i>.
+ */
+const renderLucideIcons = () => {
+    try {
+        createIcons({ icons });
+    } catch {
+        // Lucide gagal dimuat: biarkan <i> kosong daripada merusak shell.
+    }
+};
+
+renderLucideIcons();
+
+document.addEventListener('livewire:init', () => {
+    if (!window.Livewire) return;
+
+    try {
+        window.Livewire.hook('morph.updated', () => renderLucideIcons());
+    } catch {
+        // Hook tidak tersedia di versi Livewire ini.
+    }
+});
+
+document.addEventListener('livewire:navigated', renderLucideIcons);
+
 const STORAGE = {
     theme: 'sims-theme',
     sidebar: 'sims-sidebar-collapsed',
