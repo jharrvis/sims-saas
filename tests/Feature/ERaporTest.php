@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Domains\ERapor\Services\ERaporService;
 use App\Livewire\ERapor\RaporIndex;
+use App\Livewire\ERapor\RaporShow;
 use App\Models\AcademicYear;
 use App\Models\Grade;
 use App\Models\GradeComponent;
@@ -131,4 +132,11 @@ it('daftar rapor memakai struktur design system management (Batch 5)', function 
         ->assertSeeHtml('management-page-header')
         ->assertSee('Pilih rombel dan semester untuk menampilkan daftar rapor.')
         ->assertDontSee('<i data-lucide');
+});
+
+it('perbaikan QA: kertas rapor menyusut di parent flex (min-w-0)', function (): void {
+    Livewire::actingAs($this->admin)
+        ->test(RaporShow::class, ['student' => $this->siswa, 'semester' => $this->semester])
+        ->assertSee('Rapor Hasil Belajar')
+        ->assertSeeHtml('min-w-0');
 });
