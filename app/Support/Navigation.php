@@ -36,7 +36,8 @@ final class Navigation
                 self::item('QR Login', 'qr.kartu', 'qr-code', active: 'qr.*', permission: 'qr.view'),
                 self::item('Data Guru', 'guru.index', 'graduation-cap', active: 'guru.*', permission: 'guru.view'),
                 self::item('Data Kelas', 'kelas.index', 'school', active: 'kelas.*', permission: 'kelas.view'),
-                self::item('Jadwal Pelajaran', 'jadwal.index', 'calendar-days', active: 'jadwal.*,mapel.*', permission: 'jadwal.view'),
+                self::item('Mata Pelajaran', 'mapel.index', 'book-open', active: 'mapel.*', permission: 'jadwal.view'),
+                self::item('Jadwal Pelajaran', 'jadwal.index', 'calendar-days', active: 'jadwal.*', permission: 'jadwal.view'),
                 self::item('PPDB', 'ppdb.index', 'user-plus', active: 'ppdb.*', permission: 'ppdb.periode.view'),
             ],
             'akademik' => [

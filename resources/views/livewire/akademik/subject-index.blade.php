@@ -5,6 +5,13 @@
             <h2 class="management-page-title">Mata Pelajaran</h2>
             <p>Daftar mata pelajaran beserta kelompok dan KKM.</p>
         </div>
+        <div class="page-actions">
+            @can('jadwal.create')
+                <a href="{{ route('mapel.create') }}" class="btn btn-primary">
+                    <x-icon name="plus" class="h-4 w-4" /> Tambah Mapel
+                </a>
+            @endcan
+        </div>
     </div>
 
     <div class="table-toolbar management-toolbar">
@@ -26,6 +33,7 @@
                         <th scope="col">Nama</th>
                         <th scope="col">Kelompok</th>
                         <th scope="col">KKM</th>
+                        <th scope="col">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -35,10 +43,15 @@
                             <td class="font-medium">{{ $s->nama }}</td>
                             <td class="capitalize">{{ $s->kelompok }}</td>
                             <td>{{ $s->kkm_default }}</td>
+                            <td>
+                                <div class="row-actions">
+                                    @can('jadwal.update')<a href="{{ route('mapel.edit', $s) }}" class="table-action" aria-label="Ubah {{ $s->nama }}" title="Ubah data"><x-icon name="pencil" class="h-4 w-4" /></a>@endcan
+                                </div>
+                            </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" class="py-12 text-center text-sm text-slate-500 dark:text-slate-400">
+                            <td colspan="5" class="py-12 text-center text-sm text-slate-500 dark:text-slate-400">
                                 Tidak ada data mata pelajaran.
                             </td>
                         </tr>
