@@ -73,7 +73,8 @@ it('menampilkan QR absensi siswa di profil PWA', function (): void {
         ->assertSee('QR Absensi')
         ->assertSee('Tunjukkan ke scanner di sekolah')
         ->assertSee('NIS 9001')
-        ->assertSee('width="220"', false);
+        ->assertSee('width="220"', false)
+        ->assertSee('qr-absensi');
 });
 
 it('menampilkan QR anak aktif untuk orang tua', function (): void {

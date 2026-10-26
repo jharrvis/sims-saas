@@ -53,7 +53,7 @@
             </div>
             @if ($student->nis)
                 <div class="surface-card text-center">
-                    <div class="bg-white p-4 rounded-2xl inline-block">
+                    <div class="qr-absensi bg-white p-4 rounded-2xl inline-block">
                         {!! \App\Domains\Pwa\Services\QrLoginService::qrSvg($student->nis, 220) !!}
                     </div>
                     <p><strong>{{ $student->nama }} · NIS {{ $student->nis }}</strong></p>

@@ -878,3 +878,17 @@ html {
         page-break-before: always;
     }
 }
+
+/*
+ * QR absensi profil: grafik isi (bukan ikon stroke). Aturan
+ * `.pwa-body svg` di pwa-reference.css memaksa semua SVG menjadi ikon
+ * 24px tanpa isi (fill: none, stroke: currentColor) — tanpa pengecualian
+ * ini QR menyusut jadi gumpalan kecil. Spesifisitas di sini lebih tinggi
+ * (.pwa-body .qr-absensi svg) sehingga menang tanpa !important.
+ */
+.pwa-body .qr-absensi svg {
+    width: 220px;
+    height: 220px;
+    fill: #000;
+    stroke: none;
+}
