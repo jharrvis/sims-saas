@@ -134,9 +134,13 @@ it('daftar rapor memakai struktur design system management (Batch 5)', function 
         ->assertDontSee('<i data-lucide');
 });
 
-it('perbaikan QA: kertas rapor menyusut di parent flex (min-w-0)', function (): void {
+it('perbaikan QA: kertas rapor selebar parent di mobile, selebar konten di desktop', function (): void {
+    // Hanya menegaskan kontrak class yang sudah dibuktikan QA lewat
+    // modifikasi DOM sementara (368px di 390, 551.55px di 768/1920).
+    // Perilaku responsif sesungguhnya tetap diverifikasi QA di browser,
+    // karena assertion HTML tidak bisa mengukur scrollWidth.
     Livewire::actingAs($this->admin)
         ->test(RaporShow::class, ['student' => $this->siswa, 'semester' => $this->semester])
         ->assertSee('Rapor Hasil Belajar')
-        ->assertSeeHtml('min-w-0');
+        ->assertSeeHtml('min-w-0 w-full sm:w-auto');
 });
