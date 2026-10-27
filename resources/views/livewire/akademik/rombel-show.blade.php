@@ -169,7 +169,7 @@
                 <div class="rombel-table-footer">
                     <span>
                         @if ($calon->total() > 0)
-                            Menampilkan {{ $calon->firstItem() }}–{{ $calon->lastItem() }} dari {{ $calon->total() }} siswa
+                            {{ $calon->firstItem() }}–{{ $calon->lastItem() }} dari {{ $calon->total() }} siswa
                         @else
                             Tidak ada siswa
                         @endif
@@ -218,7 +218,7 @@
                         <span wire:loading wire:target="searchAnggota" class="management-inline-spinner" aria-hidden="true"></span>
                     </label>
                     <label class="sr-only" for="rombel-member-sort">Urutkan anggota</label>
-                    <select id="rombel-member-sort" wire:model.live="sortAnggota" class="select-field">
+                    <select id="rombel-member-sort" wire:model.live="sortAnggota" class="select-field rombel-sort-single">
                         <option value="nama">Urutkan: Nama (A–Z)</option>
                         <option value="nama_desc">Urutkan: Nama (Z–A)</option>
                         <option value="nis">Urutkan: NIS</option>

@@ -233,11 +233,11 @@ it('paginasi calon 8 per halaman dan seleksi bertahan pindah halaman', function 
 
     $test = Livewire::actingAs($this->admin)
         ->test(RombelShow::class, ['rombel' => $this->rombel])
-        ->assertSee('Menampilkan 1–8 dari 12 siswa')
+        ->assertSee('1–8 dari 12 siswa')
         ->set('selectedCalon', [$this->calonBebas->id])
         ->call('gotoCalonPage', 2)
         ->assertSet('selectedCalon', [$this->calonBebas->id])
-        ->assertSee('Menampilkan 9–12 dari 12 siswa');
+        ->assertSee('9–12 dari 12 siswa');
 
     $test->set('selectedCalon', [$this->calonBebas->id, $this->calonPindah->id])
         ->call('tambahkan')

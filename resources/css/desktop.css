@@ -2031,9 +2031,15 @@
     min-width: 0;
 }
 
+/* Sort panel kanan satu-satunya: lebarnya disamakan dengan sort panel kiri
+   (setengah baris, bukan sebaris penuh). */
+.rombel-board .rombel-sort-single {
+    flex: 0 1 calc(50% - 4px);
+}
+
 .rombel-table-footer {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     align-items: center;
     justify-content: space-between;
     gap: 12px;
@@ -2043,20 +2049,29 @@
     font-weight: 600;
 }
 
+.rombel-table-footer > span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 .rombel-pager {
     display: flex;
+    flex-shrink: 0;
     align-items: center;
     gap: 4px;
 }
 
 .rombel-pager button {
-    min-width: 32px;
-    height: 32px;
-    padding: 0 8px;
+    min-width: 28px;
+    height: 28px;
+    padding: 0 6px;
     border: 1px solid var(--line);
     border-radius: 8px;
     background: var(--surface);
     color: var(--ink);
+    font-size: 12px;
     font-weight: 700;
     cursor: pointer;
 }
