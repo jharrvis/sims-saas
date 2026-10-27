@@ -2033,8 +2033,39 @@
 
 /* Sort panel kanan satu-satunya: lebarnya disamakan dengan sort panel kiri
    (setengah baris, bukan sebaris penuh). */
-.rombel-board .rombel-sort-single {
+.rombel-board .rombel-sort-single,
+.rombel-detail .rombel-sort-single {
     flex: 0 1 calc(50% - 4px);
+}
+
+/* Halaman lihat kelas: daftar anggota memakai perlakuan yang sama dengan
+   papan kelola (tinggi tetap + scroll, header menempel, toolbar melipat). */
+.rombel-detail .table-scroll {
+    height: 480px;
+    overflow-x: auto;
+    overflow-y: auto;
+}
+
+.rombel-detail .data-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: var(--surface);
+}
+
+.rombel-detail .data-table th,
+.rombel-detail .data-table td {
+    padding: 10px 8px;
+}
+
+.rombel-detail .management-filter-group {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.rombel-detail .management-search-field {
+    flex: 1 1 100%;
+    width: 100%;
 }
 
 .rombel-table-footer {

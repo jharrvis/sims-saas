@@ -14,6 +14,7 @@ use App\Livewire\Akademik\GradeImport;
 use App\Livewire\Akademik\GradeInput;
 use App\Livewire\Akademik\GradeLeger;
 use App\Livewire\Akademik\PromoteStudents;
+use App\Livewire\Akademik\RombelDetail;
 use App\Livewire\Akademik\RombelForm;
 use App\Livewire\Akademik\RombelIndex;
 use App\Livewire\Akademik\RombelShow;
@@ -239,7 +240,8 @@ Route::middleware(['auth', 'mfa'])->group(function (): void {
         }
         Route::get('/tambah', RombelForm::class)->name('create')->middleware('permission:kelas.create');
         Route::get('/{rombel}/ubah', RombelForm::class)->name('edit')->middleware('permission:kelas.update');
-        Route::get('/{rombel}', RombelShow::class)->name('show')->middleware('permission:kelas.view');
+        Route::get('/{rombel}/anggota', RombelShow::class)->name('anggota')->middleware('permission:kelas.update');
+        Route::get('/{rombel}', RombelDetail::class)->name('show')->middleware('permission:kelas.view');
     });
 
     // Akademik

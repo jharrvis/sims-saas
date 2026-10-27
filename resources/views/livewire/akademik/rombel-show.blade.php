@@ -8,12 +8,12 @@
 
     <div class="page-header management-page-header">
         <div>
-            <p class="rombel-breadcrumb">Akademik <span aria-hidden="true">&gt;</span> <a href="{{ route('kelas.index') }}">Data Kelas</a> <span aria-hidden="true">&gt;</span> {{ $rombel->nama }}</p>
+            <p class="rombel-breadcrumb">Akademik <span aria-hidden="true">&gt;</span> <a href="{{ route('kelas.index') }}">Data Kelas</a> <span aria-hidden="true">&gt;</span> <a href="{{ route('kelas.show', $rombel) }}">{{ $rombel->nama }}</a> <span aria-hidden="true">&gt;</span> Kelola anggota</p>
             <h2 class="management-page-title">Kelola anggota kelas</h2>
             <p>Atur penempatan siswa ke kelas {{ $rombel->nama }} dengan mudah.</p>
         </div>
         <div class="page-actions">
-            <a href="{{ route('kelas.index') }}" class="btn btn-outline">
+            <a href="{{ route('kelas.show', $rombel) }}" class="btn btn-outline">
                 <x-icon name="arrow-left" class="h-4 w-4" /> Kembali
             </a>
             @can('kelas.update')
