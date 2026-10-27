@@ -28,6 +28,7 @@ class Student extends Model
         'import_batch_id',
         'nis',
         'nisn',
+        'angkatan',
         'nama',
         'jk',
         'tempat_lahir',

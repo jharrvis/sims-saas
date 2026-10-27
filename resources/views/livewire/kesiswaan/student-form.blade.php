@@ -33,6 +33,11 @@
                     <input id="nisn" type="text" wire:model="nisn" class="field">
                     @error('nisn') <p class="management-field-error" role="alert">{{ $message }}</p> @enderror
                 </div>
+                <div class="form-group">
+                    <label for="angkatan">Angkatan (tahun masuk)</label>
+                    <input id="angkatan" type="number" wire:model="angkatan" min="1900" max="2100" placeholder="cth. 2026" class="field">
+                    @error('angkatan') <p class="management-field-error" role="alert">{{ $message }}</p> @enderror
+                </div>
                 <div class="form-group management-field-span">
                     <label for="nama">Nama Lengkap <span class="required">*</span></label>
                     <input id="nama" type="text" wire:model="nama" required class="field">

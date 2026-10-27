@@ -27,6 +27,8 @@ class StudentForm extends Component
 
     public string $nisn = '';
 
+    public string $angkatan = '';
+
     public string $nama = '';
 
     public string $jk = 'L';
@@ -52,6 +54,7 @@ class StudentForm extends Component
             $this->student = $student;
             $this->nis = $student->nis;
             $this->nisn = $student->nisn ?? '';
+            $this->angkatan = $student->angkatan !== null ? (string) $student->angkatan : '';
             $this->nama = $student->nama;
             $this->jk = $student->jk;
             $this->tempat_lahir = $student->tempat_lahir ?? '';
@@ -76,6 +79,7 @@ class StudentForm extends Component
             'nisn' => ['nullable', 'string', 'max:20', Rule::unique('students')->where(
                 fn ($q) => $q->where('school_id', $schoolId)
             )->ignore($this->student?->id)],
+            'angkatan' => ['nullable', 'integer', 'min:1900', 'max:2100'],
             'nama' => ['required', 'string', 'max:150'],
             'jk' => ['required', Rule::in(['L', 'P'])],
             'tempat_lahir' => ['nullable', 'string', 'max:100'],
@@ -121,6 +125,7 @@ class StudentForm extends Component
         $data = [
             'nis' => $this->nis,
             'nisn' => $this->nisn ?: null,
+            'angkatan' => $this->angkatan !== '' ? (int) $this->angkatan : null,
             'nama' => $this->nama,
             'jk' => $this->jk,
             'tempat_lahir' => $this->tempat_lahir ?: null,

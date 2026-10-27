@@ -1725,3 +1725,36 @@
 .dark .help-content blockquote {
     background: #1d2b43;
 }
+
+/* Papan manajemen kelas dua kolom (RombelShow): satu kolom di layar kecil,
+   tiga area (calon | aksi | anggota) mulai 900px, sesuai ritme 4/8px. */
+.rombel-board {
+    display: grid;
+    gap: 16px;
+    grid-template-columns: minmax(0, 1fr);
+}
+
+.rombel-board-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+
+.rombel-capacity-confirm span {
+    flex: 1;
+}
+
+@media (min-width: 900px) {
+    .rombel-board {
+        grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+        align-items: start;
+    }
+
+    .rombel-board-actions {
+        flex-direction: column;
+        align-items: stretch;
+        position: sticky;
+        top: 16px;
+    }
+}
