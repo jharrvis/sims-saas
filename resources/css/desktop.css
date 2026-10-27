@@ -1726,8 +1726,9 @@
     background: #1d2b43;
 }
 
-/* Papan manajemen kelas dua kolom (RombelShow): satu kolom di layar kecil,
-   tiga area (calon | aksi | anggota) mulai 900px, sesuai ritme 4/8px. */
+/* Papan manajemen kelas dua kolom (RombelShow): satu kolom di bawah 1200px
+   (agar panel sisi cukup lebar dan tabel tidak perlu scroll horizontal),
+   tiga area (calon | aksi 180px | anggota) mulai 1200px, sesuai ritme 4/8px. */
 .rombel-board {
     position: relative;
     display: grid;
@@ -1746,9 +1747,9 @@
     flex: 1;
 }
 
-@media (min-width: 900px) {
+@media (min-width: 1200px) {
     .rombel-board {
-        grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+        grid-template-columns: minmax(0, 1fr) 180px minmax(0, 1fr);
         align-items: start;
     }
 
@@ -1988,6 +1989,46 @@
     color: var(--muted);
     font-size: 13px;
     line-height: 1.5;
+}
+
+/* Daftar papan kelas: tinggi sama di kedua sisi dengan scroll internal,
+   header tabel menempel saat menggulir, toolbar melipat (pencarian sebaris
+   penuh, select berbagi baris) agar tidak ada scroll horizontal. */
+.rombel-board .table-scroll {
+    height: 480px;
+    overflow-x: auto;
+    overflow-y: auto;
+}
+
+.rombel-board .data-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: var(--surface);
+}
+
+.rombel-board .data-table th,
+.rombel-board .data-table td {
+    padding: 10px 8px;
+}
+
+.rombel-board .data-table td {
+    overflow-wrap: anywhere;
+}
+
+.rombel-board .management-filter-group {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.rombel-board .management-search-field {
+    flex: 1 1 100%;
+    width: 100%;
+}
+
+.rombel-board .select-field {
+    flex: 1 1 0;
+    min-width: 0;
 }
 
 .rombel-table-footer {
