@@ -76,21 +76,34 @@ afterEach(function (): void {
     app(PermissionRegistrar::class)->setPermissionsTeamId(null);
 });
 
-it('papan dua kolom tampil untuk admin dan hanya anggota untuk viewer', function (): void {
+it('papan mockup tampil untuk admin dan hanya anggota untuk viewer', function (): void {
     Livewire::actingAs($this->admin)
         ->test(RombelShow::class, ['rombel' => $this->rombel])
-        ->assertSee('Calon Siswa')
-        ->assertSee('Anggota Kelas')
-        ->assertSee('Pindahkan yang dipilih')
-        ->assertSee('Keluarkan yang dipilih')
-        ->assertSee('Belum ada kelas')
-        ->assertSee('Dari VII B');
+        ->assertSee('Kelola anggota kelas')
+        ->assertSee('Simpan perubahan')
+        ->assertSee('Calon siswa')
+        ->assertSee('Anggota kelas')
+        ->assertSee('Pindahkan siswa')
+        ->assertSee('Tambahkan')
+        ->assertSee('Keluarkan')
+        ->assertSee('Dari VII B')
+        ->assertSee('Semua perubahan tersimpan');
 
     Livewire::actingAs($this->viewer)
         ->test(RombelShow::class, ['rombel' => $this->rombel])
-        ->assertSee('Anggota Kelas')
-        ->assertDontSee('Calon Siswa')
-        ->assertDontSee('Pindahkan yang dipilih');
+        ->assertSee('Anggota kelas')
+        ->assertDontSee('Calon siswa')
+        ->assertDontSee('Simpan perubahan');
+});
+
+it('papan memakai checkbox Alpine instan dan overlay spinner, bukan redup menyeluruh', function (): void {
+    Livewire::actingAs($this->admin)
+        ->test(RombelShow::class, ['rombel' => $this->rombel])
+        ->assertSeeHtml('x-model="selectedCalon"')
+        ->assertSeeHtml('x-model="selectedAnggota"')
+        ->assertSeeHtml('rombel-loading-overlay')
+        ->assertSeeHtml('rombel-spinner')
+        ->assertDontSeeHtml('management-content-loading');
 });
 
 it('pencarian calon dan anggota memakai nama, NIS, dan NISN', function (): void {
@@ -105,15 +118,14 @@ it('pencarian calon dan anggota memakai nama, NIS, dan NISN', function (): void 
         ->assertSee('Anggota Satu');
 });
 
-it('filter asal memisahkan siswa tanpa kelas dan siswa dari kelas lain', function (): void {
+it('filter angkatan memisahkan calon berdasarkan tahun masuk', function (): void {
     Livewire::actingAs($this->admin)
         ->test(RombelShow::class, ['rombel' => $this->rombel])
-        ->set('filterAsal', 'tanpa-kelas')
-        ->assertSee('Calon Bebas')
-        ->assertDontSee('Calon Pindah')
-        ->set('filterAsal', 'rombel:'.$this->rombelLain->id)
+        ->set('filterAngkatan', '2025')
         ->assertSee('Calon Pindah')
-        ->assertDontSee('Calon Bebas');
+        ->assertDontSee('Calon Bebas')
+        ->set('filterAngkatan', 'semua')
+        ->assertSee('Calon Bebas');
 });
 
 it('sortir calon berdasarkan angkatan menaruh angkatan lama lebih dulu', function (): void {
@@ -123,30 +135,19 @@ it('sortir calon berdasarkan angkatan menaruh angkatan lama lebih dulu', functio
         ->assertSeeInOrder(['Calon Pindah', 'Calon Bebas']);
 });
 
-it('papan memakai checkbox Alpine instan dan overlay spinner, bukan redup menyeluruh', function (): void {
-    Livewire::actingAs($this->admin)
-        ->test(RombelShow::class, ['rombel' => $this->rombel])
-        ->assertSeeHtml('x-model="selectedCalon"')
-        ->assertSeeHtml('x-model="selectedAnggota"')
-        ->assertSeeHtml('rombel-loading-overlay')
-        ->assertSeeHtml('rombel-spinner')
-        ->assertDontSeeHtml('management-content-loading');
-});
-
-it('pilih semua calon memilih yang tampil, lalu membatalkannya', function (): void {
-    Livewire::actingAs($this->admin)
-        ->test(RombelShow::class, ['rombel' => $this->rombel])
-        ->call('toggleSelectAllCalon')
-        ->assertSet('selectedCalon', [$this->calonBebas->id, $this->calonPindah->id])
-        ->call('toggleSelectAllCalon')
-        ->assertSet('selectedCalon', []);
-});
-
-it('pindah massal menonaktifkan penempatan lama di tahun ajaran yang sama', function (): void {
-    Livewire::actingAs($this->admin)
+it('tambahkan hanya menahap, simpan baru menulis dan menonaktifkan penempatan lama', function (): void {
+    $test = Livewire::actingAs($this->admin)
         ->test(RombelShow::class, ['rombel' => $this->rombel])
         ->set('selectedCalon', [$this->calonBebas->id, $this->calonPindah->id])
-        ->call('assignSelected');
+        ->call('tambahkan')
+        ->assertSee('Perubahan belum disimpan');
+
+    // Tahap saja: database belum berubah.
+    expect($this->rombel->students()->wherePivot('status', 'aktif')->where('students.id', $this->calonBebas->id)->exists())->toBeFalse();
+
+    $test->call('simpan')
+        ->assertSee('Perubahan anggota kelas disimpan')
+        ->assertSee('Semua perubahan tersimpan');
 
     expect($this->rombel->students()->wherePivot('status', 'aktif')->where('students.id', $this->calonBebas->id)->exists())->toBeTrue();
     expect($this->rombel->students()->wherePivot('status', 'aktif')->where('students.id', $this->calonPindah->id)->exists())->toBeTrue();
@@ -154,14 +155,96 @@ it('pindah massal menonaktifkan penempatan lama di tahun ajaran yang sama', func
     expect(DB::table('class_student')->where('rombel_id', $this->rombelLain->id)->where('student_id', $this->calonPindah->id)->value('status'))->toBe('pindah');
 });
 
-it('keluar massal mengubah penempatan menjadi pindah, bukan menghapus riwayat', function (): void {
+it('keluarkan bertahap lalu simpan mengubah penempatan menjadi pindah, bukan menghapus riwayat', function (): void {
     Livewire::actingAs($this->admin)
         ->test(RombelShow::class, ['rombel' => $this->rombel])
         ->set('selectedAnggota', [$this->anggota->id])
-        ->call('removeSelected');
+        ->call('keluarkan');
+
+    // Tahap saja: database belum berubah.
+    expect($this->rombel->students()->wherePivot('status', 'aktif')->where('students.id', $this->anggota->id)->exists())->toBeTrue();
+
+    Livewire::actingAs($this->admin)
+        ->test(RombelShow::class, ['rombel' => $this->rombel])
+        ->set('selectedAnggota', [$this->anggota->id])
+        ->call('keluarkan')
+        ->call('simpan');
 
     expect($this->rombel->students()->wherePivot('status', 'aktif')->where('students.id', $this->anggota->id)->exists())->toBeFalse();
     expect(DB::table('class_student')->where('rombel_id', $this->rombel->id)->where('student_id', $this->anggota->id)->value('status'))->toBe('pindah');
+});
+
+it('tambahkan membatalkan pengeluaran bertahap atas siswa yang sama', function (): void {
+    Livewire::actingAs($this->admin)
+        ->test(RombelShow::class, ['rombel' => $this->rombel])
+        ->set('selectedAnggota', [$this->anggota->id])
+        ->call('keluarkan')
+        ->set('selectedCalon', [$this->anggota->id])
+        ->call('tambahkan')
+        ->assertSee('Semua perubahan tersimpan')
+        ->call('simpan');
+
+    expect($this->rombel->students()->wherePivot('status', 'aktif')->where('students.id', $this->anggota->id)->exists())->toBeTrue();
+});
+
+it('simpan saat kelas penuh menahan aksi sampai dikonfirmasi', function (): void {
+    $this->rombel->update(['kapasitas' => 1]);
+
+    $test = Livewire::actingAs($this->admin)
+        ->test(RombelShow::class, ['rombel' => $this->rombel])
+        ->set('selectedCalon', [$this->calonBebas->id])
+        ->call('tambahkan')
+        ->call('simpan')
+        ->assertSet('confirmKapasitas', true);
+
+    expect($this->rombel->students()->wherePivot('status', 'aktif')->where('students.id', $this->calonBebas->id)->exists())->toBeFalse();
+
+    $test->call('konfirmasiSimpan')
+        ->assertSet('confirmKapasitas', false);
+
+    expect($this->rombel->students()->wherePivot('status', 'aktif')->where('students.id', $this->calonBebas->id)->exists())->toBeTrue();
+});
+
+it('aksi bertahap dan simpan ditolak tanpa kelas.update', function (): void {
+    Livewire::actingAs($this->viewer)
+        ->test(RombelShow::class, ['rombel' => $this->rombel])
+        ->set('selectedCalon', [$this->calonBebas->id])
+        ->call('tambahkan')
+        ->assertForbidden();
+
+    Livewire::actingAs($this->viewer)
+        ->test(RombelShow::class, ['rombel' => $this->rombel])
+        ->set('selectedAnggota', [$this->anggota->id])
+        ->call('keluarkan')
+        ->assertForbidden();
+
+    Livewire::actingAs($this->viewer)
+        ->test(RombelShow::class, ['rombel' => $this->rombel])
+        ->call('simpan')
+        ->assertForbidden();
+
+    expect($this->rombel->students()->wherePivot('status', 'aktif')->where('students.id', $this->calonBebas->id)->exists())->toBeFalse();
+});
+
+it('paginasi calon 8 per halaman dan seleksi bertahan pindah halaman', function (): void {
+    foreach (range(1, 10) as $i) {
+        Student::create(['nis' => '300'.$i, 'nama' => 'Calon Tambahan '.$i, 'jk' => 'L', 'status' => 'aktif', 'angkatan' => 2026]);
+    }
+
+    $test = Livewire::actingAs($this->admin)
+        ->test(RombelShow::class, ['rombel' => $this->rombel])
+        ->assertSee('Menampilkan 1–8 dari 12 siswa')
+        ->set('selectedCalon', [$this->calonBebas->id])
+        ->call('gotoCalonPage', 2)
+        ->assertSet('selectedCalon', [$this->calonBebas->id])
+        ->assertSee('Menampilkan 9–12 dari 12 siswa');
+
+    $test->set('selectedCalon', [$this->calonBebas->id, $this->calonPindah->id])
+        ->call('tambahkan')
+        ->call('simpan');
+
+    expect($this->rombel->students()->wherePivot('status', 'aktif')->where('students.id', $this->calonBebas->id)->exists())->toBeTrue();
+    expect($this->rombel->students()->wherePivot('status', 'aktif')->where('students.id', $this->calonPindah->id)->exists())->toBeTrue();
 });
 
 it('seleksi calon bertahan saat kata kunci pencarian diubah', function (): void {
@@ -170,39 +253,6 @@ it('seleksi calon bertahan saat kata kunci pencarian diubah', function (): void 
         ->set('selectedCalon', [$this->calonBebas->id])
         ->set('searchSiswa', 'Pindah')
         ->assertSet('selectedCalon', [$this->calonBebas->id]);
-});
-
-it('pindah saat kelas penuh menahan aksi sampai dikonfirmasi', function (): void {
-    $this->rombel->update(['kapasitas' => 1]);
-
-    $test = Livewire::actingAs($this->admin)
-        ->test(RombelShow::class, ['rombel' => $this->rombel])
-        ->call('assignStudent', $this->calonBebas->id)
-        ->assertSet('confirmKapasitas', true)
-        ->assertSet('pendingAssign', [$this->calonBebas->id]);
-
-    expect($this->rombel->students()->wherePivot('status', 'aktif')->where('students.id', $this->calonBebas->id)->exists())->toBeFalse();
-
-    $test->call('confirmPendingAssign')
-        ->assertSet('confirmKapasitas', false);
-
-    expect($this->rombel->students()->wherePivot('status', 'aktif')->where('students.id', $this->calonBebas->id)->exists())->toBeTrue();
-});
-
-it('aksi massal ditolak tanpa kelas.update', function (): void {
-    Livewire::actingAs($this->viewer)
-        ->test(RombelShow::class, ['rombel' => $this->rombel])
-        ->set('selectedCalon', [$this->calonBebas->id])
-        ->call('assignSelected')
-        ->assertForbidden();
-
-    Livewire::actingAs($this->viewer)
-        ->test(RombelShow::class, ['rombel' => $this->rombel])
-        ->set('selectedAnggota', [$this->anggota->id])
-        ->call('removeSelected')
-        ->assertForbidden();
-
-    expect($this->rombel->students()->wherePivot('status', 'aktif')->where('students.id', $this->calonBebas->id)->exists())->toBeFalse();
 });
 
 it('backfill angkatan memakai tahun mulai penempatan paling awal', function (): void {

@@ -7,19 +7,21 @@ namespace App\Livewire\Akademik;
 use App\Models\Rombel;
 use App\Models\Student;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 use Livewire\Component;
 
 /**
- * Detail rombel: papan manajemen kelas dua kolom (FR-102).
+ * Kelola anggota kelas: papan dua kolom dengan perubahan bertahap (FR-102).
  *
- * Kolom kiri = calon siswa (aktif, belum di kelas ini, tahun ajaran rombel);
- * kolom kanan = anggota kelas. Pindah massal lewat checkbox + tombol tengah.
- * Aturan yang dipertahankan: satu siswa satu rombel aktif per tahun ajaran
- * (ditegakkan juga oleh unique index class_student_active_unique), dan
- * penempatan lama tidak dihapus melainkan berstatus "pindah".
+ * "Tambahkan"/"Keluarkan" hanya menahap perubahan di sisi server komponen
+ * (stagedAdded/stagedRemoved); tidak ada tulis ke database sampai tombol
+ * "Simpan perubahan" ditekan. Aturan yang dipertahankan: satu siswa satu
+ * rombel aktif per tahun ajaran (ditegakkan juga oleh unique index
+ * class_student_active_unique), dan penempatan lama tidak dihapus melainkan
+ * berstatus "pindah". Daftar calon = siswa aktif yang belum menjadi anggota
+ * kelas ini (termasuk yang sedang dihapus bertahap dari kelas ini); daftar
+ * anggota = anggota kelas ditambah yang sedang ditahap masuk.
  */
 class RombelShow extends Component
 {
@@ -29,13 +31,12 @@ class RombelShow extends Component
 
     public string $searchAnggota = '';
 
-    /** Filter asal calon: "semua" | "tanpa-kelas" | "rombel:<id>". */
-    public string $filterAsal = 'semua';
+    /** Filter angkatan calon: "semua" atau tahun (mis. "2026"). */
+    public string $filterAngkatan = 'semua';
 
-    /** Sort calon: nama | nis | angkatan | kelas_asal. */
+    /** Sort: nama | nama_desc | nis | angkatan. */
     public string $sortCalon = 'nama';
 
-    /** Sort anggota: nama | nis | angkatan. */
     public string $sortAnggota = 'nama';
 
     /** @var array<int> */
@@ -44,183 +45,242 @@ class RombelShow extends Component
     /** @var array<int> */
     public array $selectedAnggota = [];
 
+    /** @var array<int> ID calon yang ditahap masuk (belum simpan). */
+    public array $stagedAdded = [];
+
+    /** @var array<int> ID anggota yang ditahap keluar (belum simpan). */
+    public array $stagedRemoved = [];
+
+    public int $calonPage = 1;
+
+    public int $anggotaPage = 1;
+
     public bool $confirmKapasitas = false;
 
-    /** @var array<int> ID calon yang menunggu konfirmasi kapasitas. */
-    public array $pendingAssign = [];
+    public bool $konfirmasiKapasitas = false;
 
-    /** Batas tampil calon agar daftar tidak membebani render. */
-    public const CALON_LIMIT = 100;
+    public const PER_PAGE = 8;
 
     public function mount(Rombel $rombel): void
     {
         $this->rombel = $rombel->load(['waliKelas:id,nama', 'academicYear:id,nama']);
     }
 
-    /**
-     * Tempatkan satu siswa ke rombel ini (FR-102).
-     */
-    public function assignStudent(int $studentId): void
+    public function updatedSearchSiswa(): void
     {
-        $this->authorize('kelas.update');
+        $this->calonPage = 1;
+    }
 
-        if ($this->kapasitasTerlampaui([$studentId])) {
-            $this->pendingAssign = [$studentId];
-            $this->confirmKapasitas = true;
+    public function updatedFilterAngkatan(): void
+    {
+        $this->calonPage = 1;
+    }
 
-            return;
-        }
+    public function updatedSortCalon(): void
+    {
+        $this->calonPage = 1;
+    }
 
-        $student = Student::findOrFail($studentId);
-        $this->tempatkan([$student->id]);
+    public function updatedSearchAnggota(): void
+    {
+        $this->anggotaPage = 1;
+    }
 
-        session()->flash('sukses', "Siswa {$student->nama} ditempatkan ke kelas {$this->rombel->nama}.");
+    public function updatedSortAnggota(): void
+    {
+        $this->anggotaPage = 1;
     }
 
     /**
-     * Tempatkan semua calon yang dipilih.
+     * Tahap masuk: calon yang dipilih pindah ke daftar anggota (belum simpan).
+     * Bila ID sedang ditahap keluar, aksinya membatalkan pengeluaran itu.
      */
-    public function assignSelected(): void
+    public function tambahkan(): void
     {
         $this->authorize('kelas.update');
 
-        $ids = $this->selectedValid($this->selectedCalon, $this->calonDisplayIds());
-        if ($ids === []) {
-            return;
+        $ids = $this->selectedValid($this->selectedCalon, $this->calonEligibleIds());
+        foreach ($ids as $id) {
+            if (in_array($id, $this->stagedRemoved, true)) {
+                $this->stagedRemoved = array_values(array_diff($this->stagedRemoved, [$id]));
+            } elseif (! in_array($id, $this->stagedAdded, true)) {
+                $this->stagedAdded[] = $id;
+            }
         }
-
-        if ($this->kapasitasTerlampaui($ids)) {
-            $this->pendingAssign = $ids;
-            $this->confirmKapasitas = true;
-
-            return;
-        }
-
-        $this->tempatkan($ids);
         $this->selectedCalon = [];
-
-        session()->flash('sukses', count($ids).' siswa ditempatkan ke kelas '.$this->rombel->nama.'.');
     }
 
     /**
-     * Lanjutkan penempatan yang tertunda setelah konfirmasi kapasitas.
+     * Tahap keluar: anggota yang dipilih pindah ke daftar calon (belum simpan).
+     * Bila ID sedang ditahap masuk, aksinya membatalkan penambahan itu.
      */
-    public function confirmPendingAssign(): void
+    public function keluarkan(): void
     {
         $this->authorize('kelas.update');
 
-        $ids = $this->selectedValid($this->pendingAssign, $this->calonDisplayIds());
-        $this->pendingAssign = [];
-        $this->confirmKapasitas = false;
-
-        if ($ids === []) {
-            return;
+        $ids = $this->selectedValid($this->selectedAnggota, $this->anggotaEligibleIds());
+        foreach ($ids as $id) {
+            if (in_array($id, $this->stagedAdded, true)) {
+                $this->stagedAdded = array_values(array_diff($this->stagedAdded, [$id]));
+            } elseif (! in_array($id, $this->stagedRemoved, true)) {
+                $this->stagedRemoved[] = $id;
+            }
         }
-
-        $this->tempatkan($ids);
-        $this->selectedCalon = array_values(array_diff($this->selectedCalon, $ids));
-
-        session()->flash('sukses', count($ids).' siswa ditempatkan ke kelas '.$this->rombel->nama.'.');
-    }
-
-    public function cancelPendingAssign(): void
-    {
-        $this->pendingAssign = [];
-        $this->confirmKapasitas = false;
-    }
-
-    public function removeStudent(int $studentId): void
-    {
-        $this->authorize('kelas.update');
-
-        $this->keluarkan([$studentId]);
-
-        session()->flash('sukses', 'Siswa dikeluarkan dari kelas '.$this->rombel->nama.'.');
-    }
-
-    /**
-     * Keluarkan semua anggota yang dipilih.
-     */
-    public function removeSelected(): void
-    {
-        $this->authorize('kelas.update');
-
-        $ids = $this->selectedValid($this->selectedAnggota, $this->anggotaDisplayIds());
-        if ($ids === []) {
-            return;
-        }
-
-        $this->keluarkan($ids);
         $this->selectedAnggota = [];
-
-        session()->flash('sukses', count($ids).' siswa dikeluarkan dari kelas '.$this->rombel->nama.'.');
     }
 
     /**
-     * Pilih/batalkan semua baris yang sedang ditampilkan di satu kolom.
+     * Simpan semua perubahan bertahap ke database dalam satu transaksi.
      */
-    public function toggleSelectAllCalon(): void
+    public function simpan(): void
     {
-        $ids = $this->calonDisplayIds();
-        $this->selectedCalon = $this->semuaDipilih($ids, $this->selectedCalon)
-            ? array_values(array_diff($this->selectedCalon, $ids))
-            : array_values(array_unique(array_merge($this->selectedCalon, $ids)));
-    }
+        $this->authorize('kelas.update');
 
-    public function toggleSelectAllAnggota(): void
-    {
-        $ids = $this->anggotaDisplayIds();
-        $this->selectedAnggota = $this->semuaDipilih($ids, $this->selectedAnggota)
-            ? array_values(array_diff($this->selectedAnggota, $ids))
-            : array_values(array_unique(array_merge($this->selectedAnggota, $ids)));
+        $added = $this->selectedValid($this->stagedAdded, $this->calonBaseIds());
+        $removed = $this->selectedValid($this->stagedRemoved, $this->anggotaIds());
+
+        if ($added === [] && $removed === []) {
+            $this->resetStaging();
+
+            return;
+        }
+
+        if (! $this->konfirmasiKapasitas && $this->kapasitasTerlampaui($added, $removed)) {
+            $this->confirmKapasitas = true;
+
+            return;
+        }
+
+        DB::transaction(function () use ($added, $removed): void {
+            $this->tempatkan($added);
+            $this->keluarkanDariKelas($removed);
+        });
+
+        $this->resetStaging();
+        $this->calonPage = 1;
+        $this->anggotaPage = 1;
+
+        $bagian = [];
+        if ($added !== []) {
+            $bagian[] = count($added).' siswa ditambahkan';
+        }
+        if ($removed !== []) {
+            $bagian[] = count($removed).' siswa dikeluarkan';
+        }
+        session()->flash('sukses', 'Perubahan anggota kelas disimpan: '.implode(', ', $bagian).'.');
     }
 
     /**
-     * Apakah semua ID yang ditampilkan sudah dipilih.
+     * Lanjutkan simpan walau kelas melebihi kapasitas.
      */
-    private function semuaDipilih(array $ids, array $selected): bool
+    public function konfirmasiSimpan(): void
     {
-        return $ids !== [] && array_diff($ids, $selected) === [];
+        $this->authorize('kelas.update');
+
+        $this->konfirmasiKapasitas = true;
+        $this->confirmKapasitas = false;
+        $this->simpan();
+    }
+
+    public function batalKonfirmasi(): void
+    {
+        $this->confirmKapasitas = false;
+    }
+
+    public function gotoCalonPage(int $page): void
+    {
+        $this->calonPage = max(1, $page);
+    }
+
+    public function gotoAnggotaPage(int $page): void
+    {
+        $this->anggotaPage = max(1, $page);
+    }
+
+    /**
+     * Inisial avatar (dua huruf pertama dari dua kata pertama nama).
+     */
+    public function initials(string $nama): string
+    {
+        $words = preg_split('/\s+/', trim($nama)) ?: [];
+        $first = $words[0] ?? '';
+        $second = $words[1] ?? '';
+
+        return mb_strtoupper(mb_substr($first, 0, 1).($second !== '' ? mb_substr($second, 0, 1) : ''));
+    }
+
+    /**
+     * Halaman pager: nomor halaman + null sebagai elipsis.
+     *
+     * @return array<int|null>
+     */
+    public function pagerPages(int $current, int $last): array
+    {
+        if ($last <= 7) {
+            return range(1, $last);
+        }
+
+        $pages = array_filter([1, $last, $current - 1, $current, $current + 1], fn ($p) => $p >= 1 && $p <= $last);
+        sort($pages);
+        $pages = array_values(array_unique($pages));
+
+        $out = [];
+        $prev = null;
+        foreach ($pages as $p) {
+            if ($prev !== null && $p > $prev + 1) {
+                $out[] = null;
+            }
+            $out[] = $p;
+            $prev = $p;
+        }
+
+        return $out;
     }
 
     public function render(): View
     {
-        $anggotaIds = $this->anggotaIds();
+        $calon = $this->calonQuery()->paginate(self::PER_PAGE, ['*'], 'calon_page', $this->calonPage);
+        if ($this->calonPage > $calon->lastPage()) {
+            $this->calonPage = max(1, $calon->lastPage());
+            $calon = $this->calonQuery()->paginate(self::PER_PAGE, ['*'], 'calon_page', $this->calonPage);
+        }
 
-        $siswa = $this->anggotaDisplayQuery()->get();
+        $anggota = $this->anggotaQuery()->paginate(self::PER_PAGE, ['*'], 'anggota_page', $this->anggotaPage);
+        if ($this->anggotaPage > $anggota->lastPage()) {
+            $this->anggotaPage = max(1, $anggota->lastPage());
+            $anggota = $this->anggotaQuery()->paginate(self::PER_PAGE, ['*'], 'anggota_page', $this->anggotaPage);
+        }
 
-        $calonTotal = $this->calonBaseQuery()->count();
-        $calon = $this->calonDisplayQuery()->get();
+        $angkatanList = Student::where('status', 'aktif')
+            ->whereNotNull('angkatan')
+            ->distinct()
+            ->orderByDesc('angkatan')
+            ->pluck('angkatan')
+            ->all();
 
         // Kelas asal calon di tahun ajaran ini (satu kueri untuk semua baris).
         $asalMap = DB::table('class_student')
             ->join('rombels', 'rombels.id', '=', 'class_student.rombel_id')
-            ->whereIn('class_student.student_id', $calon->pluck('id')->all())
+            ->whereIn('class_student.student_id', $calon->getCollection()->pluck('id')->all())
             ->where('class_student.academic_year_id', $this->rombel->academic_year_id)
             ->where('class_student.status', 'aktif')
             ->pluck('rombels.nama', 'class_student.student_id')
             ->all();
 
-        $rombelAsal = Rombel::where('academic_year_id', $this->rombel->academic_year_id)
-            ->whereKeyNot($this->rombel->id)
-            ->orderBy('nama')
-            ->get(['id', 'nama']);
-
         return view('livewire.akademik.rombel-show', [
-            'siswa' => $siswa,
-            'jumlahAnggota' => count($anggotaIds),
             'calon' => $calon,
-            'calonTotal' => $calonTotal,
-            'calonTerpotong' => $calonTotal > count($calon),
+            'anggota' => $anggota,
+            'jumlahAnggota' => $this->stagedTotal(),
+            'angkatanList' => $angkatanList,
             'asalMap' => $asalMap,
-            'rombelAsal' => $rombelAsal,
+            'dirty' => $this->stagedAdded !== [] || $this->stagedRemoved !== [],
+            'calonPager' => $this->pagerPages($calon->currentPage(), $calon->lastPage()),
+            'anggotaPager' => $this->pagerPages($anggota->currentPage(), $anggota->lastPage()),
         ])->layout('layouts.app', ['title' => 'Kelas '.$this->rombel->nama]);
     }
 
     /**
-     * ID anggota penuh (tanpa filter pencarian) untuk mengecualikan calon:
-     * memakai daftar anggota yang sudah terfilter akan membuat anggota
-     * muncul kembali sebagai calon saat pencarian anggota tidak cocok.
+     * ID anggota kelas di database (tanpa tahap) untuk tahun ajaran rombel.
      *
      * @return array<int>
      */
@@ -234,22 +294,81 @@ class RombelShow extends Component
     }
 
     /**
-     * Kueri dasar calon: siswa aktif yang belum menjadi anggota kelas ini.
+     * ID calon di database (siswa aktif yang belum menjadi anggota kelas ini).
+     *
+     * @return array<int>
      */
-    private function calonBaseQuery(): Builder
+    private function calonBaseIds(): array
     {
         return Student::query()
             ->where('status', 'aktif')
-            ->whereNotIn('id', $this->anggotaIds());
+            ->whereNotIn('id', $this->anggotaIds())
+            ->pluck('id')
+            ->all();
     }
 
     /**
-     * Terapkan pencarian (nama/NIS/NISN) dan filter asal ke kueri calon.
+     * ID yang sah ditahap masuk (calon database + yang sedang ditahap keluar).
+     *
+     * @return array<int>
      */
-    private function calonFilteredQuery(): Builder
+    private function calonEligibleIds(): array
     {
-        $query = $this->calonBaseQuery();
-        $yearId = $this->rombel->academic_year_id;
+        $ids = $this->calonBaseIds();
+        foreach ($this->stagedRemoved as $id) {
+            if (! in_array($id, $ids, true)) {
+                $ids[] = $id;
+            }
+        }
+
+        return array_values(array_diff($ids, $this->stagedAdded));
+    }
+
+    /**
+     * ID yang sah ditahap keluar (anggota database + yang sedang ditahap masuk).
+     *
+     * @return array<int>
+     */
+    private function anggotaEligibleIds(): array
+    {
+        $ids = $this->anggotaIds();
+        foreach ($this->stagedAdded as $id) {
+            if (! in_array($id, $ids, true)) {
+                $ids[] = $id;
+            }
+        }
+
+        return array_values(array_diff($ids, $this->stagedRemoved));
+    }
+
+    /**
+     * Total anggota setelah tahap diterapkan (untuk kartu kapasitas).
+     */
+    private function stagedTotal(): int
+    {
+        $added = $this->selectedValid($this->stagedAdded, $this->calonBaseIds());
+        $removed = $this->selectedValid($this->stagedRemoved, $this->anggotaIds());
+
+        return count($this->anggotaIds()) - count($removed) + count($added);
+    }
+
+    /**
+     * Kueri calon siap tampil (dengan pencarian, filter angkatan, sortir).
+     */
+    private function calonQuery(): Builder
+    {
+        $members = $this->anggotaIds();
+        $query = Student::query()->where('status', 'aktif');
+
+        $query->where(function (Builder $q) use ($members): void {
+            $q->whereNotIn('id', $members);
+            if ($this->stagedRemoved !== []) {
+                $q->orWhereIn('id', $this->stagedRemoved);
+            }
+        });
+        if ($this->stagedAdded !== []) {
+            $query->whereNotIn('id', $this->stagedAdded);
+        }
 
         if ($this->searchSiswa !== '') {
             $term = '%'.$this->searchSiswa.'%';
@@ -260,130 +379,94 @@ class RombelShow extends Component
             });
         }
 
-        if ($this->filterAsal === 'tanpa-kelas') {
-            $query->whereNotExists(function ($q) use ($yearId): void {
-                $q->select(DB::raw(1))
-                    ->from('class_student')
-                    ->whereColumn('class_student.student_id', 'students.id')
-                    ->where('class_student.academic_year_id', $yearId)
-                    ->where('class_student.status', 'aktif');
-            });
-        } elseif (str_starts_with($this->filterAsal, 'rombel:')) {
-            $asal = Rombel::whereKey((int) substr($this->filterAsal, 7))
-                ->where('academic_year_id', $yearId)
-                ->first();
-            if ($asal !== null) {
-                $query->whereExists(function ($q) use ($yearId, $asal): void {
-                    $q->select(DB::raw(1))
-                        ->from('class_student')
-                        ->whereColumn('class_student.student_id', 'students.id')
-                        ->where('class_student.academic_year_id', $yearId)
-                        ->where('class_student.rombel_id', $asal->id)
-                        ->where('class_student.status', 'aktif');
-                });
-            }
+        if ($this->filterAngkatan !== 'semua') {
+            $query->where('angkatan', (int) $this->filterAngkatan);
         }
 
+        $this->applySort($query, $this->sortCalon);
+
         return $query;
-    }
-
-    /**
-     * Kueri calon siap tampil (dengan sortir dan batas tampil).
-     */
-    private function calonDisplayQuery(): Builder
-    {
-        $query = $this->calonFilteredQuery();
-
-        match ($this->sortCalon) {
-            'nis' => $query->orderBy('nis')->orderBy('nama'),
-            'angkatan' => $query->orderByRaw('CASE WHEN angkatan IS NULL THEN 1 ELSE 0 END, angkatan')->orderBy('nama'),
-            'kelas_asal' => $query
-                ->select('students.*')
-                ->selectSub(
-                    DB::table('class_student')
-                        ->join('rombels', 'rombels.id', '=', 'class_student.rombel_id')
-                        ->select('rombels.nama')
-                        ->whereColumn('class_student.student_id', 'students.id')
-                        ->where('class_student.academic_year_id', $this->rombel->academic_year_id)
-                        ->where('class_student.status', 'aktif')
-                        ->limit(1),
-                    'asal_nama'
-                )
-                ->orderByRaw('CASE WHEN asal_nama IS NULL THEN 1 ELSE 0 END, asal_nama')
-                ->orderBy('nama'),
-            default => $query->orderBy('nama'),
-        };
-
-        return $query->limit(self::CALON_LIMIT);
     }
 
     /**
      * Kueri anggota siap tampil (dengan pencarian dan sortir).
      */
-    private function anggotaDisplayQuery(): BelongsToMany
+    private function anggotaQuery(): Builder
     {
-        $query = $this->rombel->students()
-            ->wherePivot('academic_year_id', $this->rombel->academic_year_id)
-            ->wherePivot('status', 'aktif');
+        $members = $this->anggotaIds();
+        $query = Student::query();
+
+        $query->where(function (Builder $q) use ($members): void {
+            $q->whereIn('id', $members);
+            if ($this->stagedAdded !== []) {
+                $q->orWhereIn('id', $this->stagedAdded);
+            }
+        });
+        if ($this->stagedRemoved !== []) {
+            $query->whereNotIn('id', $this->stagedRemoved);
+        }
 
         if ($this->searchAnggota !== '') {
             $term = '%'.$this->searchAnggota.'%';
             $query->where(function (Builder $q) use ($term): void {
-                $q->where('students.nama', 'like', $term)
-                    ->orWhere('students.nis', 'like', $term)
-                    ->orWhere('students.nisn', 'like', $term);
+                $q->where('nama', 'like', $term)
+                    ->orWhere('nis', 'like', $term)
+                    ->orWhere('nisn', 'like', $term);
             });
         }
 
-        match ($this->sortAnggota) {
-            'nis' => $query->orderBy('students.nis')->orderBy('students.nama'),
-            'angkatan' => $query->orderByRaw('CASE WHEN students.angkatan IS NULL THEN 1 ELSE 0 END, students.angkatan')->orderBy('students.nama'),
-            default => $query->orderBy('students.nama'),
-        };
+        $this->applySort($query, $this->sortAnggota);
 
         return $query;
     }
 
-    /**
-     * @return array<int>
-     */
-    private function calonDisplayIds(): array
+    private function applySort(Builder $query, string $sort): void
     {
-        return $this->calonDisplayQuery()->pluck('students.id')->all();
+        match ($sort) {
+            'nama_desc' => $query->orderByDesc('nama'),
+            'nis' => $query->orderBy('nis')->orderBy('nama'),
+            'angkatan' => $query->orderByRaw('CASE WHEN angkatan IS NULL THEN 1 ELSE 0 END, angkatan')->orderBy('nama'),
+            default => $query->orderBy('nama'),
+        };
     }
 
     /**
-     * @return array<int>
-     */
-    private function anggotaDisplayIds(): array
-    {
-        return $this->anggotaDisplayQuery()->pluck('students.id')->all();
-    }
-
-    /**
-     * Bersihkan seleksi: hanya ID yang masih tampil, unik, dan integer.
+     * Bersihkan seleksi: hanya ID yang masih sah, unik, dan integer.
      *
      * @param  array<int|string>  $selected
-     * @param  array<int>  $displayed
+     * @param  array<int>  $eligible
      * @return array<int>
      */
-    private function selectedValid(array $selected, array $displayed): array
+    private function selectedValid(array $selected, array $eligible): array
     {
         $selected = array_map('intval', $selected);
 
-        return array_values(array_intersect($selected, $displayed));
+        return array_values(array_intersect($selected, $eligible));
     }
 
     /**
-     * Apakah penempatan ID-ID ini akan melampaui kapasitas kelas.
+     * Apakah total anggota bertahap melampaui kapasitas kelas.
+     *
+     * @param  array<int>  $added
+     * @param  array<int>  $removed
      */
-    private function kapasitasTerlampaui(array $ids): bool
+    private function kapasitasTerlampaui(array $added, array $removed): bool
     {
         if ($this->rombel->kapasitas === null) {
             return false;
         }
 
-        return count($this->anggotaIds()) + count($ids) > $this->rombel->kapasitas;
+        return count($this->anggotaIds()) - count($removed) + count($added) > $this->rombel->kapasitas;
+    }
+
+    private function resetStaging(): void
+    {
+        $this->stagedAdded = [];
+        $this->stagedRemoved = [];
+        $this->selectedCalon = [];
+        $this->selectedAnggota = [];
+        $this->confirmKapasitas = false;
+        $this->konfirmasiKapasitas = false;
     }
 
     /**
@@ -395,28 +478,34 @@ class RombelShow extends Component
      */
     private function tempatkan(array $studentIds): void
     {
-        DB::transaction(function () use ($studentIds): void {
-            DB::table('class_student')
-                ->whereIn('student_id', $studentIds)
-                ->where('academic_year_id', $this->rombel->academic_year_id)
-                ->update(['status' => 'pindah']);
+        if ($studentIds === []) {
+            return;
+        }
 
-            foreach ($studentIds as $studentId) {
-                $this->rombel->students()->syncWithoutDetaching([
-                    $studentId => [
-                        'academic_year_id' => $this->rombel->academic_year_id,
-                        'status' => 'aktif',
-                    ],
-                ]);
-            }
-        });
+        DB::table('class_student')
+            ->whereIn('student_id', $studentIds)
+            ->where('academic_year_id', $this->rombel->academic_year_id)
+            ->update(['status' => 'pindah']);
+
+        foreach ($studentIds as $studentId) {
+            $this->rombel->students()->syncWithoutDetaching([
+                $studentId => [
+                    'academic_year_id' => $this->rombel->academic_year_id,
+                    'status' => 'aktif',
+                ],
+            ]);
+        }
     }
 
     /**
      * @param  array<int>  $studentIds
      */
-    private function keluarkan(array $studentIds): void
+    private function keluarkanDariKelas(array $studentIds): void
     {
+        if ($studentIds === []) {
+            return;
+        }
+
         DB::table('class_student')
             ->where('rombel_id', $this->rombel->id)
             ->whereIn('student_id', $studentIds)

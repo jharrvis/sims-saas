@@ -1792,7 +1792,7 @@
     width: 36px;
     height: 36px;
     border: 3px solid var(--line);
-    border-top-color: #4f46e5;
+    border-top-color: var(--blue);
     border-radius: 50%;
     animation: sims-spin 0.7s linear infinite;
 }
@@ -1801,4 +1801,277 @@
     .rombel-spinner {
         animation: none;
     }
+}
+
+[x-cloak] {
+    display: none !important;
+}
+
+/* Kelola anggota kelas ala mockup: breadcrumb, kartu info, badge, bar seleksi. */
+.rombel-breadcrumb {
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.rombel-breadcrumb a {
+    color: var(--muted);
+    text-decoration: none;
+}
+
+.rombel-breadcrumb a:hover {
+    color: var(--blue);
+}
+
+.rombel-info-card {
+    display: grid;
+    gap: 16px;
+    padding: 16px;
+}
+
+.rombel-info-main {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    align-items: center;
+}
+
+.rombel-info-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 10px 16px;
+    border-radius: 12px;
+    background: var(--blue-tint);
+    color: var(--blue);
+    font-size: 16px;
+    font-weight: 800;
+}
+
+.rombel-info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.rombel-info-label {
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.rombel-info-capacity {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.rombel-info-capacity-text {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 13px;
+}
+
+.rombel-info-capacity-text span:first-child {
+    color: var(--muted);
+    font-weight: 600;
+}
+
+.rombel-capacity-bar {
+    height: 8px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: var(--line);
+}
+
+.rombel-capacity-bar span {
+    display: block;
+    height: 100%;
+    border-radius: 999px;
+    background: var(--blue);
+}
+
+.rombel-capacity-note {
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.rombel-capacity-note.danger {
+    color: var(--red);
+}
+
+@media (min-width: 900px) {
+    .rombel-info-card {
+        grid-template-columns: 1fr minmax(280px, 360px);
+        align-items: center;
+    }
+}
+
+.rombel-count-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    margin-left: 4px;
+    border-radius: 999px;
+    background: var(--blue-tint);
+    color: var(--blue);
+    font-size: 12px;
+    font-weight: 800;
+    vertical-align: middle;
+}
+
+.rombel-selectbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    background: var(--blue-tint);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.rombel-selectbar-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 5px;
+    background: var(--blue);
+    color: #fff;
+    font-weight: 800;
+}
+
+.rombel-selectbar-clear {
+    margin-left: auto;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--blue);
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.rombel-avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    margin-right: 8px;
+    border-radius: 50%;
+    background: var(--blue-tint);
+    color: var(--blue);
+    font-size: 12px;
+    font-weight: 800;
+    vertical-align: middle;
+}
+
+.rombel-asal {
+    display: block;
+    margin-left: 40px;
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.rombel-board tr.row-selected td {
+    background: var(--blue-tint);
+}
+
+.rombel-board-actions h3 {
+    font-size: 15px;
+    font-weight: 800;
+}
+
+.rombel-board-actions p {
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.rombel-table-footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 14px;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.rombel-pager {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.rombel-pager button {
+    min-width: 32px;
+    height: 32px;
+    padding: 0 8px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--surface);
+    color: var(--ink);
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.rombel-pager button:disabled {
+    opacity: 0.5;
+    cursor: default;
+}
+
+.rombel-pager button.active {
+    border-color: var(--blue);
+    background: var(--blue);
+    color: #fff;
+}
+
+.rombel-pager-ellipsis {
+    padding: 0 4px;
+}
+
+.rombel-statusbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 14px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--surface);
+    font-size: 13px;
+}
+
+.rombel-statusbar > span:first-child {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--muted);
+}
+
+.rombel-status-dirty {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+}
+
+.rombel-status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.rombel-status-dot.dirty {
+    background: var(--orange);
+}
+
+.rombel-status-dot.clean {
+    background: var(--green);
 }

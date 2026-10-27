@@ -163,15 +163,22 @@ it('form rombel menolak tahun ajaran dan wali kelas milik tenant lain', function
     expect(Rombel::where('nama', 'VII Asing')->exists())->toBeFalse();
 });
 
-it('detail rombel: anggota dapat dicari, tempatkan dan keluarkan hanya dengan kelas.update', function (): void {
+it('detail rombel: anggota dapat dicari, tahap dan simpan hanya dengan kelas.update', function (): void {
     Livewire::actingAs($this->viewer)
         ->test(RombelShow::class, ['rombel' => $this->rombel])
-        ->call('assignStudent', $this->calon->id)
+        ->set('selectedCalon', [$this->calon->id])
+        ->call('tambahkan')
         ->assertForbidden();
 
     Livewire::actingAs($this->viewer)
         ->test(RombelShow::class, ['rombel' => $this->rombel])
-        ->call('removeStudent', $this->siswa->id)
+        ->set('selectedAnggota', [$this->siswa->id])
+        ->call('keluarkan')
+        ->assertForbidden();
+
+    Livewire::actingAs($this->viewer)
+        ->test(RombelShow::class, ['rombel' => $this->rombel])
+        ->call('simpan')
         ->assertForbidden();
 
     Livewire::actingAs($this->admin)
@@ -182,15 +189,27 @@ it('detail rombel: anggota dapat dicari, tempatkan dan keluarkan hanya dengan ke
         ->assertSee('Siswa tidak ditemukan')
         ->assertDontSee('Siswa Rombel');
 
+    // Tahap saja belum menulis.
     Livewire::actingAs($this->admin)
         ->test(RombelShow::class, ['rombel' => $this->rombel])
-        ->call('assignStudent', $this->calon->id);
+        ->set('selectedCalon', [$this->calon->id])
+        ->call('tambahkan');
+
+    expect($this->rombel->students()->wherePivot('status', 'aktif')->where('students.id', $this->calon->id)->exists())->toBeFalse();
+
+    Livewire::actingAs($this->admin)
+        ->test(RombelShow::class, ['rombel' => $this->rombel])
+        ->set('selectedCalon', [$this->calon->id])
+        ->call('tambahkan')
+        ->call('simpan');
 
     expect($this->rombel->students()->wherePivot('status', 'aktif')->where('students.id', $this->calon->id)->exists())->toBeTrue();
 
     Livewire::actingAs($this->admin)
         ->test(RombelShow::class, ['rombel' => $this->rombel])
-        ->call('removeStudent', $this->calon->id);
+        ->set('selectedAnggota', [$this->calon->id])
+        ->call('keluarkan')
+        ->call('simpan');
 
     expect($this->rombel->students()->wherePivot('status', 'aktif')->where('students.id', $this->calon->id)->exists())->toBeFalse();
 });
