@@ -8,6 +8,14 @@
 @import './app.css';
 @import './desktop-reference.css';
 
+/* Ukuran font dasar desktop: 14px (naik dari 13px referensi) agar teks isi
+   lebih nyaman dibaca; 13px tetap dipakai teks sekunder yang ukurannya
+   eksplisit. Override ini sengaja di sini, bukan di file referensi, supaya
+   bundel referensi tetap utuh. */
+body {
+    font-size: 14px;
+}
+
 /* Surface accent: platform uses the amber/orange reference token. */
 .surface-platform {
     --blue: #d97706;
