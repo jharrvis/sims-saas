@@ -123,6 +123,16 @@ it('sortir calon berdasarkan angkatan menaruh angkatan lama lebih dulu', functio
         ->assertSeeInOrder(['Calon Pindah', 'Calon Bebas']);
 });
 
+it('papan memakai checkbox Alpine instan dan overlay spinner, bukan redup menyeluruh', function (): void {
+    Livewire::actingAs($this->admin)
+        ->test(RombelShow::class, ['rombel' => $this->rombel])
+        ->assertSeeHtml('x-model="selectedCalon"')
+        ->assertSeeHtml('x-model="selectedAnggota"')
+        ->assertSeeHtml('rombel-loading-overlay')
+        ->assertSeeHtml('rombel-spinner')
+        ->assertDontSeeHtml('management-content-loading');
+});
+
 it('pilih semua calon memilih yang tampil, lalu membatalkannya', function (): void {
     Livewire::actingAs($this->admin)
         ->test(RombelShow::class, ['rombel' => $this->rombel])

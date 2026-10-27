@@ -176,9 +176,9 @@ class RombelShow extends Component
     }
 
     /**
-     * Apakah semua ID yang ditampilkan sudah dipilih (untuk checkbox header).
+     * Apakah semua ID yang ditampilkan sudah dipilih.
      */
-    public function semuaDipilih(array $ids, array $selected): bool
+    private function semuaDipilih(array $ids, array $selected): bool
     {
         return $ids !== [] && array_diff($ids, $selected) === [];
     }

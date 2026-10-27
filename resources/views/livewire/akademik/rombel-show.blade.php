@@ -34,7 +34,38 @@
         </div>
     @endif
 
-    <div class="rombel-board" wire:loading.class="management-content-loading" wire:target="searchSiswa,searchAnggota,filterAsal,sortCalon,sortAnggota,assignStudent,assignSelected,removeStudent,removeSelected,confirmPendingAssign,toggleSelectAllCalon,toggleSelectAllAnggota">
+    <div class="rombel-board" x-data="{
+        selectedCalon: $wire.entangle('selectedCalon'),
+        selectedAnggota: $wire.entangle('selectedAnggota'),
+        headerCalon: false,
+        headerAnggota: false,
+        syncHeaders() {
+            const calonIds = [...this.$root.querySelectorAll('[data-calon-check]')].map((el) => Number(el.value));
+            const anggotaIds = [...this.$root.querySelectorAll('[data-anggota-check]')].map((el) => Number(el.value));
+            const selC = this.selectedCalon.map(Number);
+            const selA = this.selectedAnggota.map(Number);
+            this.headerCalon = calonIds.length > 0 && calonIds.every((id) => selC.includes(id));
+            this.headerAnggota = anggotaIds.length > 0 && anggotaIds.every((id) => selA.includes(id));
+        },
+        toggleAllCalon() {
+            const ids = [...this.$root.querySelectorAll('[data-calon-check]')].map((el) => Number(el.value));
+            const sel = this.selectedCalon.map(Number);
+            this.selectedCalon = ids.length > 0 && ids.every((id) => sel.includes(id))
+                ? sel.filter((id) => !ids.includes(id))
+                : [...new Set([...sel, ...ids])];
+        },
+        toggleAllAnggota() {
+            const ids = [...this.$root.querySelectorAll('[data-anggota-check]')].map((el) => Number(el.value));
+            const sel = this.selectedAnggota.map(Number);
+            this.selectedAnggota = ids.length > 0 && ids.every((id) => sel.includes(id))
+                ? sel.filter((id) => !ids.includes(id))
+                : [...new Set([...sel, ...ids])];
+        },
+    }" x-init="$watch('selectedCalon', () => syncHeaders()); $watch('selectedAnggota', () => syncHeaders()); if (window.Livewire) { Livewire.hook('morph.updated', () => syncHeaders()); } syncHeaders();">
+        <div class="rombel-loading-overlay" wire:loading wire:target="assignSelected,removeSelected,assignStudent,removeStudent,confirmPendingAssign,filterAsal,sortCalon,sortAnggota" role="status" aria-live="polite">
+            <span class="rombel-spinner" aria-hidden="true"></span>
+            <span>Memuat...</span>
+        </div>
         @can('kelas.update')
             <section class="card management-table-card" aria-labelledby="rombel-candidate-title">
                 <div class="card-head management-table-heading">
@@ -74,7 +105,7 @@
                     <table class="data-table management-data-table">
                         <thead>
                             <tr>
-                                <th scope="col"><input type="checkbox" wire:click="toggleSelectAllCalon" @checked($this->semuaDipilih($calon->pluck('id')->all(), $selectedCalon)) aria-label="Pilih semua calon yang ditampilkan"></th>
+                                <th scope="col"><input type="checkbox" :checked="headerCalon" @click.prevent="toggleAllCalon()" aria-label="Pilih semua calon yang ditampilkan"></th>
                                 <th scope="col">Nama Siswa</th>
                                 <th scope="col">NIS</th>
                                 <th scope="col">Angkatan</th>
@@ -85,7 +116,7 @@
                         <tbody>
                             @forelse ($calon as $c)
                                 <tr wire:key="rombel-candidate-{{ $c->id }}">
-                                    <td><input type="checkbox" wire:model="selectedCalon" value="{{ $c->id }}" aria-label="Pilih {{ $c->nama }}"></td>
+                                    <td><input type="checkbox" x-model="selectedCalon" data-calon-check value="{{ $c->id }}" aria-label="Pilih {{ $c->nama }}"></td>
                                     <td><strong>{{ $c->nama }}</strong></td>
                                     <td><span class="management-reference">{{ $c->nis }}</span></td>
                                     <td>{{ $c->angkatan ?? '—' }}</td>
@@ -105,11 +136,11 @@
             </section>
 
             <div class="rombel-board-actions" role="group" aria-label="Pindah massal">
-                <button type="button" wire:click="assignSelected" @disabled(count($selectedCalon) === 0) wire:loading.attr="disabled" class="btn btn-primary">
-                    Pindahkan yang dipilih ({{ count($selectedCalon) }}) <x-icon name="arrow-right" class="h-4 w-4" />
+                <button type="button" wire:click="assignSelected" :disabled="selectedCalon.length === 0" class="btn btn-primary">
+                    Pindahkan yang dipilih (<span x-text="selectedCalon.length"></span>) <x-icon name="arrow-right" class="h-4 w-4" />
                 </button>
-                <button type="button" wire:click="removeSelected" @disabled(count($selectedAnggota) === 0) wire:loading.attr="disabled" class="btn btn-outline">
-                    <x-icon name="arrow-left" class="h-4 w-4" /> Keluarkan yang dipilih ({{ count($selectedAnggota) }})
+                <button type="button" wire:click="removeSelected" :disabled="selectedAnggota.length === 0" class="btn btn-outline">
+                    <x-icon name="arrow-left" class="h-4 w-4" /> Keluarkan yang dipilih (<span x-text="selectedAnggota.length"></span>)
                 </button>
             </div>
         @endcan
@@ -144,7 +175,7 @@
                     <thead>
                         <tr>
                             @can('kelas.update')
-                                <th scope="col"><input type="checkbox" wire:click="toggleSelectAllAnggota" @checked($this->semuaDipilih($siswa->pluck('id')->all(), $selectedAnggota)) aria-label="Pilih semua anggota yang ditampilkan"></th>
+                                <th scope="col"><input type="checkbox" :checked="headerAnggota" @click.prevent="toggleAllAnggota()" aria-label="Pilih semua anggota yang ditampilkan"></th>
                             @endcan
                             <th scope="col">Nama Siswa</th>
                             <th scope="col">NIS</th>
@@ -156,7 +187,7 @@
                         @forelse ($siswa as $s)
                             <tr wire:key="rombel-member-{{ $s->id }}">
                                 @can('kelas.update')
-                                    <td><input type="checkbox" wire:model="selectedAnggota" value="{{ $s->id }}" aria-label="Pilih {{ $s->nama }}"></td>
+                                    <td><input type="checkbox" x-model="selectedAnggota" data-anggota-check value="{{ $s->id }}" aria-label="Pilih {{ $s->nama }}"></td>
                                 @endcan
                                 <td><strong>{{ $s->nama }}</strong></td>
                                 <td><span class="management-reference">{{ $s->nis }}</span></td>

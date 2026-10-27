@@ -1729,6 +1729,7 @@
 /* Papan manajemen kelas dua kolom (RombelShow): satu kolom di layar kecil,
    tiga area (calon | aksi | anggota) mulai 900px, sesuai ritme 4/8px. */
 .rombel-board {
+    position: relative;
     display: grid;
     gap: 16px;
     grid-template-columns: minmax(0, 1fr);
@@ -1756,5 +1757,48 @@
         align-items: stretch;
         position: sticky;
         top: 16px;
+    }
+}
+
+/* Overlay loading papan kelas: lingkaran berputar, bukan redup menyeluruh.
+   Keyframes sims-spin juga memperbaiki spinner kecil yang sudah ada
+   (management-inline-spinner) yang selama ini tidak berputar karena
+   keyframes-nya tidak ada di stylesheet yang dibangun. */
+@keyframes sims-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.rombel-loading-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.75);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.dark .rombel-loading-overlay {
+    background: rgba(9, 22, 42, 0.6);
+}
+
+.rombel-spinner {
+    width: 36px;
+    height: 36px;
+    border: 3px solid var(--line);
+    border-top-color: #4f46e5;
+    border-radius: 50%;
+    animation: sims-spin 0.7s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .rombel-spinner {
+        animation: none;
     }
 }
