@@ -10,6 +10,9 @@
                 <x-icon name="arrow-left" class="h-4 w-4" /> Kembali
             </a>
             @can('kelas.update')
+                <a href="{{ route('kelas.edit', $rombel) }}" class="btn btn-outline">
+                    <x-icon name="pencil" class="h-4 w-4" /> Ubah kelas
+                </a>
                 <a href="{{ route('kelas.anggota', $rombel) }}" class="btn btn-primary">
                     <x-icon name="settings" class="h-4 w-4" /> Atur anggota kelas
                 </a>
@@ -78,8 +81,8 @@
                 <thead>
                     <tr>
                         <th scope="col">Nama siswa</th>
-                        <th scope="col">NIS</th>
-                        <th scope="col">Angkatan</th>
+                        <th scope="col" class="col-nis">NIS</th>
+                        <th scope="col" class="col-angkatan">Angkatan</th>
                     </tr>
                 </thead>
                 <tbody>

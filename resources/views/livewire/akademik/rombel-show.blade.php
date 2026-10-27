@@ -140,10 +140,10 @@
                     <table class="data-table management-data-table">
                         <thead>
                             <tr>
-                                <th scope="col"><input type="checkbox" :checked="headerCalon" @click.prevent="toggleAllCalon()" aria-label="Pilih semua calon yang ditampilkan"></th>
+                                <th scope="col" class="col-check"><input type="checkbox" :checked="headerCalon" @click.prevent="toggleAllCalon()" aria-label="Pilih semua calon yang ditampilkan"></th>
                                 <th scope="col">Nama siswa</th>
-                                <th scope="col">NIS</th>
-                                <th scope="col">Angkatan</th>
+                                <th scope="col" class="col-nis">NIS</th>
+                                <th scope="col" class="col-angkatan">Angkatan</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -238,11 +238,11 @@
                     <thead>
                         <tr>
                             @can('kelas.update')
-                                <th scope="col"><input type="checkbox" :checked="headerAnggota" @click.prevent="toggleAllAnggota()" aria-label="Pilih semua anggota yang ditampilkan"></th>
+                                <th scope="col" class="col-check"><input type="checkbox" :checked="headerAnggota" @click.prevent="toggleAllAnggota()" aria-label="Pilih semua anggota yang ditampilkan"></th>
                             @endcan
                             <th scope="col">Nama siswa</th>
-                            <th scope="col">NIS</th>
-                            <th scope="col">Angkatan</th>
+                            <th scope="col" class="col-nis">NIS</th>
+                            <th scope="col" class="col-angkatan">Angkatan</th>
                         </tr>
                     </thead>
                     <tbody>

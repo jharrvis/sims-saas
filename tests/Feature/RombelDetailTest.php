@@ -72,13 +72,15 @@ it('halaman lihat kelas menampilkan info, daftar anggota, dan tombol atur hanya 
         ->assertSee('Bu Wali')
         ->assertSee('1 / 32 siswa')
         ->assertSee('Anggota Satu')
-        ->assertSee('Atur anggota kelas');
+        ->assertSee('Atur anggota kelas')
+        ->assertSee('Ubah kelas');
 
     Livewire::actingAs($this->viewer)
         ->test(RombelDetail::class, ['rombel' => $this->rombel])
         ->assertSee('Kelas IX A')
         ->assertSee('Anggota Satu')
-        ->assertDontSee('Atur anggota kelas');
+        ->assertDontSee('Atur anggota kelas')
+        ->assertDontSee('Ubah kelas');
 });
 
 it('pencarian anggota halaman lihat memakai nama, NIS, dan NISN', function (): void {

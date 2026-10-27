@@ -2016,6 +2016,39 @@
     overflow-wrap: anywhere;
 }
 
+/* Kolom tabel papan/detail dibuat compact: layout fixed + lebar eksplisit
+   menonaktifkan min-width 620px dan nowrap bawaan .data-table, sehingga
+   tabel tidak lagi meluber dan tidak ada scroll horizontal di panel. */
+.rombel-board .data-table,
+.rombel-detail .data-table {
+    table-layout: fixed;
+    width: 100%;
+    min-width: 0;
+}
+
+.rombel-board .data-table th,
+.rombel-board .data-table td,
+.rombel-detail .data-table th,
+.rombel-detail .data-table td {
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+.rombel-board .data-table .col-check,
+.rombel-detail .data-table .col-check {
+    width: 36px;
+}
+
+.rombel-board .data-table .col-nis,
+.rombel-detail .data-table .col-nis {
+    width: 64px;
+}
+
+.rombel-board .data-table .col-angkatan,
+.rombel-detail .data-table .col-angkatan {
+    width: 76px;
+}
+
 .rombel-board .management-filter-group {
     display: flex;
     flex-wrap: wrap;
