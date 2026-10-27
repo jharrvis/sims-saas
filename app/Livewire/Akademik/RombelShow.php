@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Akademik;
 
+use App\Models\ClassOfficer;
 use App\Models\Rombel;
 use App\Models\Student;
 use Illuminate\Database\Eloquent\Builder;
@@ -51,6 +52,14 @@ class RombelShow extends Component
     /** @var array<int> ID anggota yang ditahap keluar (belum simpan). */
     public array $stagedRemoved = [];
 
+    /** @var array<string, int|null> Jabatan pengurus => ID siswa (null bila kosong). */
+    public array $pengurus = [
+        'ketua' => null,
+        'wakil' => null,
+        'sekretaris' => null,
+        'bendahara' => null,
+    ];
+
     public int $calonPage = 1;
 
     public int $anggotaPage = 1;
@@ -64,6 +73,7 @@ class RombelShow extends Component
     public function mount(Rombel $rombel): void
     {
         $this->rombel = $rombel->load(['waliKelas:id,nama', 'academicYear:id,nama']);
+        $this->pengurus = $this->loadPengurus();
     }
 
     public function updatedSearchSiswa(): void
@@ -154,9 +164,19 @@ class RombelShow extends Component
         DB::transaction(function () use ($added, $removed): void {
             $this->tempatkan($added);
             $this->keluarkanDariKelas($removed);
+
+            // Siswa yang keluar kelas kehilangan jabatannya di kelas ini.
+            if ($removed !== []) {
+                DB::table('class_officers')
+                    ->where('rombel_id', $this->rombel->id)
+                    ->where('academic_year_id', $this->rombel->academic_year_id)
+                    ->whereIn('student_id', $removed)
+                    ->delete();
+            }
         });
 
         $this->resetStaging();
+        $this->pengurus = $this->loadPengurus();
         $this->calonPage = 1;
         $this->anggotaPage = 1;
 
@@ -185,6 +205,61 @@ class RombelShow extends Component
     public function batalKonfirmasi(): void
     {
         $this->confirmKapasitas = false;
+    }
+
+    /**
+     * Simpan pengurus kelas. Pengurus hanya boleh dipilih dari anggota kelas
+     * di database (bukan dari tahap), dan satu siswa memegang satu jabatan.
+     */
+    public function simpanPengurus(): void
+    {
+        $this->authorize('kelas.update');
+
+        $members = $this->anggotaIds();
+        $values = [];
+        $hasError = false;
+
+        foreach (ClassOfficer::JABATAN as $key => $label) {
+            $raw = $this->pengurus[$key] ?? null;
+            $id = $raw === '' || $raw === null ? null : (int) $raw;
+
+            if ($id !== null && ! in_array($id, $members, true)) {
+                $this->addError('pengurus.'.$key, $label.' harus dipilih dari anggota kelas ini.');
+                $hasError = true;
+            }
+            $values[$key] = $id;
+        }
+
+        $filled = array_values(array_filter($values));
+        if (count($filled) !== count(array_unique($filled))) {
+            $this->addError('pengurus.ketua', 'Satu siswa hanya boleh memegang satu jabatan.');
+            $hasError = true;
+        }
+
+        if ($hasError) {
+            return;
+        }
+
+        DB::transaction(function () use ($values): void {
+            ClassOfficer::query()
+                ->where('rombel_id', $this->rombel->id)
+                ->where('academic_year_id', $this->rombel->academic_year_id)
+                ->delete();
+
+            foreach ($values as $jabatan => $studentId) {
+                if ($studentId !== null) {
+                    ClassOfficer::create([
+                        'rombel_id' => $this->rombel->id,
+                        'student_id' => $studentId,
+                        'academic_year_id' => $this->rombel->academic_year_id,
+                        'jabatan' => $jabatan,
+                    ]);
+                }
+            }
+        });
+
+        $this->pengurus = $values;
+        session()->flash('sukses', 'Pengurus kelas disimpan.');
     }
 
     public function gotoCalonPage(int $page): void
@@ -273,10 +348,33 @@ class RombelShow extends Component
             'jumlahAnggota' => $this->stagedTotal(),
             'angkatanList' => $angkatanList,
             'asalMap' => $asalMap,
+            'pengurusAnggota' => Student::whereIn('id', $this->anggotaIds())->orderBy('nama')->get(['id', 'nama']),
+            'pengurusLabels' => ClassOfficer::JABATAN,
             'dirty' => $this->stagedAdded !== [] || $this->stagedRemoved !== [],
             'calonPager' => $this->pagerPages($calon->currentPage(), $calon->lastPage()),
             'anggotaPager' => $this->pagerPages($anggota->currentPage(), $anggota->lastPage()),
         ])->layout('layouts.app', ['title' => 'Kelas '.$this->rombel->nama]);
+    }
+
+    /**
+     * Pengurus tersimpan di database (jabatan => ID siswa, null bila kosong).
+     *
+     * @return array<string, int|null>
+     */
+    private function loadPengurus(): array
+    {
+        $map = ClassOfficer::query()
+            ->where('rombel_id', $this->rombel->id)
+            ->where('academic_year_id', $this->rombel->academic_year_id)
+            ->pluck('student_id', 'jabatan')
+            ->all();
+
+        $out = [];
+        foreach (ClassOfficer::JABATAN as $key => $label) {
+            $out[$key] = isset($map[$key]) ? (int) $map[$key] : null;
+        }
+
+        return $out;
     }
 
     /**

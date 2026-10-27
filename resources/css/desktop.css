@@ -2071,6 +2071,33 @@
     flex: 0 1 calc(50% - 4px);
 }
 
+.rombel-pengurus-card .form-grid {
+    padding: 14px;
+}
+
+.rombel-pengurus-actions {
+    padding: 0 14px 14px;
+}
+
+.rombel-pengurus-view-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 32px;
+    padding: 14px;
+}
+
+.rombel-pengurus-view-list > div {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.rombel-pengurus-view-list span {
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 600;
+}
+
 /* Halaman lihat kelas: daftar anggota memakai perlakuan yang sama dengan
    papan kelola (tinggi tetap + scroll, header menempel, toolbar melipat). */
 .rombel-detail .table-scroll {

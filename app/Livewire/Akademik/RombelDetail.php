@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Akademik;
 
+use App\Models\ClassOfficer;
 use App\Models\Rombel;
 use App\Models\Student;
 use Illuminate\Database\Eloquent\Builder;
@@ -97,10 +98,26 @@ class RombelDetail extends Component
             $anggota = $this->anggotaQuery()->paginate(self::PER_PAGE, ['*'], 'anggota_page', $this->anggotaPage);
         }
 
+        $pengurusRows = ClassOfficer::query()
+            ->where('rombel_id', $this->rombel->id)
+            ->where('academic_year_id', $this->rombel->academic_year_id)
+            ->with('student:id,nama')
+            ->get();
+
+        $pengurus = [];
+        foreach (ClassOfficer::JABATAN as $key => $label) {
+            $pengurus[$key] = null;
+        }
+        foreach ($pengurusRows as $row) {
+            $pengurus[$row->jabatan] = $row->student?->nama;
+        }
+
         return view('livewire.akademik.rombel-detail', [
             'anggota' => $anggota,
             'jumlahAnggota' => $this->anggotaIdsCount(),
             'anggotaPager' => $this->pagerPages($anggota->currentPage(), $anggota->lastPage()),
+            'pengurus' => $pengurus,
+            'pengurusLabels' => ClassOfficer::JABATAN,
         ])->layout('layouts.app', ['title' => 'Kelas '.$this->rombel->nama]);
     }
 

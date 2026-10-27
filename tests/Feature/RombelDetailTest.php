@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Livewire\Akademik\RombelDetail;
 use App\Models\AcademicYear;
+use App\Models\ClassOfficer;
 use App\Models\Employee;
 use App\Models\Membership;
 use App\Models\Rombel;
@@ -117,6 +118,22 @@ it('daftar anggota halaman lihat dipaginasi 8 per halaman', function (): void {
         ->call('gotoAnggotaPage', 2)
         ->assertSee('Anggota J')
         ->assertDontSee('Anggota B');
+});
+
+it('halaman lihat kelas menampilkan pengurus kelas', function (): void {
+    ClassOfficer::create([
+        'rombel_id' => $this->rombel->id,
+        'student_id' => $this->anggota->id,
+        'academic_year_id' => $this->ta->id,
+        'jabatan' => 'ketua',
+    ]);
+
+    Livewire::actingAs($this->admin)
+        ->test(RombelDetail::class, ['rombel' => $this->rombel])
+        ->assertSee('Pengurus kelas')
+        ->assertSee('Ketua Kelas')
+        ->assertSee('Anggota Satu')
+        ->assertSee('Bendahara');
 });
 
 it('rute kelola anggota hanya dapat dibuka pemegang kelas.update', function (): void {

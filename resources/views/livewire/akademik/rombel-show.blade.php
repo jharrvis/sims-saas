@@ -54,6 +54,37 @@
         </div>
     </section>
 
+    @can('kelas.update')
+        <section class="card rombel-pengurus-card" aria-labelledby="rombel-pengurus-title">
+            <div class="card-head management-table-heading">
+                <div class="card-title">
+                    <span class="mini-icon purple"><x-icon name="award" class="h-[19px] w-[19px]" /></span>
+                    <div>
+                        <h3 id="rombel-pengurus-title">Pengurus kelas</h3>
+                        <p>Ketua, wakil, sekretaris, dan bendahara dipilih dari anggota kelas</p>
+                    </div>
+                </div>
+            </div>
+            <div class="form-grid management-form-grid rombel-pengurus-grid">
+                @foreach ($pengurusLabels as $key => $label)
+                    <div class="form-group">
+                        <label for="rombel-pengurus-{{ $key }}">{{ $label }}</label>
+                        <select id="rombel-pengurus-{{ $key }}" wire:model="pengurus.{{ $key }}" class="select-field">
+                            <option value="">— Tidak ada —</option>
+                            @foreach ($pengurusAnggota as $a)
+                                <option value="{{ $a->id }}">{{ $a->nama }}</option>
+                            @endforeach
+                        </select>
+                        @error('pengurus.'.$key) <p class="management-field-error" role="alert">{{ $message }}</p> @enderror
+                    </div>
+                @endforeach
+            </div>
+            <div class="rombel-pengurus-actions">
+                <button type="button" wire:click="simpanPengurus" wire:loading.attr="disabled" class="btn btn-primary">Simpan pengurus</button>
+            </div>
+        </section>
+    @endcan
+
     @if ($confirmKapasitas)
         <div class="management-alert management-alert-warning rombel-capacity-confirm" role="alert">
             <span>Kelas akan melebihi kapasitas ({{ number_format($jumlahAnggota, 0, ',', '.') }}/{{ $rombel->kapasitas }}). Tetap simpan perubahan?</span>

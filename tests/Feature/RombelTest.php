@@ -187,7 +187,7 @@ it('detail rombel: anggota dapat dicari, tahap dan simpan hanya dengan kelas.upd
         ->assertSee('Siswa Rombel')
         ->set('searchAnggota', 'TidakAda')
         ->assertSee('Siswa tidak ditemukan')
-        ->assertDontSee('Siswa Rombel');
+        ->assertSee('0 siswa terdaftar');
 
     // Tahap saja belum menulis.
     Livewire::actingAs($this->admin)

@@ -50,6 +50,23 @@
         </div>
     </section>
 
+    <section class="card" aria-label="Pengurus kelas">
+        <div class="card-head management-table-heading">
+            <div class="card-title">
+                <span class="mini-icon purple"><x-icon name="award" class="h-[19px] w-[19px]" /></span>
+                <div>
+                    <h3>Pengurus kelas</h3>
+                    <p>Ketua, wakil, sekretaris, dan bendahara kelas ini</p>
+                </div>
+            </div>
+        </div>
+        <div class="rombel-pengurus-view-list">
+            @foreach ($pengurusLabels as $key => $label)
+                <div><span>{{ $label }}</span><strong>{{ $pengurus[$key] ?? '—' }}</strong></div>
+            @endforeach
+        </div>
+    </section>
+
     <section class="card management-table-card" aria-labelledby="rombel-detail-member-title">
         <div class="card-head management-table-heading">
             <div class="card-title">
