@@ -117,12 +117,14 @@
                         <tr wire:key="rombel-detail-member-{{ $s->id }}" wire:click="bukaDetail({{ $s->id }})" class="rombel-row-clickable">
                             <td>{{ $nomorAwal + $loop->iteration }}</td>
                             <td>
-                                @if ($s->fotoUrl())
-                                    <img src="{{ $s->fotoUrl() }}" alt="Foto {{ $s->nama }}" class="management-avatar-image rombel-avatar-img">
-                                @else
-                                    <span class="rombel-avatar" aria-hidden="true">{{ $this->initials($s->nama) }}</span>
-                                @endif
-                                <strong>{{ $s->nama }}</strong>
+                                <span class="person-cell">
+                                    @if ($s->fotoUrl())
+                                        <img src="{{ $s->fotoUrl() }}" alt="Foto {{ $s->nama }}" class="management-avatar-image">
+                                    @else
+                                        <span class="rombel-avatar" aria-hidden="true">{{ $this->initials($s->nama) }}</span>
+                                    @endif
+                                    <strong>{{ $s->nama }}</strong>
+                                </span>
                             </td>
                             <td><span class="management-reference">{{ $s->nis }}</span></td>
                             <td><span class="management-reference">{{ $s->nisn ?? '—' }}</span></td>
@@ -154,6 +156,7 @@
     </section>
 
     @if ($detailSiswa)
+        @teleport('body')
         <div class="rombel-modal-backdrop" wire:click="tutupDetail" x-data @keydown.escape.window="$wire.tutupDetail()">
             <div class="rombel-modal-card" role="dialog" aria-modal="true" aria-labelledby="rombel-modal-siswa-title" wire:click.stop>
                 <div class="rombel-modal-head">
@@ -190,5 +193,6 @@
                 </div>
             </div>
         </div>
+        @endteleport
     @endif
 </div>

@@ -179,6 +179,9 @@ class RombelDetail extends Component
         ])->layout('layouts.app', ['title' => 'Kelas '.$this->rombel->nama]);
     }
 
+    /** @var array<int>|null Cache ID anggota selama satu request. */
+    private ?array $anggotaIdsCache = null;
+
     /**
      * ID anggota kelas aktif untuk tahun ajaran rombel.
      *
@@ -186,11 +189,15 @@ class RombelDetail extends Component
      */
     private function anggotaIds(): array
     {
-        return $this->rombel->students()
-            ->wherePivot('academic_year_id', $this->rombel->academic_year_id)
-            ->wherePivot('status', 'aktif')
-            ->pluck('students.id')
-            ->all();
+        if ($this->anggotaIdsCache === null) {
+            $this->anggotaIdsCache = $this->rombel->students()
+                ->wherePivot('academic_year_id', $this->rombel->academic_year_id)
+                ->wherePivot('status', 'aktif')
+                ->pluck('students.id')
+                ->all();
+        }
+
+        return $this->anggotaIdsCache;
     }
 
     private function anggotaIdsCount(): int

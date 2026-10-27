@@ -1959,7 +1959,6 @@
     justify-content: center;
     width: 32px;
     height: 32px;
-    margin-right: 8px;
     border-radius: 50%;
     background: var(--blue-tint);
     color: var(--blue);
@@ -2108,11 +2107,6 @@
 
 .rombel-detail .col-jk {
     width: 84px;
-}
-
-.rombel-avatar-img {
-    margin-right: 8px;
-    vertical-align: middle;
 }
 
 .rombel-row-clickable {

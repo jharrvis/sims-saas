@@ -182,12 +182,14 @@
                                 <tr wire:key="rombel-candidate-{{ $c->id }}" :class="{ 'row-selected': selectedCalon.map(Number).includes({{ $c->id }}) }">
                                     <td><input type="checkbox" x-model="selectedCalon" data-calon-check value="{{ $c->id }}" aria-label="Pilih {{ $c->nama }}"></td>
                                     <td>
-                                        @if ($c->fotoUrl())
-                                            <img src="{{ $c->fotoUrl() }}" alt="Foto {{ $c->nama }}" class="management-avatar-image rombel-avatar-img">
-                                        @else
-                                            <span class="rombel-avatar" aria-hidden="true">{{ $this->initials($c->nama) }}</span>
-                                        @endif
-                                        <strong>{{ $c->nama }}</strong>
+                                        <span class="person-cell">
+                                            @if ($c->fotoUrl())
+                                                <img src="{{ $c->fotoUrl() }}" alt="Foto {{ $c->nama }}" class="management-avatar-image">
+                                            @else
+                                                <span class="rombel-avatar" aria-hidden="true">{{ $this->initials($c->nama) }}</span>
+                                            @endif
+                                            <strong>{{ $c->nama }}</strong>
+                                        </span>
                                         @if (isset($asalMap[$c->id]))
                                             <span class="rombel-asal">Dari {{ $asalMap[$c->id] }}</span>
                                         @endif
@@ -287,12 +289,14 @@
                                     <td><input type="checkbox" x-model="selectedAnggota" data-anggota-check value="{{ $s->id }}" aria-label="Pilih {{ $s->nama }}"></td>
                                 @endcan
                                 <td>
-                                    @if ($s->fotoUrl())
-                                        <img src="{{ $s->fotoUrl() }}" alt="Foto {{ $s->nama }}" class="management-avatar-image rombel-avatar-img">
-                                    @else
-                                        <span class="rombel-avatar" aria-hidden="true">{{ $this->initials($s->nama) }}</span>
-                                    @endif
-                                    <strong>{{ $s->nama }}</strong>
+                                    <span class="person-cell">
+                                        @if ($s->fotoUrl())
+                                            <img src="{{ $s->fotoUrl() }}" alt="Foto {{ $s->nama }}" class="management-avatar-image">
+                                        @else
+                                            <span class="rombel-avatar" aria-hidden="true">{{ $this->initials($s->nama) }}</span>
+                                        @endif
+                                        <strong>{{ $s->nama }}</strong>
+                                    </span>
                                 </td>
                                 <td><span class="management-reference">{{ $s->nis }}</span></td>
                                 <td>{{ $s->angkatan ?? '—' }}</td>
