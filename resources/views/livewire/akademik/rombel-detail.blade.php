@@ -72,7 +72,7 @@
             <div class="card-title">
                 <span class="mini-icon blue"><x-icon name="users" class="h-[19px] w-[19px]" /></span>
                 <div>
-                    <h3 id="rombel-detail-member-title">Anggota kelas {{ $rombel->nama }} <span class="rombel-count-badge">{{ $anggota->total() }}</span></h3>
+                    <h3 id="rombel-detail-member-title">Anggota kelas {{ $rombel->nama }} <span class="rombel-count-badge">{{ $anggotaTotal }}</span></h3>
                     <p>Daftar siswa yang terdaftar di kelas ini</p>
                 </div>
             </div>
@@ -91,46 +91,104 @@
                     <option value="nis">Urutkan: NIS</option>
                     <option value="angkatan">Urutkan: Angkatan</option>
                 </select>
+                <label class="sr-only" for="rombel-detail-member-per-page">Jumlah baris per halaman</label>
+                <select id="rombel-detail-member-per-page" wire:model.live="perPage" class="select-field rombel-sort-single">
+                    @foreach ($perPageOptions as $opt)
+                        <option value="{{ $opt }}">{{ $opt }} baris</option>
+                    @endforeach
+                    <option value="0">Semua</option>
+                </select>
             </div>
         </div>
         <div class="table-scroll">
             <table class="data-table management-data-table">
                 <thead>
                     <tr>
+                        <th scope="col" class="col-no">No</th>
                         <th scope="col">Nama siswa</th>
                         <th scope="col" class="col-nis">NIS</th>
+                        <th scope="col" class="col-nisn">NISN</th>
+                        <th scope="col" class="col-jk">Jenis Kelamin</th>
                         <th scope="col" class="col-angkatan">Angkatan</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse ($anggota as $s)
-                        <tr wire:key="rombel-detail-member-{{ $s->id }}">
+                        <tr wire:key="rombel-detail-member-{{ $s->id }}" wire:click="bukaDetail({{ $s->id }})" class="rombel-row-clickable">
+                            <td>{{ $nomorAwal + $loop->iteration }}</td>
                             <td>
-                                <span class="rombel-avatar" aria-hidden="true">{{ $this->initials($s->nama) }}</span>
+                                @if ($s->fotoUrl())
+                                    <img src="{{ $s->fotoUrl() }}" alt="Foto {{ $s->nama }}" class="management-avatar-image rombel-avatar-img">
+                                @else
+                                    <span class="rombel-avatar" aria-hidden="true">{{ $this->initials($s->nama) }}</span>
+                                @endif
                                 <strong>{{ $s->nama }}</strong>
                             </td>
                             <td><span class="management-reference">{{ $s->nis }}</span></td>
+                            <td><span class="management-reference">{{ $s->nisn ?? '—' }}</span></td>
+                            <td>{{ $s->jk === 'L' ? 'Laki-laki' : ($s->jk === 'P' ? 'Perempuan' : '—') }}</td>
                             <td>{{ $s->angkatan ?? '—' }}</td>
                         </tr>
                     @empty
-                        <tr><td colspan="3"><div class="empty-state"><div class="empty-symbol"><x-icon name="users" class="h-7 w-7" /></div><h3>{{ $searchAnggota !== '' ? 'Siswa tidak ditemukan' : 'Belum ada siswa di kelas ini' }}</h3><p>{{ $searchAnggota !== '' ? 'Ubah kata kunci untuk melihat anggota lainnya.' : 'Kelas ini belum memiliki anggota.' }}</p></div></td></tr>
+                        <tr><td colspan="6"><div class="empty-state"><div class="empty-symbol"><x-icon name="users" class="h-7 w-7" /></div><h3>{{ $searchAnggota !== '' ? 'Siswa tidak ditemukan' : 'Belum ada siswa di kelas ini' }}</h3><p>{{ $searchAnggota !== '' ? 'Ubah kata kunci untuk melihat anggota lainnya.' : 'Kelas ini belum memiliki anggota.' }}</p></div></td></tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
         <div class="rombel-table-footer">
-            <span>{{ $anggota->total() }} siswa terdaftar</span>
-            <nav class="rombel-pager" aria-label="Halaman anggota kelas">
-                <button type="button" wire:click="gotoAnggotaPage({{ $anggota->currentPage() - 1 }})" @disabled($anggota->onFirstPage()) aria-label="Halaman sebelumnya">&lt;</button>
-                @foreach ($anggotaPager as $p)
-                    @if ($p === null)
-                        <span class="rombel-pager-ellipsis" aria-hidden="true">…</span>
-                    @else
-                        <button type="button" wire:click="gotoAnggotaPage({{ $p }})" @class(['active' => $p === $anggota->currentPage()]) aria-current="{{ $p === $anggota->currentPage() ? 'page' : 'false' }}">{{ $p }}</button>
-                    @endif
-                @endforeach
-                <button type="button" wire:click="gotoAnggotaPage({{ $anggota->currentPage() + 1 }})" @disabled(!$anggota->hasMorePages()) aria-label="Halaman berikutnya">&gt;</button>
-            </nav>
+            <span>{{ $isSemua ? 'Menampilkan semua '.$anggotaTotal.' siswa' : $anggotaTotal.' siswa terdaftar' }}</span>
+            @if (! $isSemua)
+                <nav class="rombel-pager" aria-label="Halaman anggota kelas">
+                    <button type="button" wire:click="gotoAnggotaPage({{ $anggota->currentPage() - 1 }})" @disabled($anggota->onFirstPage()) aria-label="Halaman sebelumnya">&lt;</button>
+                    @foreach ($anggotaPager as $p)
+                        @if ($p === null)
+                            <span class="rombel-pager-ellipsis" aria-hidden="true">…</span>
+                        @else
+                            <button type="button" wire:click="gotoAnggotaPage({{ $p }})" @class(['active' => $p === $anggota->currentPage()]) aria-current="{{ $p === $anggota->currentPage() ? 'page' : 'false' }}">{{ $p }}</button>
+                        @endif
+                    @endforeach
+                    <button type="button" wire:click="gotoAnggotaPage({{ $anggota->currentPage() + 1 }})" @disabled(!$anggota->hasMorePages()) aria-label="Halaman berikutnya">&gt;</button>
+                </nav>
+            @endif
         </div>
     </section>
+
+    @if ($detailSiswa)
+        <div class="rombel-modal-backdrop" wire:click="tutupDetail" x-data @keydown.escape.window="$wire.tutupDetail()">
+            <div class="rombel-modal-card" role="dialog" aria-modal="true" aria-labelledby="rombel-modal-siswa-title" wire:click.stop>
+                <div class="rombel-modal-head">
+                    @if ($detailSiswa->fotoUrl())
+                        <img src="{{ $detailSiswa->fotoUrl() }}" alt="Foto {{ $detailSiswa->nama }}" class="rombel-modal-photo">
+                    @else
+                        <span class="rombel-modal-photo-fallback" aria-hidden="true">{{ $this->initials($detailSiswa->nama) }}</span>
+                    @endif
+                    <div>
+                        <h3 id="rombel-modal-siswa-title">{{ $detailSiswa->nama }}</h3>
+                        <p>Siswa kelas {{ $rombel->nama }} · {{ $rombel->academicYear->nama ?? '—' }}</p>
+                    </div>
+                    <button type="button" wire:click="tutupDetail" class="rombel-modal-close" aria-label="Tutup detail">×</button>
+                </div>
+                <dl class="rombel-modal-grid">
+                    <div><dt>NIS</dt><dd>{{ $detailSiswa->nis }}</dd></div>
+                    <div><dt>NISN</dt><dd>{{ $detailSiswa->nisn ?? '—' }}</dd></div>
+                    <div><dt>Jenis Kelamin</dt><dd>{{ $detailSiswa->jk === 'L' ? 'Laki-laki' : ($detailSiswa->jk === 'P' ? 'Perempuan' : '—') }}</dd></div>
+                    <div><dt>Tempat, Tanggal Lahir</dt><dd>{{ $detailTtl }}</dd></div>
+                    <div><dt>Agama</dt><dd>{{ $detailSiswa->agama ?? '—' }}</dd></div>
+                    <div><dt>Angkatan</dt><dd>{{ $detailSiswa->angkatan ?? '—' }}</dd></div>
+                    <div><dt>Status</dt><dd>{{ ucfirst($detailSiswa->status) }}</dd></div>
+                    <div><dt>Telepon</dt><dd>{{ $detailSiswa->phone ?? '—' }}</dd></div>
+                    <div class="rombel-modal-span"><dt>Alamat</dt><dd>{{ $detailSiswa->alamat ?? '—' }}</dd></div>
+                    @if ($detailSiswa->guardians->isNotEmpty())
+                        <div class="rombel-modal-span"><dt>Orang tua / Wali</dt><dd>{{ $detailSiswa->guardians->pluck('nama')->join(', ') }}</dd></div>
+                    @endif
+                </dl>
+                <div class="rombel-modal-actions">
+                    @can('siswa.view')
+                        <a href="{{ route('siswa.show', $detailSiswa) }}" class="btn btn-outline">Lihat data lengkap</a>
+                    @endcan
+                    <button type="button" wire:click="tutupDetail" class="btn btn-primary">Tutup</button>
+                </div>
+            </div>
+        </div>
+    @endif
 </div>

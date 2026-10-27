@@ -294,3 +294,13 @@ it('form siswa menyimpan angkatan', function (): void {
 
     expect(Student::where('nis', '3001')->value('angkatan'))->toBe(2024);
 });
+
+it('foto calon dan anggota tampil bila ada di papan kelola', function (): void {
+    $this->calonBebas->update(['foto_path' => 'siswa/calon-bebas.jpg']);
+    $this->anggota->update(['foto_path' => 'siswa/anggota-satu.jpg']);
+
+    Livewire::actingAs($this->admin)
+        ->test(RombelShow::class, ['rombel' => $this->rombel])
+        ->assertSee('/storage/siswa/calon-bebas.jpg')
+        ->assertSee('/storage/siswa/anggota-satu.jpg');
+});

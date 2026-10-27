@@ -7,6 +7,7 @@ namespace App\Livewire\Akademik;
 use App\Models\ClassOfficer;
 use App\Models\Rombel;
 use App\Models\Student;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\View\View;
 use Livewire\Component;
@@ -28,7 +29,13 @@ class RombelDetail extends Component
 
     public int $anggotaPage = 1;
 
-    public const PER_PAGE = 8;
+    /** Jumlah baris per halaman; 0 berarti tampilkan semua. */
+    public int $perPage = 8;
+
+    public const PER_PAGE_OPTIONS = [8, 16, 32, 50];
+
+    /** ID siswa yang modal detailnya sedang dibuka (null bila tidak ada). */
+    public ?int $detailSiswaId = null;
 
     public function mount(Rombel $rombel): void
     {
@@ -45,9 +52,28 @@ class RombelDetail extends Component
         $this->anggotaPage = 1;
     }
 
+    public function updatedPerPage(): void
+    {
+        $this->perPage = (int) $this->perPage;
+        $this->anggotaPage = 1;
+    }
+
     public function gotoAnggotaPage(int $page): void
     {
         $this->anggotaPage = max(1, $page);
+    }
+
+    /**
+     * Buka modal detail siswa; hanya untuk anggota kelas ini.
+     */
+    public function bukaDetail(int $id): void
+    {
+        $this->detailSiswaId = in_array($id, $this->anggotaIds(), true) ? $id : null;
+    }
+
+    public function tutupDetail(): void
+    {
+        $this->detailSiswaId = null;
     }
 
     /**
@@ -92,10 +118,36 @@ class RombelDetail extends Component
 
     public function render(): View
     {
-        $anggota = $this->anggotaQuery()->paginate(self::PER_PAGE, ['*'], 'anggota_page', $this->anggotaPage);
-        if ($this->anggotaPage > $anggota->lastPage()) {
-            $this->anggotaPage = max(1, $anggota->lastPage());
-            $anggota = $this->anggotaQuery()->paginate(self::PER_PAGE, ['*'], 'anggota_page', $this->anggotaPage);
+        $perPage = (int) $this->perPage;
+        $isSemua = $perPage <= 0;
+
+        if ($isSemua) {
+            $anggota = $this->anggotaQuery()->get();
+            $anggotaTotal = $anggota->count();
+            $anggotaPager = [1];
+            $nomorAwal = 0;
+        } else {
+            $anggota = $this->anggotaQuery()->paginate($perPage, ['*'], 'anggota_page', $this->anggotaPage);
+            if ($this->anggotaPage > $anggota->lastPage()) {
+                $this->anggotaPage = max(1, $anggota->lastPage());
+                $anggota = $this->anggotaQuery()->paginate($perPage, ['*'], 'anggota_page', $this->anggotaPage);
+            }
+            $anggotaTotal = $anggota->total();
+            $anggotaPager = $this->pagerPages($anggota->currentPage(), $anggota->lastPage());
+            $nomorAwal = ($anggota->currentPage() - 1) * $perPage;
+        }
+
+        $detailSiswa = null;
+        $detailTtl = '—';
+        if ($this->detailSiswaId !== null) {
+            $detailSiswa = Student::query()->whereIn('id', $this->anggotaIds())->with('guardians:id,nama')->find($this->detailSiswaId);
+            if ($detailSiswa !== null) {
+                $ttlParts = array_filter([
+                    $detailSiswa->tempat_lahir,
+                    $detailSiswa->tgl_lahir ? Carbon::parse($detailSiswa->tgl_lahir)->translatedFormat('d F Y') : null,
+                ]);
+                $detailTtl = $ttlParts !== [] ? implode(', ', $ttlParts) : '—';
+            }
         }
 
         $pengurusRows = ClassOfficer::query()
@@ -114,8 +166,14 @@ class RombelDetail extends Component
 
         return view('livewire.akademik.rombel-detail', [
             'anggota' => $anggota,
+            'anggotaTotal' => $anggotaTotal,
             'jumlahAnggota' => $this->anggotaIdsCount(),
-            'anggotaPager' => $this->pagerPages($anggota->currentPage(), $anggota->lastPage()),
+            'anggotaPager' => $anggotaPager,
+            'isSemua' => $isSemua,
+            'nomorAwal' => $nomorAwal,
+            'perPageOptions' => self::PER_PAGE_OPTIONS,
+            'detailSiswa' => $detailSiswa,
+            'detailTtl' => $detailTtl,
             'pengurus' => $pengurus,
             'pengurusLabels' => ClassOfficer::JABATAN,
         ])->layout('layouts.app', ['title' => 'Kelas '.$this->rombel->nama]);

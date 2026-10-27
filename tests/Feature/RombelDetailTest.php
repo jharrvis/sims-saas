@@ -141,3 +141,61 @@ it('rute kelola anggota hanya dapat dibuka pemegang kelas.update', function (): 
     $this->actingAs($this->admin)->get(route('kelas.anggota', $this->rombel))->assertOk();
     $this->actingAs($this->viewer)->get(route('kelas.show', $this->rombel))->assertOk();
 });
+
+it('tabel anggota menampilkan nomor urut, NISN, dan jenis kelamin', function (): void {
+    Livewire::actingAs($this->admin)
+        ->test(RombelDetail::class, ['rombel' => $this->rombel])
+        ->assertSee('No')
+        ->assertSee('NISN')
+        ->assertSee('Jenis Kelamin')
+        ->assertSee('111')
+        ->assertSee('Laki-laki');
+});
+
+it('jumlah baris per halaman dapat diubah dan semua dapat ditampilkan', function (): void {
+    foreach (range(2, 10) as $i) {
+        $s = Student::create([
+            'nis' => '100'.$i, 'nisn' => '11'.$i, 'nama' => 'Siswa '.str_pad((string) $i, 2, '0', STR_PAD_LEFT),
+            'jk' => 'P', 'status' => 'aktif', 'angkatan' => 2026,
+        ]);
+        $s->rombels()->attach($this->rombel->id, ['academic_year_id' => $this->ta->id, 'status' => 'aktif']);
+    }
+
+    $test = Livewire::actingAs($this->admin)
+        ->test(RombelDetail::class, ['rombel' => $this->rombel])
+        ->assertDontSee('Siswa 10')
+        ->set('perPage', 0)
+        ->assertSee('Siswa 10')
+        ->assertSee('Menampilkan semua 10 siswa');
+
+    expect($test->get('perPage'))->toBe(0);
+});
+
+it('klik baris membuka modal detail siswa', function (): void {
+    $lengkap = Student::create([
+        'nis' => '1002', 'nisn' => '222', 'nama' => 'Siswa Lengkap', 'jk' => 'P',
+        'tempat_lahir' => 'Salatiga', 'tgl_lahir' => '2012-05-06', 'agama' => 'Islam',
+        'alamat' => 'Jl. Merdeka 1', 'phone' => '628123456789', 'status' => 'aktif', 'angkatan' => 2026,
+    ]);
+    $lengkap->rombels()->attach($this->rombel->id, ['academic_year_id' => $this->ta->id, 'status' => 'aktif']);
+
+    Livewire::actingAs($this->admin)
+        ->test(RombelDetail::class, ['rombel' => $this->rombel])
+        ->call('bukaDetail', $lengkap->id)
+        ->assertSee('Siswa Lengkap')
+        ->assertSee('222')
+        ->assertSee('Perempuan')
+        ->assertSee('Salatiga')
+        ->assertSee('Islam')
+        ->assertSee('Jl. Merdeka 1')
+        ->call('tutupDetail')
+        ->assertSet('detailSiswaId', null);
+});
+
+it('foto siswa tampil bila ada di tabel anggota', function (): void {
+    $this->anggota->update(['foto_path' => 'siswa/anggota-satu.jpg']);
+
+    Livewire::actingAs($this->admin)
+        ->test(RombelDetail::class, ['rombel' => $this->rombel])
+        ->assertSee('/storage/siswa/anggota-satu.jpg');
+});

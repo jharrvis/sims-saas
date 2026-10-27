@@ -182,7 +182,11 @@
                                 <tr wire:key="rombel-candidate-{{ $c->id }}" :class="{ 'row-selected': selectedCalon.map(Number).includes({{ $c->id }}) }">
                                     <td><input type="checkbox" x-model="selectedCalon" data-calon-check value="{{ $c->id }}" aria-label="Pilih {{ $c->nama }}"></td>
                                     <td>
-                                        <span class="rombel-avatar" aria-hidden="true">{{ $this->initials($c->nama) }}</span>
+                                        @if ($c->fotoUrl())
+                                            <img src="{{ $c->fotoUrl() }}" alt="Foto {{ $c->nama }}" class="management-avatar-image rombel-avatar-img">
+                                        @else
+                                            <span class="rombel-avatar" aria-hidden="true">{{ $this->initials($c->nama) }}</span>
+                                        @endif
                                         <strong>{{ $c->nama }}</strong>
                                         @if (isset($asalMap[$c->id]))
                                             <span class="rombel-asal">Dari {{ $asalMap[$c->id] }}</span>
@@ -283,7 +287,11 @@
                                     <td><input type="checkbox" x-model="selectedAnggota" data-anggota-check value="{{ $s->id }}" aria-label="Pilih {{ $s->nama }}"></td>
                                 @endcan
                                 <td>
-                                    <span class="rombel-avatar" aria-hidden="true">{{ $this->initials($s->nama) }}</span>
+                                    @if ($s->fotoUrl())
+                                        <img src="{{ $s->fotoUrl() }}" alt="Foto {{ $s->nama }}" class="management-avatar-image rombel-avatar-img">
+                                    @else
+                                        <span class="rombel-avatar" aria-hidden="true">{{ $this->initials($s->nama) }}</span>
+                                    @endif
                                     <strong>{{ $s->nama }}</strong>
                                 </td>
                                 <td><span class="management-reference">{{ $s->nis }}</span></td>

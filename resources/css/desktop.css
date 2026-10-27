@@ -2098,6 +2098,136 @@
     font-weight: 600;
 }
 
+.rombel-detail .col-no {
+    width: 44px;
+}
+
+.rombel-detail .col-nisn {
+    width: 96px;
+}
+
+.rombel-detail .col-jk {
+    width: 84px;
+}
+
+.rombel-avatar-img {
+    margin-right: 8px;
+    vertical-align: middle;
+}
+
+.rombel-row-clickable {
+    cursor: pointer;
+}
+
+.rombel-row-clickable:hover td {
+    background: var(--surface-2);
+}
+
+.rombel-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    background: rgb(10 20 40 / 50%);
+}
+
+.rombel-modal-card {
+    width: 100%;
+    max-width: 520px;
+    max-height: 90vh;
+    overflow: auto;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+}
+
+.rombel-modal-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    border-bottom: 1px solid var(--line);
+}
+
+.rombel-modal-head > div {
+    flex: 1;
+    min-width: 0;
+}
+
+.rombel-modal-head p {
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.rombel-modal-photo {
+    width: 56px;
+    height: 56px;
+    flex: 0 0 auto;
+    border-radius: 14px;
+    object-fit: cover;
+}
+
+.rombel-modal-photo-fallback {
+    display: grid;
+    place-items: center;
+    width: 56px;
+    height: 56px;
+    flex: 0 0 auto;
+    border-radius: 14px;
+    background: var(--blue-tint);
+    color: var(--blue);
+    font-size: 18px;
+    font-weight: 800;
+}
+
+.rombel-modal-close {
+    border: 0;
+    background: transparent;
+    color: var(--muted);
+    font-size: 22px;
+    line-height: 1;
+}
+
+.rombel-modal-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px 16px;
+    padding: 16px;
+    margin: 0;
+}
+
+.rombel-modal-grid > div {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.rombel-modal-grid dt {
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.rombel-modal-grid dd {
+    margin: 0;
+    font-weight: 600;
+}
+
+.rombel-modal-span {
+    grid-column: 1 / -1;
+}
+
+.rombel-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 0 16px 16px;
+}
+
 /* Halaman lihat kelas: daftar anggota memakai perlakuan yang sama dengan
    papan kelola (tinggi tetap + scroll, header menempel, toolbar melipat). */
 .rombel-detail .table-scroll {
