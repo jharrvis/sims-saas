@@ -57,6 +57,21 @@
 <div class="app-frame">
     <div class="sims-progress" data-sims-progress aria-hidden="true"><span></span></div>
 
+    <div class="app-loading-overlay" data-sims-loading hidden aria-hidden="true">
+        <div class="app-loading-card" role="status">
+            <div class="app-loading-spinner" aria-hidden="true"></div>
+            <strong>Memuat {{ $title }}...</strong>
+            <p>Mohon tunggu sebentar.</p>
+        </div>
+    </div>
+
+    @if ($helpRoute)
+        <a href="{{ $helpRoute }}" class="sims-help-fab" aria-label="Buka panduan bantuan">
+            <x-icon name="sparkles" class="h-[16px] w-[16px]" />
+            <span>Bantuan</span>
+        </a>
+    @endif
+
     <div class="mobile-scrim" x-show="mobileOpen" x-cloak @click="mobileOpen = false"></div>
 
     <aside class="sidebar" :class="{ 'sidebar-mini': collapsed, 'sidebar-mobile-open': mobileOpen }" aria-label="Navigasi utama">
@@ -107,14 +122,6 @@
         </nav>
 
         <div class="sidebar-footer">
-            @if ($helpRoute)
-                <div class="sidebar-help" x-show="!collapsed">
-                    <x-icon name="sparkles" class="h-[17px] w-[17px]" />
-                    <strong>Butuh bantuan?</strong>
-                    <p>{{ $surface === 'platform' ? 'Panduan operasional platform tersedia untuk tim operator.' : 'Panduan penggunaan SIMS tersedia untuk tim sekolah Anda.' }}</p>
-                    <a href="{{ $helpRoute }}">Buka panduan <x-icon name="arrow-up-right" class="h-[13px] w-[13px]" /></a>
-                </div>
-            @endif
             @if ($settingsRoute)
                 <a class="nav-link footer-settings" href="{{ $settingsRoute }}">
                     <x-icon name="settings" class="h-[19px] w-[19px]" />

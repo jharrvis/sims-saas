@@ -182,23 +182,58 @@ document.addEventListener('alpine:init', () => {
  * Loading manager: a request-scoped progress bar with a timeout guard.
  * Never leaves a blocking overlay behind on success, validation error,
  * exception, or timeout.
+ *
+ * The modal overlay (data-sims-loading, gaya .app-loading-* dari referensi)
+ * hanya muncul bila permintaan berjalan lebih dari 400ms, supaya interaksi
+ * cepat (mis. ketik di kolom cari) tidak berkedip tertutup modal.
  */
 document.addEventListener('livewire:init', () => {
     if (!window.Livewire) return;
 
     let active = 0;
     let navigationTimer = null;
+    let overlayTimer = null;
     const timers = new Set();
     const bar = () => document.querySelector('[data-sims-progress]');
+    const overlay = () => document.querySelector('[data-sims-loading]');
+
+    const showOverlay = () => {
+        const element = overlay();
+        if (!element) return;
+
+        element.removeAttribute('hidden');
+        element.setAttribute('aria-hidden', 'false');
+    };
+
+    const hideOverlay = () => {
+        const element = overlay();
+        if (!element) return;
+
+        element.setAttribute('hidden', '');
+        element.setAttribute('aria-hidden', 'true');
+    };
 
     const start = () => {
         active += 1;
         bar()?.classList.add('is-active');
+        if (active === 1 && overlayTimer === null) {
+            overlayTimer = window.setTimeout(() => {
+                overlayTimer = null;
+                if (active > 0) showOverlay();
+            }, 400);
+        }
         const timer = window.setTimeout(() => {
             if (!timers.delete(timer)) return;
 
             active = Math.max(0, active - 1);
-            if (active === 0) bar()?.classList.remove('is-active');
+            if (active === 0) {
+                bar()?.classList.remove('is-active');
+                if (overlayTimer !== null) {
+                    window.clearTimeout(overlayTimer);
+                    overlayTimer = null;
+                }
+                hideOverlay();
+            }
             showToast({ type: 'error', title: 'Koneksi lambat', message: 'Permintaan memakan waktu terlalu lama. Silakan coba lagi.' });
         }, 20000);
         timers.add(timer);
@@ -213,6 +248,11 @@ document.addEventListener('livewire:init', () => {
         active = Math.max(0, active - 1);
         if (active === 0) {
             bar()?.classList.remove('is-active');
+            if (overlayTimer !== null) {
+                window.clearTimeout(overlayTimer);
+                overlayTimer = null;
+            }
+            hideOverlay();
         }
     };
 
@@ -235,5 +275,6 @@ document.addEventListener('livewire:init', () => {
 
     document.addEventListener('livewire:navigated', () => {
         bar()?.classList.remove('is-active');
+        hideOverlay();
     });
 });

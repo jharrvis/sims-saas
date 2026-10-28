@@ -2359,3 +2359,43 @@ body {
 .rombel-status-dot.clean {
     background: var(--green);
 }
+
+/* Overlay loading global + tombol bantuan melayang (2026-10-28).
+   Kartu/spinner overlay memakai gaya .app-loading-* dari referensi;
+   aturan [hidden] di sini diperlukan karena display:grid referensi
+   mengalahkan atribut hidden bawaan browser. */
+.app-loading-overlay[hidden] {
+    display: none;
+}
+
+/* Tombol bantuan kecil di pojok kanan bawah, menggantikan kartu besar
+   di sidebar. z-index di bawah tray toast (120) supaya notifikasi
+   sesaat tetap terbaca; tombol kembali bisa diklik setelah toast hilang. */
+.sims-help-fab {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    z-index: 110;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 16px;
+    border-radius: 999px;
+    background: var(--blue);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    box-shadow: 0 12px 30px #06122833;
+    transition: filter .2s ease, transform .2s ease;
+}
+
+.sims-help-fab:hover {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+}
+
+.sims-help-fab:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 2px;
+}
