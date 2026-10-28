@@ -33,6 +33,7 @@ final class Navigation
             ],
             'data-master' => [
                 self::item('Data Siswa', 'siswa.index', 'users', active: 'siswa.*', permission: 'siswa.view'),
+                self::item('Data Wali', 'wali.index', 'user-round-check', active: 'wali.*', permission: 'wali-murid.view'),
                 self::item('QR Login', 'qr.kartu', 'qr-code', active: 'qr.*', permission: 'qr.view'),
                 self::item('Data Guru', 'guru.index', 'graduation-cap', active: 'guru.*', permission: 'guru.view'),
                 self::item('Data Kelas', 'kelas.index', 'school', active: 'kelas.*', permission: 'kelas.view'),
