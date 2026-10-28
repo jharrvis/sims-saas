@@ -9,11 +9,16 @@
 @import './desktop-reference.css';
 
 /* Ukuran font dasar desktop: 14px (naik dari 13px referensi) agar teks isi
-   lebih nyaman dibaca; 13px tetap dipakai teks sekunder yang ukurannya
-   eksplisit. Override ini sengaja di sini, bukan di file referensi, supaya
-   bundel referensi tetap utuh. */
+   lebih nyaman dibaca. Override ini sengaja di sini, bukan di file referensi,
+   supaya bundel referensi tetap utuh. */
 body {
     font-size: 14px;
+}
+
+/* Subjudul kartu (mis. jumlah aktivitas di Audit Log): 12px, naik dari
+   10px referensi agar tetap terbaca di samping judulnya. */
+.card-title p {
+    font-size: 12px;
 }
 
 /* Surface accent: platform uses the amber/orange reference token. */
