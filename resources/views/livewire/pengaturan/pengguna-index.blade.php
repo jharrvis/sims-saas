@@ -102,6 +102,9 @@
                                     <div class="min-w-0">
                                         <div class="font-medium">{{ $pengguna->name }}</div>
                                         <div class="text-xs text-slate-500 font-mono">{{ $pengguna->username }}</div>
+                                        @if ($pengguna->employee)
+                                            <div class="text-xs text-slate-500">Guru/Pegawai: {{ $pengguna->employee->nama }} · {{ $pengguna->employee->labelJenis() }}</div>
+                                        @endif
                                     </div>
                                 </div>
                             </td>

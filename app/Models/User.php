@@ -44,6 +44,7 @@ class User extends Authenticatable
         'password',
         'is_platform',
         'student_id',
+        'employee_id',
     ];
 
     /**
@@ -129,6 +130,16 @@ class User extends Authenticatable
     public function student(): BelongsTo
     {
         return $this->belongsTo(Student::class);
+    }
+
+    /**
+     * Tautan akun guru/pegawai 1:1 ke data kepegawaian.
+     *
+     * @return BelongsTo<Employee, $this>
+     */
+    public function employee(): BelongsTo
+    {
+        return $this->belongsTo(Employee::class);
     }
 
     /**

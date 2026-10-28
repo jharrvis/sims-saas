@@ -120,6 +120,7 @@
                         <th scope="col">Jenis</th>
                         <th scope="col">Telepon</th>
                         <th scope="col">Status</th>
+                        <th scope="col">Akun Login</th>
                         <th scope="col" class="management-actions-heading">Aksi</th>
                     </tr>
                 </thead>
@@ -146,6 +147,13 @@
                             <td>{{ $guru->labelJenis() }}</td>
                             <td>{{ $guru->phone ?: '—' }}</td>
                             <td><span class="badge {{ $statusClass }}">{{ $statusLabel }}</span></td>
+                            <td>
+                                @if ($guru->user)
+                                    <span class="font-mono text-xs">{{ $guru->user->username }}</span>
+                                @else
+                                    <span class="text-xs text-slate-500">Belum ada akun</span>
+                                @endif
+                            </td>
                             <td>
                                 <div class="row-actions management-row-actions">
                                     @if ($showTrashed)

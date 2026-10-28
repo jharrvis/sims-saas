@@ -49,6 +49,7 @@ use App\Livewire\ERapor\RaporShow;
 use App\Livewire\Kantin\Kasir;
 use App\Livewire\Kantin\ProductIndex;
 use App\Livewire\Kantin\TransactionIndex;
+use App\Livewire\Kepegawaian\EmployeeAccountForm;
 use App\Livewire\Kepegawaian\EmployeeForm;
 use App\Livewire\Kepegawaian\EmployeeImport;
 use App\Livewire\Kepegawaian\EmployeeIndex;
@@ -229,6 +230,7 @@ Route::middleware(['auth', 'mfa'])->group(function (): void {
         }
         Route::get('/tambah', EmployeeForm::class)->name('create')->middleware('permission:guru.create');
         Route::get('/{employee}/ubah', EmployeeForm::class)->name('edit')->middleware('permission:guru.update');
+        Route::get('/{employee}/akun', EmployeeAccountForm::class)->name('akun')->middleware('permission:pengguna.create');
         Route::get('/{employee}', EmployeeShow::class)->name('show')->middleware('permission:guru.view');
     });
 

@@ -6,6 +6,7 @@ namespace App\Livewire\Kepegawaian;
 
 use App\Models\Employee;
 use App\Models\Schedule;
+use App\Tenancy\TenantContext;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
 use Livewire\Component;
@@ -19,7 +20,7 @@ class EmployeeShow extends Component
 
     public function mount(Employee $employee): void
     {
-        $this->employee = $employee->load('rombelsAsWali');
+        $this->employee = $employee->load('rombelsAsWali', 'user.roles', 'user.memberships');
     }
 
     public function render(): View
@@ -36,8 +37,22 @@ class EmployeeShow extends Component
         $jadwalPerHari = $jadwal->groupBy('hari')
             ->sortKeysUsing(fn (string $a, string $b): int => ($urutanHari[$a] ?? 99) <=> ($urutanHari[$b] ?? 99));
 
+        // Akun login yang tertaut (bila ada) + statusnya di sekolah aktif.
+        $akun = null;
+        if ($this->employee->user !== null) {
+            $schoolId = (int) app(TenantContext::class)->schoolId();
+            $akun = [
+                'id' => $this->employee->user->id,
+                'username' => $this->employee->user->username,
+                'roles' => $this->employee->user->getRoleNames()->all(),
+                'status' => $this->employee->user->memberships
+                    ->where('school_id', $schoolId)->first()?->status,
+            ];
+        }
+
         return view('livewire.kepegawaian.employee-show', [
             'jadwalPerHari' => $jadwalPerHari,
+            'akun' => $akun,
         ])->layout('layouts.app', ['title' => 'Detail Guru']);
     }
 }

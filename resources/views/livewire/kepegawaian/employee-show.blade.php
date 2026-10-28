@@ -1,4 +1,11 @@
 <div class="page-stack">
+    @if (session('sukses'))
+        <div class="management-alert management-alert-success" role="status" aria-live="polite">
+            <x-icon name="check-circle" class="h-5 w-5" />
+            <span>{{ session('sukses') }}</span>
+        </div>
+    @endif
+
     @php
         $namaParts = preg_split('/\s+/', trim($employee->nama));
         $inisial = strtoupper(mb_substr($namaParts[0], 0, 1).(count($namaParts) > 1 ? mb_substr(end($namaParts), 0, 1) : ''));
@@ -95,6 +102,46 @@
             <div><dt>Sertifikasi</dt><dd>{{ $employee->labelSertifikasi() }}</dd></div>
             <div><dt>No. Sertifikat Pendidik</dt><dd>{{ $employee->no_sertifikat ?? '—' }}</dd></div>
         </dl>
+    </section>
+
+    <section class="card" aria-labelledby="employee-akun-title">
+        <div class="card-head">
+            <div class="card-title">
+                <span class="mini-icon blue"><x-icon name="key-round" class="h-[19px] w-[19px]" /></span>
+                <div>
+                    <h3 id="employee-akun-title">Akun Login</h3>
+                    <p>Akun yang dipakai guru/pegawai ini untuk masuk ke aplikasi.</p>
+                </div>
+            </div>
+        </div>
+
+        @if ($akun)
+            <dl class="management-definition-list">
+                <div><dt>Username</dt><dd class="font-mono">{{ $akun['username'] }}</dd></div>
+                <div><dt>Peran</dt><dd>{{ collect($akun['roles'])->map(fn ($role) => \App\Support\RoleCatalog::label($role))->join(', ') ?: '—' }}</dd></div>
+                <div><dt>Status di sekolah ini</dt><dd>{{ $akun['status'] === 'aktif' ? 'Aktif' : 'Nonaktif' }}</dd></div>
+            </dl>
+            @can('pengguna.update')
+                <div class="mt-4 flex justify-end">
+                    <a href="{{ route('pengaturan.pengguna.edit', $akun['id']) }}" class="btn btn-outline">
+                        <x-icon name="pencil" class="h-4 w-4" /> Kelola di Pengguna
+                    </a>
+                </div>
+            @endcan
+        @else
+            <div class="empty-state">
+                <div class="empty-symbol"><x-icon name="key-round" class="h-7 w-7" /></div>
+                <h3>Belum ada akun login</h3>
+                <p>Guru/pegawai ini belum dapat masuk ke aplikasi. Buatkan akun agar namanya tertaut dengan daftar Pengguna.</p>
+            </div>
+            @can('pengguna.create')
+                <div class="mt-4 flex justify-end">
+                    <a href="{{ route('guru.akun', $employee) }}" class="btn btn-primary">
+                        <x-icon name="plus" class="h-4 w-4" /> Buatkan Akun Login
+                    </a>
+                </div>
+            @endcan
+        @endif
     </section>
 
     <section class="card" aria-labelledby="employee-wali-title">

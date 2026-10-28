@@ -127,6 +127,7 @@ class EmployeeIndex extends Component
         }
 
         $employees = Employee::query()
+            ->with('user')
             ->when($this->showTrashed, fn ($q) => $q->onlyTrashed())
             ->when($this->search !== '', fn ($q) => $q->where(function ($w): void {
                 $w->where('nama', 'like', '%'.$this->search.'%')

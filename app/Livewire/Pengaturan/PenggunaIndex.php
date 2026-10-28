@@ -128,6 +128,7 @@ class PenggunaIndex extends Component
             ))
             ->with([
                 'roles',
+                'employee',
                 'memberships' => fn ($m) => $m->where('school_id', $schoolId),
             ])
             ->orderBy('name')

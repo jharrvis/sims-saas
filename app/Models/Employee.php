@@ -7,6 +7,7 @@ namespace App\Models;
 use App\Concerns\BelongsToSchool;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
@@ -101,6 +102,17 @@ class Employee extends Model
     public function rombelsAsWali(): HasMany
     {
         return $this->hasMany(Rombel::class, 'wali_kelas_id');
+    }
+
+    /**
+     * Akun login yang tertaut ke data kepegawaian ini (maksimal satu,
+     * lihat unique pada users.employee_id).
+     *
+     * @return HasOne<User, $this>
+     */
+    public function user(): HasOne
+    {
+        return $this->hasOne(User::class, 'employee_id');
     }
 
     public function labelJenis(): string
