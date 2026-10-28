@@ -978,7 +978,7 @@ body {
     display: block;
     margin-top: 3px;
     color: var(--muted);
-    font-size: 9px;
+    font-size: 11px;
 }
 
 .platform-muted-value {
