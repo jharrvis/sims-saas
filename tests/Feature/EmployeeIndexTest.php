@@ -4,9 +4,13 @@ declare(strict_types=1);
 
 use App\Livewire\Kepegawaian\EmployeeForm;
 use App\Livewire\Kepegawaian\EmployeeIndex;
+use App\Models\AcademicYear;
 use App\Models\Employee;
 use App\Models\Membership;
+use App\Models\Rombel;
+use App\Models\Schedule;
 use App\Models\School;
+use App\Models\Subject;
 use App\Models\User;
 use App\Scopes\SchoolScope;
 use App\Tenancy\TenantContext;
@@ -304,6 +308,79 @@ it('akun tertaut kehilangan akses saat pegawai dihapus dan kembali saat dipulihk
 
     $component->call('restore', $this->guruSatu->id);
     expect($membership->fresh()->status)->toBe('aktif');
+});
+
+it('pengguna guru.delete tanpa force-delete ditolak saat hapus permanen (QA B-03)', function (): void {
+    $penghapus = User::create([
+        'username' => 'penghapus-guru-'.uniqid(), 'name' => 'Penghapus Guru',
+        'phone' => '62854'.random_int(1000000, 9999999),
+    ]);
+    Membership::create(['user_id' => $penghapus->id, 'school_id' => $this->school->id, 'status' => 'aktif']);
+    $penghapus->givePermissionTo(['guru.view', 'guru.delete']);
+
+    $this->guruSatu->delete();
+
+    Livewire::actingAs($penghapus)
+        ->test(EmployeeIndex::class)
+        ->call('forceDelete', $this->guruSatu->id)
+        ->assertForbidden();
+
+    expect(Employee::withTrashed()->find($this->guruSatu->id))->not->toBeNull();
+});
+
+it('pegawai dengan jadwal mengajar tidak dapat dihapus permanen (QA B-03)', function (): void {
+    $ta = AcademicYear::create([
+        'nama' => '2026/2027', 'aktif' => true,
+        'tgl_mulai' => '2026-07-01', 'tgl_selesai' => '2027-06-30',
+    ]);
+    $rombel = Rombel::create(['nama' => 'VII A', 'academic_year_id' => $ta->id, 'tingkat' => '7']);
+    $mapel = Subject::create(['kode' => 'MTK', 'nama' => 'Matematika', 'kelompok' => 'wajib']);
+    Schedule::create([
+        'rombel_id' => $rombel->id, 'academic_year_id' => $ta->id, 'hari' => 'senin',
+        'jam_ke' => 1, 'subject_id' => $mapel->id, 'employee_id' => $this->guruSatu->id,
+    ]);
+
+    $component = Livewire::actingAs($this->admin)->test(EmployeeIndex::class);
+    $component->call('delete', $this->guruSatu->id);
+    $component->call('forceDelete', $this->guruSatu->id)
+        ->assertSee('tidak dapat dihapus permanen');
+
+    expect(Employee::withTrashed()->find($this->guruSatu->id))->not->toBeNull();
+});
+
+it('pegawai yang masih wali kelas tidak dapat dihapus permanen (QA B-03)', function (): void {
+    $ta = AcademicYear::create([
+        'nama' => '2026/2027', 'aktif' => true,
+        'tgl_mulai' => '2026-07-01', 'tgl_selesai' => '2027-06-30',
+    ]);
+    Rombel::create([
+        'nama' => 'VII B', 'academic_year_id' => $ta->id, 'tingkat' => '7',
+        'wali_kelas_id' => $this->guruSatu->id,
+    ]);
+
+    $component = Livewire::actingAs($this->admin)->test(EmployeeIndex::class);
+    $component->call('delete', $this->guruSatu->id);
+    $component->call('forceDelete', $this->guruSatu->id)
+        ->assertSee('wali kelas');
+
+    expect(Employee::withTrashed()->find($this->guruSatu->id))->not->toBeNull();
+});
+
+it('hapus permanen pegawai berakun menonaktifkan membership dan melepas tautan (QA B-03)', function (): void {
+    $akun = User::create([
+        'username' => 'gurusatu-permanen', 'name' => 'Guru Satu', 'employee_id' => $this->guruSatu->id,
+    ]);
+    $membership = Membership::create([
+        'user_id' => $akun->id, 'school_id' => $this->school->id, 'status' => 'aktif',
+    ]);
+
+    $component = Livewire::actingAs($this->admin)->test(EmployeeIndex::class);
+    $component->call('delete', $this->guruSatu->id);
+    $component->call('forceDelete', $this->guruSatu->id);
+
+    expect(Employee::withTrashed()->find($this->guruSatu->id))->toBeNull()
+        ->and($akun->fresh()->employee_id)->toBeNull()
+        ->and($membership->fresh()->status)->toBe('dinonaktifkan');
 });
 
 it('akun tertaut mengikuti status_aktif yang diubah lewat form (QA B-01)', function (): void {

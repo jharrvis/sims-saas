@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Livewire\Kesiswaan\StudentIndex;
 use App\Models\AcademicYear;
+use App\Models\Attendance;
 use App\Models\Membership;
 use App\Models\Rombel;
 use App\Models\School;
@@ -203,4 +204,72 @@ it('halaman admin tetap tampil ketika fitur impor belum tersedia', function (): 
         ->get('/siswa')
         ->assertOk()
         ->assertDontSee('Impor Data');
+});
+
+it('hapus permanen siswa tanpa data turunan berhasil bagi pemegang force-delete (QA B-02)', function (): void {
+    $siswa = Student::where('nama', 'Siswa A1')->firstOrFail();
+    $siswa->delete();
+
+    Livewire::actingAs($this->admin)
+        ->test(StudentIndex::class)
+        ->call('forceDelete', $siswa->id);
+
+    expect(Student::withTrashed()->find($siswa->id))->toBeNull();
+});
+
+it('pengguna siswa.delete tanpa force-delete ditolak saat hapus permanen (QA B-02)', function (): void {
+    $penghapus = User::create([
+        'username' => 'penghapus-'.uniqid(), 'name' => 'Penghapus Saja',
+        'phone' => '62814'.random_int(1000000, 9999999),
+    ]);
+    Membership::create(['user_id' => $penghapus->id, 'school_id' => $this->school->id, 'status' => 'aktif']);
+    $penghapus->givePermissionTo(['siswa.view', 'siswa.delete']);
+
+    $siswa = Student::where('nama', 'Siswa A1')->firstOrFail();
+    $siswa->delete();
+
+    Livewire::actingAs($penghapus)
+        ->test(StudentIndex::class)
+        ->call('forceDelete', $siswa->id)
+        ->assertForbidden();
+
+    expect(Student::withTrashed()->find($siswa->id))->not->toBeNull();
+});
+
+it('siswa dengan catatan absensi tidak dapat dihapus permanen (QA B-02)', function (): void {
+    $siswa = Student::where('nama', 'Siswa A1')->firstOrFail();
+    Attendance::create([
+        'student_id' => $siswa->id, 'rombel_id' => $this->rombelA->id,
+        'tanggal' => '2026-10-05', 'status' => 'H',
+    ]);
+    $siswa->delete();
+
+    Livewire::actingAs($this->admin)
+        ->test(StudentIndex::class)
+        ->call('forceDelete', $siswa->id)
+        ->assertSee('tidak dapat dihapus permanen');
+
+    expect(Student::withTrashed()->find($siswa->id))->not->toBeNull()
+        ->and(Attendance::where('student_id', $siswa->id)->count())->toBe(1);
+});
+
+it('hapus permanen massal melewati siswa yang masih berdata turunan (QA B-02)', function (): void {
+    $bersih = Student::where('nama', 'Siswa A1')->firstOrFail();
+    $berdata = Student::where('nama', 'Siswa A2')->firstOrFail();
+    Attendance::create([
+        'student_id' => $berdata->id, 'rombel_id' => $this->rombelA->id,
+        'tanggal' => '2026-10-05', 'status' => 'H',
+    ]);
+    $bersih->delete();
+    $berdata->delete();
+
+    Livewire::actingAs($this->admin)
+        ->test(StudentIndex::class)
+        ->call('toggleTrashed')
+        ->set('selected', [$bersih->id, $berdata->id])
+        ->set('bulkAksi', 'hapus_permanen')
+        ->call('bulkTerapkan');
+
+    expect(Student::withTrashed()->find($bersih->id))->toBeNull()
+        ->and(Student::withTrashed()->find($berdata->id))->not->toBeNull();
 });

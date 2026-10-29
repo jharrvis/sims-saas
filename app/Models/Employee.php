@@ -105,6 +105,18 @@ class Employee extends Model
     }
 
     /**
+     * Jadwal mengajar guru ini. FK schedules.employee_id bersifat
+     * restrictOnDelete — jadwal harus dipindah/dihapus sebelum data
+     * pegawai boleh dihapus permanen.
+     *
+     * @return HasMany<Schedule, $this>
+     */
+    public function schedules(): HasMany
+    {
+        return $this->hasMany(Schedule::class, 'employee_id');
+    }
+
+    /**
      * Akun login yang tertaut ke data kepegawaian ini (maksimal satu,
      * lihat unique pada users.employee_id).
      *

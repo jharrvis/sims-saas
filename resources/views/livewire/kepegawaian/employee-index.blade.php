@@ -6,6 +6,13 @@
         </div>
     @endif
 
+    @if (session('gagal'))
+        <div class="management-alert management-alert-warning" role="alert">
+            <x-icon name="alert-triangle" class="h-5 w-5" />
+            <span>{{ session('gagal') }}</span>
+        </div>
+    @endif
+
     <div class="page-header management-page-header">
         <div>
             <span class="eyebrow">Kepegawaian / Data Induk</span>
@@ -159,7 +166,9 @@
                                     @if ($showTrashed)
                                         @can('guru.delete')
                                             <button type="button" wire:click="restore({{ $guru->id }})" wire:loading.attr="disabled" wire:target="restore({{ $guru->id }})" class="table-action management-action-success" aria-label="Pulihkan {{ $guru->nama }}" title="Pulihkan"><x-icon name="undo-2" class="h-4 w-4" /></button>
-                                            <button type="button" wire:click="forceDelete({{ $guru->id }})" wire:confirm="Hapus permanen {{ $guru->nama }}? Data dan foto tidak dapat dikembalikan." wire:loading.attr="disabled" wire:target="forceDelete({{ $guru->id }})" class="table-action danger" aria-label="Hapus permanen {{ $guru->nama }}" title="Hapus permanen"><x-icon name="trash-2" class="h-4 w-4" /></button>
+                                        @endcan
+                                        @can('guru.force-delete')
+                                            <button type="button" wire:click="forceDelete({{ $guru->id }})" wire:confirm="Hapus permanen {{ $guru->nama }}? Data dan foto tidak dapat dikembalikan. Pegawai yang masih memiliki jadwal atau menjadi wali kelas akan ditolak oleh sistem." wire:loading.attr="disabled" wire:target="forceDelete({{ $guru->id }})" class="table-action danger" aria-label="Hapus permanen {{ $guru->nama }}" title="Hapus permanen"><x-icon name="trash-2" class="h-4 w-4" /></button>
                                         @endcan
                                     @else
                                         @can('guru.view')<a href="{{ route('guru.show', $guru) }}" class="table-action" aria-label="Lihat {{ $guru->nama }}" title="Lihat detail"><x-icon name="eye" class="h-4 w-4" /></a>@endcan

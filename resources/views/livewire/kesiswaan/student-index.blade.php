@@ -6,6 +6,13 @@
         </div>
     @endif
 
+    @if (session('gagal'))
+        <div class="management-alert management-alert-warning" role="alert">
+            <x-icon name="alert-triangle" class="h-5 w-5" />
+            <span>{{ session('gagal') }}</span>
+        </div>
+    @endif
+
     @php
         $totalStudents = (int) $statusCounts->sum();
         $activeStudents = (int) ($statusCounts['aktif'] ?? 0);
@@ -78,8 +85,12 @@
                 <select id="student-bulk-action" wire:model.live="bulkAksi" class="select-field">
                     <option value="">Pilih aksi</option>
                     @if ($showTrashed)
-                        <option value="pulihkan">Pulihkan</option>
-                        <option value="hapus_permanen">Hapus permanen</option>
+                        @can('siswa.delete')
+                            <option value="pulihkan">Pulihkan</option>
+                        @endcan
+                        @can('siswa.force-delete')
+                            <option value="hapus_permanen">Hapus permanen</option>
+                        @endcan
                     @else
                         @can('siswa.update')
                             <option value="status">Ubah status</option>
@@ -222,7 +233,9 @@
                                     @if ($showTrashed)
                                         @can('siswa.delete')
                                             <button type="button" wire:click="restore({{ $student->id }})" wire:loading.attr="disabled" wire:target="restore({{ $student->id }})" class="table-action management-action-success" aria-label="Pulihkan {{ $student->nama }}" title="Pulihkan"><x-icon name="undo-2" class="h-4 w-4" /></button>
-                                            <button type="button" wire:click="forceDelete({{ $student->id }})" wire:confirm="Hapus permanen {{ $student->nama }}? Data tidak dapat dikembalikan." wire:loading.attr="disabled" wire:target="forceDelete({{ $student->id }})" class="table-action danger" aria-label="Hapus permanen {{ $student->nama }}" title="Hapus permanen"><x-icon name="trash-2" class="h-4 w-4" /></button>
+                                        @endcan
+                                        @can('siswa.force-delete')
+                                            <button type="button" wire:click="forceDelete({{ $student->id }})" wire:confirm="Hapus permanen {{ $student->nama }}? Data tidak dapat dikembalikan. Siswa yang masih memiliki invoice, nilai, atau absensi akan ditolak oleh sistem." wire:loading.attr="disabled" wire:target="forceDelete({{ $student->id }})" class="table-action danger" aria-label="Hapus permanen {{ $student->nama }}" title="Hapus permanen"><x-icon name="trash-2" class="h-4 w-4" /></button>
                                         @endcan
                                     @else
                                         @can('siswa.view')<a href="{{ route('siswa.show', $student) }}" class="table-action" aria-label="Lihat {{ $student->nama }}" title="Lihat detail"><x-icon name="eye" class="h-4 w-4" /></a>@endcan

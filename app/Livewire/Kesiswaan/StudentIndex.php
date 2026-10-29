@@ -6,6 +6,9 @@ namespace App\Livewire\Kesiswaan;
 
 use App\Domains\Kesiswaan\Services\StudentPhotoService;
 use App\Models\AcademicYear;
+use App\Models\Attendance;
+use App\Models\Grade;
+use App\Models\Invoice;
 use App\Models\Rombel;
 use App\Models\Student;
 use Illuminate\Support\Facades\DB;
@@ -131,13 +134,50 @@ class StudentIndex extends Component
 
     public function forceDelete(int $id): void
     {
-        $this->authorize('siswa.delete');
+        // Hapus permanen adalah aksi terpisah dari soft delete (QA B-02).
+        $this->authorize('siswa.force-delete');
 
         $student = Student::onlyTrashed()->findOrFail($id);
+
+        $penghalang = $this->penghalangHapusPermanen($student);
+        if ($penghalang !== null) {
+            session()->flash('gagal', "Data {$student->nama} tidak dapat dihapus permanen karena masih memiliki {$penghalang}. Hapus permanen akan ikut memusnahkan data tersebut lewat relasi cascade.");
+
+            return;
+        }
+
         app(StudentPhotoService::class)->delete($student->foto_path);
         $student->forceDelete();
 
         session()->flash('sukses', "Data {$student->nama} dihapus permanen.");
+    }
+
+    /**
+     * Ringkasan data turunan yang akan ikut musnah lewat FK cascade bila
+     * siswa dihapus permanen (invoice, nilai, absensi). Null = aman dihapus.
+     */
+    private function penghalangHapusPermanen(Student $student): ?string
+    {
+        $invoice = Invoice::where('student_id', $student->id)->count();
+        $nilai = Grade::where('student_id', $student->id)->count();
+        $absensi = Attendance::where('student_id', $student->id)->count();
+
+        if ($invoice + $nilai + $absensi === 0) {
+            return null;
+        }
+
+        $bagian = [];
+        if ($invoice > 0) {
+            $bagian[] = "{$invoice} invoice/tagihan";
+        }
+        if ($nilai > 0) {
+            $bagian[] = "{$nilai} nilai";
+        }
+        if ($absensi > 0) {
+            $bagian[] = "{$absensi} catatan absensi";
+        }
+
+        return implode(', ', $bagian);
     }
 
     public function bulkTerapkan(): void
@@ -260,8 +300,6 @@ class StudentIndex extends Component
 
     private function bulkTerapkanTrashed(): void
     {
-        $this->authorize('siswa.delete');
-
         match ($this->bulkAksi) {
             'pulihkan' => $this->bulkPulihkan(),
             'hapus_permanen' => $this->bulkHapusPermanen(),
@@ -271,6 +309,8 @@ class StudentIndex extends Component
 
     private function bulkPulihkan(): void
     {
+        $this->authorize('siswa.delete');
+
         Student::onlyTrashed()->whereIn('id', $this->selected)->restore();
         session()->flash('sukses', count($this->selected).' siswa dipulihkan dari sampah.');
         $this->resetSelection();
@@ -279,15 +319,33 @@ class StudentIndex extends Component
 
     private function bulkHapusPermanen(): void
     {
+        $this->authorize('siswa.force-delete');
+
         $students = Student::onlyTrashed()->whereIn('id', $this->selected)->get();
         $photoService = app(StudentPhotoService::class);
+        $terhapus = 0;
+        $terhalang = [];
 
         foreach ($students as $student) {
+            // Siswa dengan data keuangan/akademik tidak ikut terhapus (QA B-02).
+            if ($this->penghalangHapusPermanen($student) !== null) {
+                $terhalang[] = $student->nama;
+
+                continue;
+            }
+
             $photoService->delete($student->foto_path);
             $student->forceDelete();
+            $terhapus++;
         }
 
-        session()->flash('sukses', count($this->selected).' siswa dihapus permanen.');
+        if ($terhapus > 0) {
+            session()->flash('sukses', "{$terhapus} siswa dihapus permanen.");
+        }
+        if ($terhalang !== []) {
+            session()->flash('gagal', count($terhalang).' siswa tidak dihapus permanen karena masih memiliki invoice, nilai, atau absensi: '.implode(', ', $terhalang).'.');
+        }
+
         $this->resetSelection();
         $this->bulkAksi = '';
     }

@@ -7,6 +7,7 @@ namespace App\Livewire\Kepegawaian;
 use App\Domains\Kepegawaian\Services\EmployeeAccountSync;
 use App\Domains\Kesiswaan\Services\StudentPhotoService;
 use App\Models\Employee;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -111,18 +112,48 @@ class EmployeeIndex extends Component
 
     public function forceDelete(int $id): void
     {
-        $this->authorize('guru.delete');
+        // Hapus permanen adalah aksi terpisah dari soft delete (QA B-03).
+        $this->authorize('guru.force-delete');
 
         $employee = Employee::onlyTrashed()->findOrFail($id);
+
+        // FK schedules.employee_id bersifat restrictOnDelete: tanpa cek ini
+        // pengguna menerima error 500 mentah dari QueryException.
+        $jadwal = $employee->schedules()->count();
+        if ($jadwal > 0) {
+            session()->flash('gagal', "Data {$employee->nama} tidak dapat dihapus permanen karena masih memiliki {$jadwal} jadwal mengajar. Pindahkan atau hapus jadwal tersebut terlebih dahulu.");
+
+            return;
+        }
+
+        // Rombel binaan tidak boleh kehilangan wali kelas secara diam-diam
+        // lewat nullOnDelete.
+        $rombelBinaan = $employee->rombelsAsWali()->count();
+        if ($rombelBinaan > 0) {
+            session()->flash('gagal', "Data {$employee->nama} tidak dapat dihapus permanen karena masih tercatat sebagai wali kelas {$rombelBinaan} rombel. Tunjuk wali kelas pengganti terlebih dahulu.");
+
+            return;
+        }
+
+        $punyaAkun = $employee->user !== null;
 
         // Simpan path lebih dulu, force delete, lalu buang file: kegagalan pada
         // operasi database tidak menghapus foto yang masih terpasang di storage.
         $fotoPath = $employee->foto_path;
-        $employee->forceDelete();
+
+        DB::transaction(function () use ($employee): void {
+            // Nasib akun tertaut diputuskan eksplisit: akses sekolah
+            // dinonaktifkan (QA B-01), lalu FK nullOnDelete melepas tautan
+            // employee_id pada baris user saat data pegawai hilang.
+            app(EmployeeAccountSync::class)->syncMembershipStatus($employee);
+            $employee->forceDelete();
+        });
 
         app(StudentPhotoService::class)->delete($fotoPath);
 
-        session()->flash('sukses', 'Data guru/pegawai dihapus permanen.');
+        session()->flash('sukses', $punyaAkun
+            ? "Data {$employee->nama} dihapus permanen. Akun login tertaut dinonaktifkan dan tautannya dilepas."
+            : 'Data guru/pegawai dihapus permanen.');
     }
 
     public function render(): View
