@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domains\Kepegawaian\Http\Controllers;
 
+use App\Domains\Kepegawaian\Services\EmployeeAccountSync;
 use App\Models\Employee;
 use App\Models\Student;
 use Illuminate\Http\JsonResponse;
@@ -44,6 +45,9 @@ class EmployeeController extends Controller
     {
         $employee->update($this->validated($request));
 
+        // Status akun login tertaut mengikuti status_aktif (QA B-01).
+        app(EmployeeAccountSync::class)->syncMembershipStatus($employee);
+
         return response()->json($employee->fresh());
     }
 
@@ -51,6 +55,8 @@ class EmployeeController extends Controller
     {
         // Nonaktifkan (soft delete)
         $employee->delete();
+
+        app(EmployeeAccountSync::class)->syncMembershipStatus($employee);
 
         return response()->json(['message' => 'Guru/pegawai dinonaktifkan.']);
     }

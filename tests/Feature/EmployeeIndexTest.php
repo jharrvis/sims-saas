@@ -288,3 +288,41 @@ it('tombol impor dan ekspor tidak dirender selama route belum tersedia', functio
         ->assertDontSee('Impor Data')
         ->assertDontSee('Ekspor Data');
 });
+
+it('akun tertaut kehilangan akses saat pegawai dihapus dan kembali saat dipulihkan (QA B-01)', function (): void {
+    $akun = User::create([
+        'username' => 'gurusatu-akun', 'name' => 'Guru Satu', 'employee_id' => $this->guruSatu->id,
+    ]);
+    $membership = Membership::create([
+        'user_id' => $akun->id, 'school_id' => $this->school->id, 'status' => 'aktif',
+    ]);
+
+    $component = Livewire::actingAs($this->admin)->test(EmployeeIndex::class);
+
+    $component->call('delete', $this->guruSatu->id);
+    expect($membership->fresh()->status)->toBe('dinonaktifkan');
+
+    $component->call('restore', $this->guruSatu->id);
+    expect($membership->fresh()->status)->toBe('aktif');
+});
+
+it('akun tertaut mengikuti status_aktif yang diubah lewat form (QA B-01)', function (): void {
+    $akun = User::create([
+        'username' => 'gurusatu-form', 'name' => 'Guru Satu', 'employee_id' => $this->guruSatu->id,
+    ]);
+    $membership = Membership::create([
+        'user_id' => $akun->id, 'school_id' => $this->school->id, 'status' => 'aktif',
+    ]);
+
+    Livewire::actingAs($this->admin)
+        ->test(EmployeeForm::class, ['employee' => $this->guruSatu])
+        ->set('status_aktif', false)
+        ->call('save');
+    expect($membership->fresh()->status)->toBe('dinonaktifkan');
+
+    Livewire::actingAs($this->admin)
+        ->test(EmployeeForm::class, ['employee' => $this->guruSatu->fresh()])
+        ->set('status_aktif', true)
+        ->call('save');
+    expect($membership->fresh()->status)->toBe('aktif');
+});

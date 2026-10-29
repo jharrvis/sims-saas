@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Kepegawaian;
 
+use App\Domains\Kepegawaian\Services\EmployeeAccountSync;
 use App\Domains\Kesiswaan\Services\StudentPhotoService;
 use App\Models\Employee;
 use Illuminate\View\View;
@@ -89,6 +90,9 @@ class EmployeeIndex extends Component
         $employee = Employee::findOrFail($id);
         $employee->delete();
 
+        // Akun login tertaut ikut kehilangan akses selama data di sampah (QA B-01).
+        app(EmployeeAccountSync::class)->syncMembershipStatus($employee);
+
         session()->flash('sukses', 'Data guru/pegawai dipindah ke sampah.');
     }
 
@@ -98,6 +102,9 @@ class EmployeeIndex extends Component
 
         $employee = Employee::onlyTrashed()->findOrFail($id);
         $employee->restore();
+
+        // Akses akun tertaut dipulihkan mengikuti status_aktif pegawai (QA B-01).
+        app(EmployeeAccountSync::class)->syncMembershipStatus($employee);
 
         session()->flash('sukses', "Data {$employee->nama} dipulihkan.");
     }

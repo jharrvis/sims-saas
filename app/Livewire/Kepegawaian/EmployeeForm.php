@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Kepegawaian;
 
+use App\Domains\Kepegawaian\Services\EmployeeAccountSync;
 use App\Domains\Kesiswaan\Services\StudentPhotoService;
 use App\Models\Employee;
 use App\Models\Student;
@@ -187,6 +188,8 @@ class EmployeeForm extends Component
 
         if ($this->employee?->exists) {
             $this->employee->update($data);
+            // Status akun login tertaut mengikuti status_aktif (QA B-01).
+            app(EmployeeAccountSync::class)->syncMembershipStatus($this->employee);
         } else {
             Employee::create($data);
         }
