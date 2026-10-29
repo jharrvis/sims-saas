@@ -111,16 +111,26 @@ class EmployeeForm extends Component
      */
     protected function rules(): array
     {
+        $schoolId = app(TenantContext::class)->requireSchoolId();
+
         return [
-            'nip_nuptk' => ['nullable', 'string', 'max:30'],
-            'nik' => ['nullable', 'string', 'max:20'],
+            // Identitas pegawai unik per sekolah, selaras indeks unik
+            // database (QA B-10); NIK disamakan 16 digit seperti wali (B-19).
+            'nip_nuptk' => ['nullable', 'string', 'max:30', Rule::unique('employees')->where(
+                fn ($q) => $q->where('school_id', $schoolId)
+            )->ignore($this->employee?->id)],
+            'nik' => ['nullable', 'string', 'digits:16', Rule::unique('employees')->where(
+                fn ($q) => $q->where('school_id', $schoolId)
+            )->ignore($this->employee?->id)],
             'nama' => ['required', 'string', 'max:150'],
             'tempat_lahir' => ['nullable', 'string', 'max:100'],
             'tgl_lahir' => ['nullable', 'date'],
             'jk' => ['nullable', Rule::in(['L', 'P'])],
             'agama' => ['nullable', Rule::in(Student::AGAMAS)],
             'alamat' => ['nullable', 'string'],
-            'email' => ['nullable', 'email', 'max:150'],
+            'email' => ['nullable', 'email', 'max:150', Rule::unique('employees')->where(
+                fn ($q) => $q->where('school_id', $schoolId)
+            )->ignore($this->employee?->id)],
             'phone' => ['nullable', 'string', 'max:20'],
             'foto' => ['nullable', 'image', 'max:2048', 'mimes:jpeg,png,webp'],
             'jenis' => ['required', Rule::in(['guru_mapel', 'guru_kelas', 'tendik'])],

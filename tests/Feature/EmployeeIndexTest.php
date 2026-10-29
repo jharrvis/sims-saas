@@ -392,6 +392,40 @@ it('hapus permanen pegawai berakun menonaktifkan membership dan melepas tautan (
         ->and($membership->fresh()->status)->toBe('dinonaktifkan');
 });
 
+it('form menolak NIP, NIK, dan email duplikat di sekolah yang sama (QA B-10)', function (): void {
+    Employee::create([
+        'nama' => 'Pegawai Identitas', 'jenis' => 'tendik', 'status_kepegawaian' => 'honorer',
+        'nip_nuptk' => '198001012010011001', 'nik' => '3273010101800001',
+        'email' => 'identitas@example.sch.id', 'status_aktif' => true,
+    ]);
+
+    Livewire::actingAs($this->admin)
+        ->test(EmployeeForm::class)
+        ->set('nama', 'Pegawai Duplikat')
+        ->set('jenis', 'tendik')
+        ->set('status_kepegawaian', 'honorer')
+        ->set('nip_nuptk', '198001012010011001')
+        ->set('nik', '3273010101800001')
+        ->set('email', 'identitas@example.sch.id')
+        ->call('save')
+        ->assertHasErrors(['nip_nuptk', 'nik', 'email']);
+
+    expect(Employee::where('nama', 'Pegawai Duplikat')->exists())->toBeFalse();
+});
+
+it('form menolak NIK pegawai yang bukan 16 digit (QA B-19)', function (): void {
+    Livewire::actingAs($this->admin)
+        ->test(EmployeeForm::class)
+        ->set('nama', 'Pegawai NIK Pendek')
+        ->set('jenis', 'guru_mapel')
+        ->set('status_kepegawaian', 'pns')
+        ->set('nik', '123456')
+        ->call('save')
+        ->assertHasErrors(['nik']);
+
+    expect(Employee::where('nama', 'Pegawai NIK Pendek')->exists())->toBeFalse();
+});
+
 it('akun tertaut mengikuti status_aktif yang diubah lewat form (QA B-01)', function (): void {
     $akun = User::create([
         'username' => 'gurusatu-form', 'name' => 'Guru Satu', 'employee_id' => $this->guruSatu->id,

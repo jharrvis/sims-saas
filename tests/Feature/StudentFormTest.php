@@ -6,6 +6,7 @@ use App\Livewire\Kesiswaan\StudentForm;
 use App\Models\AcademicYear;
 use App\Models\Membership;
 use App\Models\School;
+use App\Models\Student;
 use App\Models\User;
 use App\Tenancy\TenantContext;
 use Database\Seeders\PermissionSeeder;
@@ -103,4 +104,32 @@ it('submit valid berhasil setelah otorisasi dan tahun ajaran aktif (perbaikan QA
         ->assertRedirect(route('siswa.index'));
 
     $this->assertDatabaseHas('students', ['nis' => '9903', 'school_id' => $this->school->id]);
+});
+
+it('NISN yang bukan 10 digit ditolak (QA B-07)', function (): void {
+    Livewire::actingAs($this->admin)->test(StudentForm::class)
+        ->set('nis', '9910')
+        ->set('nama', 'Siswa NISN Pendek')
+        ->set('jk', 'L')
+        ->set('nisn', '12345')
+        ->call('save')
+        ->assertHasErrors(['nisn']);
+
+    expect(Student::where('nis', '9910')->exists())->toBeFalse();
+});
+
+it('NISN duplikat di sekolah yang sama ditolak (QA B-07)', function (): void {
+    Student::create([
+        'nis' => '9911', 'nama' => 'Siswa Pertama', 'jk' => 'P', 'nisn' => '0011223344',
+    ]);
+
+    Livewire::actingAs($this->admin)->test(StudentForm::class)
+        ->set('nis', '9912')
+        ->set('nama', 'Siswa Kedua')
+        ->set('jk', 'L')
+        ->set('nisn', '0011223344')
+        ->call('save')
+        ->assertHasErrors(['nisn']);
+
+    expect(Student::where('nis', '9912')->exists())->toBeFalse();
 });

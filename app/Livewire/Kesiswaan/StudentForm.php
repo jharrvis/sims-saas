@@ -76,7 +76,9 @@ class StudentForm extends Component
             'nis' => ['required', 'string', 'max:30', Rule::unique('students')->where(
                 fn ($q) => $q->where('school_id', $schoolId)
             )->ignore($this->student?->id)],
-            'nisn' => ['nullable', 'string', 'max:20', Rule::unique('students')->where(
+            // NISN selalu 10 digit dan unik per sekolah — divalidasi di
+            // sini dan ditegakkan indeks unik database (QA B-07).
+            'nisn' => ['nullable', 'string', 'digits:10', Rule::unique('students')->where(
                 fn ($q) => $q->where('school_id', $schoolId)
             )->ignore($this->student?->id)],
             'angkatan' => ['nullable', 'integer', 'min:1900', 'max:2100'],
