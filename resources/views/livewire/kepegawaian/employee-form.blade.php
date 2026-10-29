@@ -6,7 +6,7 @@
             </a>
             <span class="eyebrow">Kepegawaian / Data Induk</span>
             <h2 class="management-page-title">{{ $employee?->exists ? 'Ubah Data Guru & Pegawai' : 'Tambah Guru & Pegawai' }}</h2>
-            <p>{{ $employee?->exists ? 'Perbarui identitas, pendidikan, dan status kepegawaian. Kolom bertanda bintang wajib diisi.' : 'Lengkapi identitas, pendidikan, dan status kepegawaian guru atau tenaga kependidikan.' }}</p>
+            <p>{{ $employee?->exists ? 'Perbarui identitas, pendidikan, dan status kepegawaian. Kolom bertanda bintang wajib diisi.' : 'Lengkapi identitas, pendidikan, dan status kepegawaian guru atau tenaga kependidikan. Kolom bertanda bintang wajib diisi.' }}</p>
         </div>
     </div>
 
@@ -22,11 +22,10 @@
                 </div>
             </div>
 
-            <div class="management-upload-zone"
+            <label class="management-upload-zone" for="foto-input"
                  ondragover="event.preventDefault(); this.classList.add('is-dragover')"
                  ondragleave="this.classList.remove('is-dragover')"
-                 ondrop="event.preventDefault(); this.classList.remove('is-dragover'); const f = event.dataTransfer.files[0]; if (f) { const dt = new DataTransfer(); dt.items.add(f); const inp = document.getElementById('foto-input'); inp.files = dt.files; inp.dispatchEvent(new Event('change', {bubbles: true})); }"
-                 onclick="document.getElementById('foto-input').click()">
+                 ondrop="event.preventDefault(); this.classList.remove('is-dragover'); const f = event.dataTransfer.files[0]; if (f) { const dt = new DataTransfer(); dt.items.add(f); const inp = document.getElementById('foto-input'); inp.files = dt.files; inp.dispatchEvent(new Event('change', {bubbles: true})); }">
                 <div class="management-upload-preview">
                     @if ($foto)
                         <img src="{{ $foto->temporaryUrl() }}" alt="Pratinjau foto" class="management-upload-preview">
@@ -43,9 +42,8 @@
                 <p class="management-upload-hint">Seret &amp; letakkan foto di sini, atau <span class="management-upload-link">pilih file</span></p>
                 <p class="helper-text">Foto otomatis dikompresi (maks 512×512, JPEG) agar halaman tetap ringan.</p>
                 @error('foto') <p class="management-field-error" role="alert">{{ $message }}</p> @enderror
-            </div>
-
-            <input type="file" id="foto-input" wire:model="foto" accept="image/jpeg,image/png,image/webp" class="hidden">
+                <input type="file" id="foto-input" wire:model="foto" accept="image/jpeg,image/png,image/webp" class="sr-only">
+            </label>
 
             @if ($employee?->foto_path)
                 <label class="toggle-row" for="hapus-foto">

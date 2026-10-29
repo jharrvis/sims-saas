@@ -6,7 +6,7 @@
             </a>
             <span class="eyebrow">Kesiswaan / Data Induk</span>
             <h2 class="management-page-title">{{ $guardian?->exists ? 'Ubah Data Wali Murid' : 'Tambah Wali Murid' }}</h2>
-            <p>{{ $guardian?->exists ? 'Perbarui identitas dan kontak wali murid. Kolom bertanda bintang wajib diisi.' : 'Lengkapi identitas dan kontak wali murid. Nomor WA dipakai untuk OTP dan notifikasi.' }}</p>
+            <p>{{ $guardian?->exists ? 'Perbarui identitas dan kontak wali murid. Kolom bertanda bintang wajib diisi.' : 'Lengkapi identitas dan kontak wali murid. Nomor WA dipakai untuk OTP dan notifikasi. Kolom bertanda bintang wajib diisi.' }}</p>
         </div>
     </div>
 
@@ -68,7 +68,8 @@
         <div class="page-actions management-form-actions">
             <a href="{{ route('wali.index') }}" class="btn btn-outline">Batal</a>
             <button type="submit" wire:loading.attr="disabled" wire:target="save" class="btn btn-primary">
-                <x-icon name="check" class="h-4 w-4" /> {{ $guardian?->exists ? 'Simpan Perubahan' : 'Simpan Wali' }}
+                <span wire:loading.remove wire:target="save"><x-icon name="check" class="h-4 w-4" /> {{ $guardian?->exists ? 'Simpan Perubahan' : 'Simpan Wali' }}</span>
+                <span wire:loading wire:target="save">Menyimpan...</span>
             </button>
         </div>
     </form>

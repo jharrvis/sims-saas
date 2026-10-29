@@ -38,6 +38,10 @@
         </div>
     </div>
 
+    @if ($search !== '' || $status !== '' || $rombel !== '')
+        <p class="helper-text">Statistik di bawah mencakup seluruh data sekolah dan tidak terpengaruh filter yang sedang aktif.</p>
+    @endif
+
     <div class="stats-grid management-summary-stats">
         <article class="card stat-card">
             <div class="stat-top"><span class="mini-icon blue"><x-icon name="users" class="h-5 w-5" /></span><span class="badge badge-blue">Terdaftar</span></div>

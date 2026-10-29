@@ -1,7 +1,15 @@
 <div class="page-stack">
+    @if (session('sukses'))
+        <div class="management-alert management-alert-success" role="status" aria-live="polite">
+            <x-icon name="check-circle" class="h-5 w-5" />
+            <span>{{ session('sukses') }}</span>
+        </div>
+    @endif
+
     @php
-        $badgeStatus = $student->status === 'aktif' ? 'badge-green' : 'badge-gray';
-        $labelStatus = ucfirst($student->status);
+        // Palet status selaras daftar siswa (QA F-11).
+        $badgeStatus = match ($student->status) { 'aktif' => 'badge-green', 'lulus' => 'badge-blue', 'pindah' => 'badge-orange', 'keluar', 'do' => 'badge-red', default => 'badge-gray' };
+        $labelStatus = match ($student->status) { 'aktif' => 'Aktif', 'lulus' => 'Lulus', 'pindah' => 'Pindah', 'keluar' => 'Keluar', 'do' => 'DO', default => ucfirst($student->status) };
     @endphp
 
     <div class="page-header management-page-header">
@@ -50,7 +58,7 @@
 
         <dl class="management-definition-list">
             <div><dt>Jenis Kelamin</dt><dd>{{ $student->jk === 'L' ? 'Laki-laki' : 'Perempuan' }}</dd></div>
-            <div><dt>Tempat, Tanggal Lahir</dt><dd>{{ $student->tempat_lahir ?? '—' }}, {{ $student->tgl_lahir?->format('d M Y') ?? '—' }}</dd></div>
+            <div><dt>Tempat, Tanggal Lahir</dt><dd>{{ $student->tempat_lahir ?? '—' }}, {{ $student->tgl_lahir?->translatedFormat('d M Y', 'id') ?? '—' }}</dd></div>
             <div><dt>Agama</dt><dd>{{ $student->agama ?? '—' }}</dd></div>
             <div><dt>No. HP</dt><dd>{{ $student->phone ?? '—' }}</dd></div>
             <div><dt>Alamat</dt><dd>{{ $student->alamat ?? '—' }}</dd></div>
@@ -86,7 +94,13 @@
                     <tbody>
                         @foreach ($student->guardians as $wali)
                             <tr wire:key="student-guardian-{{ $wali->id }}">
-                                <td><strong>{{ $wali->nama }}</strong></td>
+                                <td>
+                                    @can('wali-murid.view')
+                                        <a href="{{ route('wali.show', $wali) }}"><strong>{{ $wali->nama }}</strong></a>
+                                    @else
+                                        <strong>{{ $wali->nama }}</strong>
+                                    @endcan
+                                </td>
                                 <td>{{ ucfirst($wali->pivot->hubungan) }}</td>
                                 <td>{{ $wali->no_wa }}</td>
                             </tr>

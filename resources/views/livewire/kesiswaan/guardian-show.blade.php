@@ -110,7 +110,7 @@
         @endif
 
         @can('wali-murid.link')
-            <form wire:submit="linkStudent" class="management-form-stack" style="padding: 16px;">
+            <form wire:submit="linkStudent" class="management-form-stack">
                 <div class="form-grid management-form-grid">
                     <div class="form-group">
                         <label for="link-search">Cari Siswa</label>
@@ -138,7 +138,8 @@
                 </div>
                 <div class="page-actions management-form-actions">
                     <button type="submit" wire:loading.attr="disabled" wire:target="linkStudent" class="btn btn-primary btn-sm">
-                        <x-icon name="plus" class="h-4 w-4" /> Tautkan Siswa
+                        <span wire:loading.remove wire:target="linkStudent"><x-icon name="plus" class="h-4 w-4" /> Tautkan Siswa</span>
+                        <span wire:loading wire:target="linkStudent">Menautkan...</span>
                     </button>
                 </div>
             </form>

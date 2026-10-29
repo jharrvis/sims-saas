@@ -38,6 +38,10 @@
         </div>
     </div>
 
+    @if ($search !== '' || $jenis !== '' || $status !== '')
+        <p class="helper-text">Statistik di bawah mencakup seluruh data sekolah dan tidak terpengaruh filter yang sedang aktif.</p>
+    @endif
+
     <div class="stats-grid management-summary-stats">
         <article class="card stat-card">
             <div class="stat-top"><span class="mini-icon blue"><x-icon name="users" class="h-5 w-5" /></span><span class="badge badge-blue">Terdaftar</span></div>
@@ -179,7 +183,7 @@
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="6"><div class="empty-state"><div class="empty-symbol"><x-icon name="users" class="h-7 w-7" /></div><h3>{{ $showTrashed ? 'Sampah masih kosong' : 'Guru/pegawai tidak ditemukan' }}</h3><p>{{ $showTrashed ? 'Belum ada data guru atau pegawai yang dipindahkan ke sampah.' : 'Ubah kata kunci atau filter untuk melihat data lainnya.' }}</p>@if (! $showTrashed && ($search !== '' || $jenis !== '' || $status !== ''))<button type="button" wire:click="resetFilters" class="btn btn-soft btn-sm">Reset filter</button>@endif</div></td></tr>
+                        <tr><td colspan="7"><div class="empty-state"><div class="empty-symbol"><x-icon name="users" class="h-7 w-7" /></div><h3>{{ $showTrashed ? 'Sampah masih kosong' : 'Guru/pegawai tidak ditemukan' }}</h3><p>{{ $showTrashed ? 'Belum ada data guru atau pegawai yang dipindahkan ke sampah.' : 'Ubah kata kunci atau filter untuk melihat data lainnya.' }}</p>@if (! $showTrashed && ($search !== '' || $jenis !== '' || $status !== ''))<button type="button" wire:click="resetFilters" class="btn btn-soft btn-sm">Reset filter</button>@endif</div></td></tr>
                     @endforelse
                 </tbody>
             </table>

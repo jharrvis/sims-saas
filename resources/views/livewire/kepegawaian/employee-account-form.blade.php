@@ -1,38 +1,41 @@
 <div class="page-stack">
     <div class="page-header management-page-header">
         <div>
-            <span class="eyebrow">Kepegawaian</span>
+            <a href="{{ route('guru.show', $employee) }}" class="management-back-link">
+                <x-icon name="arrow-left" class="h-4 w-4" /> Kembali ke Detail Guru
+            </a>
+            <span class="eyebrow">Kepegawaian / Data Induk</span>
             <h2 class="management-page-title">Buatkan Akun Login</h2>
             <p>Akun untuk {{ $employee->nama }} ({{ $employee->labelJenis() }}) agar dapat masuk ke aplikasi.</p>
-        </div>
-        <div class="page-actions">
-            <a href="{{ route('guru.show', $employee) }}" class="back-link">← Detail Guru</a>
         </div>
     </div>
 
     @if ($error)
-        <div class="rounded-xl border border-danger/30 bg-red-50 dark:bg-red-900/20 p-4 text-sm text-danger" role="alert">{{ $error }}</div>
+        <div class="management-alert management-alert-warning" role="alert">
+            <x-icon name="alert-triangle" class="h-5 w-5" />
+            <span>{{ $error }}</span>
+        </div>
     @endif
 
-    <div class="card">
-        <div class="flex items-start gap-3">
-            <div class="w-10 h-10 shrink-0 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
-                <x-icon name="users" class="w-5 h-5" />
-            </div>
-            <div class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                <p class="text-sm font-semibold">{{ $employee->nama }}</p>
-                <p class="mt-1">
-                    {{ $employee->labelJenis() }}@if ($employee->jabatan) · {{ $employee->jabatan }}@endif
-                    · NIP / NUPTK {{ $employee->nip_nuptk ?? '—' }}
-                </p>
-                <p class="mt-1">
-                    Nama dan kontak di bawah diambil dari data kepegawaian. Mengubah kontak di sini
-                    tidak mengubah data kepegawaian. Status akun mengikuti status kepegawaian:
-                    {{ $employee->status_aktif ? 'aktif' : 'nonaktif' }}.
-                </p>
+    <section class="card management-form-card" aria-labelledby="employee-account-info-title">
+        <div class="card-head">
+            <div class="card-title">
+                <span class="mini-icon blue"><x-icon name="users" class="h-[19px] w-[19px]" /></span>
+                <div>
+                    <h3 id="employee-account-info-title">{{ $employee->nama }}</h3>
+                    <p>
+                        {{ $employee->labelJenis() }}@if ($employee->jabatan) · {{ $employee->jabatan }}@endif
+                        · NIP / NUPTK {{ $employee->nip_nuptk ?? '—' }}
+                    </p>
+                </div>
             </div>
         </div>
-    </div>
+        <p class="helper-text">
+            Nama dan kontak di bawah diambil dari data kepegawaian. Mengubah kontak di sini
+            tidak mengubah data kepegawaian. Status akun mengikuti status kepegawaian:
+            {{ $employee->status_aktif ? 'aktif' : 'nonaktif' }}.
+        </p>
+    </section>
 
     <form wire:submit="simpan" class="card management-form-card" aria-labelledby="employee-account-form-title">
         <div class="card-head">
@@ -72,6 +75,7 @@
             <div class="form-group">
                 <label for="password_confirmation">Ulangi Kata Sandi</label>
                 <input id="password_confirmation" type="password" wire:model="password_confirmation" autocomplete="new-password" class="field">
+                @error('password_confirmation') <p class="management-field-error" role="alert">{{ $message }}</p> @enderror
             </div>
         </div>
 
@@ -98,7 +102,7 @@
             @error('roles.*') <p class="management-field-error" role="alert">{{ $message }}</p> @enderror
         </div>
 
-        <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-700/60">
+        <div class="page-actions management-form-actions">
             <a href="{{ route('guru.show', $employee) }}" class="btn btn-outline">Batal</a>
             <button type="submit" wire:loading.attr="disabled" class="btn btn-primary" wire:target="simpan">
                 <x-icon name="check" class="w-4 h-4" />

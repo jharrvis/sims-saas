@@ -55,7 +55,7 @@
         <dl class="management-definition-list">
             <div><dt>NIP / NUPTK</dt><dd>{{ $employee->nip_nuptk ?? '—' }}</dd></div>
             <div><dt>NIK</dt><dd>{{ $employee->nikTersamar() ?? '—' }}</dd></div>
-            <div><dt>Tempat, Tanggal Lahir</dt><dd>{{ $employee->tempat_lahir ?? '—' }}, {{ $employee->tgl_lahir?->format('d M Y') ?? '—' }}</dd></div>
+            <div><dt>Tempat, Tanggal Lahir</dt><dd>{{ $employee->tempat_lahir ?? '—' }}, {{ $employee->tgl_lahir?->translatedFormat('d M Y', 'id') ?? '—' }}</dd></div>
             <div><dt>Jenis Kelamin</dt><dd>{{ $employee->labelJk() }}</dd></div>
             <div><dt>Agama</dt><dd>{{ $employee->agama ?? '—' }}</dd></div>
             <div><dt>Email</dt><dd>{{ $employee->email ?? '—' }}</dd></div>
@@ -97,7 +97,7 @@
             <div><dt>Jenis</dt><dd>{{ $employee->labelJenis() }}</dd></div>
             <div><dt>Status Kepegawaian</dt><dd>{{ ucfirst($employee->status_kepegawaian) }}</dd></div>
             <div><dt>Jabatan</dt><dd>{{ $employee->jabatan ?? '—' }}</dd></div>
-            <div><dt>TMT</dt><dd>{{ $employee->tmt?->format('d M Y') ?? '—' }}</dd></div>
+            <div><dt>TMT</dt><dd>{{ $employee->tmt?->translatedFormat('d M Y', 'id') ?? '—' }}</dd></div>
             <div><dt>Golongan / Pangkat</dt><dd>{{ $employee->golongan ?? '—' }}</dd></div>
             <div><dt>Sertifikasi</dt><dd>{{ $employee->labelSertifikasi() }}</dd></div>
             <div><dt>No. Sertifikat Pendidik</dt><dd>{{ $employee->no_sertifikat ?? '—' }}</dd></div>
