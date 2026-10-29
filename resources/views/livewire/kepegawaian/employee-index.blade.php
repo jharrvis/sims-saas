@@ -150,7 +150,7 @@
                                     <span><strong>{{ $guru->nama }}</strong><small>{{ $guru->jabatan ?: 'Guru & Pegawai' }}</small></span>
                                 </div>
                             </td>
-                            <td><span class="management-reference">{{ $guru->nip_nuptk ?? '—' }}</span>@if ($guru->nik)<small class="management-cell-meta">NIK {{ $guru->nik }}</small>@endif</td>
+                            <td><span class="management-reference">{{ $guru->nip_nuptk ?? '—' }}</span>@if ($guru->nik)<small class="management-cell-meta">NIK {{ $guru->nikTersamar() }}</small>@endif</td>
                             <td>{{ $guru->labelJenis() }}</td>
                             <td>{{ $guru->phone ?: '—' }}</td>
                             <td><span class="badge {{ $statusClass }}">{{ $statusLabel }}</span></td>

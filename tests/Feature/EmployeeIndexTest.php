@@ -286,6 +286,15 @@ it('daftar kosong menampilkan empty state dan reset filter hanya muncul saat fil
         ->assertSee('Reset filter');
 });
 
+it('NIK pegawai tampil tersamar di daftar, bukan 16 digit penuh (QA F-01)', function (): void {
+    $this->guruSatu->update(['nik' => '3201010101800007']);
+
+    Livewire::actingAs($this->admin)
+        ->test(EmployeeIndex::class)
+        ->assertSee('••••0007')
+        ->assertDontSee('3201010101800007');
+});
+
 it('tombol impor dan ekspor tidak dirender selama route belum tersedia', function (): void {
     Livewire::actingAs($this->admin)
         ->test(EmployeeIndex::class)

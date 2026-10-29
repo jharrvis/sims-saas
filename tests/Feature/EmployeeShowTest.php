@@ -110,7 +110,9 @@ it('halaman detail guru menampilkan data identitas, pendidikan, dan kepegawaian'
     $this->actingAs($this->admin)
         ->get('/guru/'.$this->guru->id)
         ->assertOk()
-        ->assertSee('3201010101800001')
+        // NIK tampil tersamar di halaman detail (QA F-01).
+        ->assertSee('••••0001')
+        ->assertDontSee('3201010101800001')
         ->assertSee('Bandung')
         ->assertSee('Laki-laki')
         ->assertSee('Islam')

@@ -54,7 +54,7 @@
 
         <dl class="management-definition-list">
             <div><dt>NIP / NUPTK</dt><dd>{{ $employee->nip_nuptk ?? '—' }}</dd></div>
-            <div><dt>NIK</dt><dd>{{ $employee->nik ?? '—' }}</dd></div>
+            <div><dt>NIK</dt><dd>{{ $employee->nikTersamar() ?? '—' }}</dd></div>
             <div><dt>Tempat, Tanggal Lahir</dt><dd>{{ $employee->tempat_lahir ?? '—' }}, {{ $employee->tgl_lahir?->format('d M Y') ?? '—' }}</dd></div>
             <div><dt>Jenis Kelamin</dt><dd>{{ $employee->labelJk() }}</dd></div>
             <div><dt>Agama</dt><dd>{{ $employee->agama ?? '—' }}</dd></div>

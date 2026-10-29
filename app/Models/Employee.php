@@ -127,6 +127,21 @@ class Employee extends Model
         return $this->hasOne(User::class, 'employee_id');
     }
 
+    /**
+     * NIK tersamar untuk tampilan (QA F-01): hanya 4 digit terakhir,
+     * pola yang sama dengan penyamaran NIK wali murid. Nilai penuh
+     * tetap tersimpan dan hanya tampil di form ubah bagi pemegang
+     * permission guru.update.
+     */
+    public function nikTersamar(): ?string
+    {
+        if ($this->nik === null || $this->nik === '') {
+            return null;
+        }
+
+        return '••••'.mb_substr($this->nik, -4);
+    }
+
     public function labelJenis(): string
     {
         return match ($this->jenis) {
