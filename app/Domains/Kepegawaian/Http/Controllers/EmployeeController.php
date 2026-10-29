@@ -80,14 +80,14 @@ class EmployeeController extends Controller
             )->ignore($employee?->id)],
             'nama' => ['required', 'string', 'max:150'],
             'tempat_lahir' => ['nullable', 'string', 'max:100'],
-            'tgl_lahir' => ['nullable', 'date'],
+            'tgl_lahir' => ['nullable', 'date', 'before_or_equal:today'],
             'jk' => ['nullable', Rule::in(['L', 'P'])],
             'agama' => ['nullable', Rule::in(Student::AGAMAS)],
             'alamat' => ['nullable', 'string'],
             'email' => ['nullable', 'email', 'max:150', Rule::unique('employees')->where(
                 fn ($q) => $q->where('school_id', $schoolId)
             )->ignore($employee?->id)],
-            'phone' => ['nullable', 'string', 'max:20'],
+            'phone' => ['nullable', 'string', 'max:20', 'regex:/^[+0-9][0-9\s\-]{7,19}$/'],
             'jenis' => ['required', Rule::in(['guru_mapel', 'guru_kelas', 'tendik'])],
             'status_kepegawaian' => ['required', Rule::in(['pns', 'pppk', 'honorer', 'kontrak'])],
             'jabatan' => ['nullable', 'string', 'max:100'],

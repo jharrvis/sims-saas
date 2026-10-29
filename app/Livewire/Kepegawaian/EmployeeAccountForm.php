@@ -10,6 +10,7 @@ use App\Models\Membership;
 use App\Models\User;
 use App\Support\RoleCatalog;
 use App\Tenancy\TenantContext;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
@@ -111,6 +112,29 @@ class EmployeeAccountForm extends Component
             return;
         }
 
+        try {
+            $this->simpanAkun($schoolId);
+        } catch (QueryException $e) {
+            // Dua admin menekan simpan hampir bersamaan: unique
+            // users.employee_id menolak yang kedua — ubah menjadi pesan
+            // form yang ramah, bukan 500 (QA B-16).
+            $pesan = $e->getMessage();
+            if (str_contains($pesan, 'users_employee_id_unique') || str_contains($pesan, 'users.employee_id')) {
+                $this->addError('username', 'Guru/pegawai ini baru saja dibuatkan akun oleh proses lain. Muat ulang halaman untuk melihat akunnya.');
+
+                return;
+            }
+
+            throw $e;
+        }
+
+        session()->flash('sukses', 'Akun login berhasil dibuat dan ditautkan ke data guru/pegawai.');
+
+        $this->redirectRoute('guru.show', $this->employee);
+    }
+
+    private function simpanAkun(int $schoolId): void
+    {
         DB::transaction(function () use ($schoolId): void {
             /** @var User $user */
             $user = User::create([
@@ -151,10 +175,6 @@ class EmployeeAccountForm extends Component
                 'user_agent' => substr((string) request()->userAgent(), 0, 500),
             ]);
         });
-
-        session()->flash('sukses', 'Akun login berhasil dibuat dan ditautkan ke data guru/pegawai.');
-
-        $this->redirectRoute('guru.show', $this->employee);
     }
 
     public function render(): View

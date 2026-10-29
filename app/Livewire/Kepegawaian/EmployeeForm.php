@@ -9,6 +9,7 @@ use App\Domains\Kesiswaan\Services\StudentPhotoService;
 use App\Models\Employee;
 use App\Models\Student;
 use App\Tenancy\TenantContext;
+use Illuminate\Database\QueryException;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Livewire\Component;
@@ -124,14 +125,16 @@ class EmployeeForm extends Component
             )->ignore($this->employee?->id)],
             'nama' => ['required', 'string', 'max:150'],
             'tempat_lahir' => ['nullable', 'string', 'max:100'],
-            'tgl_lahir' => ['nullable', 'date'],
+            // Tanggal lahir tidak boleh di masa depan (QA B-13).
+            'tgl_lahir' => ['nullable', 'date', 'before_or_equal:today'],
             'jk' => ['nullable', Rule::in(['L', 'P'])],
             'agama' => ['nullable', Rule::in(Student::AGAMAS)],
             'alamat' => ['nullable', 'string'],
             'email' => ['nullable', 'email', 'max:150', Rule::unique('employees')->where(
                 fn ($q) => $q->where('school_id', $schoolId)
             )->ignore($this->employee?->id)],
-            'phone' => ['nullable', 'string', 'max:20'],
+            // Format nomor telepon dasar, selaras form siswa (QA B-14).
+            'phone' => ['nullable', 'string', 'max:20', 'regex:/^[+0-9][0-9\s\-]{7,19}$/'],
             'foto' => ['nullable', 'image', 'max:2048', 'mimes:jpeg,png,webp'],
             'jenis' => ['required', Rule::in(['guru_mapel', 'guru_kelas', 'tendik'])],
             'status_kepegawaian' => ['required', Rule::in(['pns', 'pppk', 'honorer', 'kontrak'])],
@@ -196,12 +199,40 @@ class EmployeeForm extends Component
             $data['foto_path'] = null;
         }
 
-        if ($this->employee?->exists) {
-            $this->employee->update($data);
-            // Status akun login tertaut mengikuti status_aktif (QA B-01).
-            app(EmployeeAccountSync::class)->syncMembershipStatus($this->employee);
-        } else {
-            Employee::create($data);
+        try {
+            if ($this->employee?->exists) {
+                $this->employee->update($data);
+                // Status akun login tertaut mengikuti status_aktif (QA B-01).
+                app(EmployeeAccountSync::class)->syncMembershipStatus($this->employee);
+            } else {
+                Employee::create($data);
+            }
+        } catch (QueryException $e) {
+            // Simpan gagal: bersihkan foto baru agar tidak yatim (QA B-17),
+            // dan petakan tabrakan indeks unik identitas (QA B-10) ke
+            // pesan validasi per kolom alih-alih halaman 500.
+            if ($newFotoPath) {
+                $photoService->delete($newFotoPath);
+            }
+
+            $pesan = $e->getMessage();
+            $tabrakan = match (true) {
+                str_contains($pesan, 'employees_school_id_nip_nuptk_unique'),
+                str_contains($pesan, 'employees.school_id, employees.nip_nuptk') => ['nip_nuptk', 'NIP/NUPTK ini sudah dipakai pegawai lain di sekolah ini.'],
+                str_contains($pesan, 'employees_school_id_nik_unique'),
+                str_contains($pesan, 'employees.school_id, employees.nik') => ['nik', 'NIK ini sudah dipakai pegawai lain di sekolah ini.'],
+                str_contains($pesan, 'employees_school_id_email_unique'),
+                str_contains($pesan, 'employees.school_id, employees.email') => ['email', 'Email ini sudah dipakai pegawai lain di sekolah ini.'],
+                default => null,
+            };
+
+            if ($tabrakan !== null) {
+                $this->addError($tabrakan[0], $tabrakan[1]);
+
+                return;
+            }
+
+            throw $e;
         }
 
         if ($newFotoPath || ($this->hapusFoto && $this->employee?->exists)) {

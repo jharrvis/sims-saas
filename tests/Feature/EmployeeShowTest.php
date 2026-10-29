@@ -67,6 +67,31 @@ afterEach(function (): void {
     app(PermissionRegistrar::class)->setPermissionsTeamId(null);
 });
 
+it('peran akun di detail guru hanya dari sekolah pegawai ini (QA B-18)', function (): void {
+    $user = User::create([
+        'username' => 'gurulintas', 'name' => 'Guru Detail', 'phone' => '628120000099',
+        'employee_id' => $this->guru->id,
+    ]);
+    Membership::create(['user_id' => $user->id, 'school_id' => $this->school->id, 'status' => 'aktif']);
+    $user->assignRole('guru-mapel');
+
+    $sekolahLain = School::create([
+        'nama' => 'Sekolah Lain', 'slug' => 'lain-'.uniqid(), 'jenjang' => 'SMP',
+        'status' => 'aktif', 'status_langganan' => 'active',
+    ]);
+    RoleSeeder::seedForSchool($sekolahLain->id);
+    Membership::create(['user_id' => $user->id, 'school_id' => $sekolahLain->id, 'status' => 'aktif']);
+    app(PermissionRegistrar::class)->setPermissionsTeamId($sekolahLain->id);
+    $user->assignRole('tata-usaha');
+    app(PermissionRegistrar::class)->setPermissionsTeamId($this->school->id);
+
+    $this->actingAs($this->admin)
+        ->get('/guru/'.$this->guru->id)
+        ->assertOk()
+        ->assertSee('Guru Mapel')
+        ->assertDontSee('Tata Usaha');
+});
+
 it('halaman detail guru menampilkan biodata, wali kelas, dan jadwal mengajar', function (): void {
     $this->actingAs($this->admin)
         ->get('/guru/'.$this->guru->id)

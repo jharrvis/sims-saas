@@ -11,6 +11,8 @@ use App\Models\User;
 use App\Tenancy\TenantContext;
 use Database\Seeders\PermissionSeeder;
 use Database\Seeders\RoleSeeder;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 use Spatie\Permission\PermissionRegistrar;
 
@@ -132,4 +134,70 @@ it('NISN duplikat di sekolah yang sama ditolak (QA B-07)', function (): void {
         ->assertHasErrors(['nisn']);
 
     expect(Student::where('nis', '9912')->exists())->toBeFalse();
+});
+
+it('tanggal lahir di masa depan ditolak (QA B-13)', function (): void {
+    Livewire::actingAs($this->admin)->test(StudentForm::class)
+        ->set('nis', '9913')
+        ->set('nama', 'Siswa Masa Depan')
+        ->set('jk', 'L')
+        ->set('tgl_lahir', now()->addYear()->format('Y-m-d'))
+        ->call('save')
+        ->assertHasErrors(['tgl_lahir']);
+
+    expect(Student::where('nis', '9913')->exists())->toBeFalse();
+});
+
+it('nomor telepon dengan huruf ditolak (QA B-14)', function (): void {
+    Livewire::actingAs($this->admin)->test(StudentForm::class)
+        ->set('nis', '9914')
+        ->set('nama', 'Siswa Telepon Aneh')
+        ->set('jk', 'P')
+        ->set('phone', 'bukan-nomor')
+        ->call('save')
+        ->assertHasErrors(['phone']);
+
+    expect(Student::where('nis', '9914')->exists())->toBeFalse();
+});
+
+it('NIS milik siswa di sampah memberi pesan pulihkan, bukan 500 (QA B-15)', function (): void {
+    AcademicYear::create([
+        'nama' => '2026/2027', 'aktif' => true,
+        'tgl_mulai' => '2026-07-01', 'tgl_selesai' => '2027-06-30',
+    ]);
+
+    $lama = Student::create(['nis' => '9915', 'nama' => 'Siswa Lama', 'jk' => 'L']);
+    $lama->delete();
+
+    Livewire::actingAs($this->admin)->test(StudentForm::class)
+        ->set('nis', '9915')
+        ->set('nama', 'Siswa Baru')
+        ->set('jk', 'P')
+        ->call('save')
+        ->assertHasErrors(['nis'])
+        ->assertSee('di sampah');
+
+    expect(Student::where('nama', 'Siswa Baru')->exists())->toBeFalse();
+});
+
+it('foto baru dibersihkan ketika simpan siswa gagal (QA B-17)', function (): void {
+    Storage::fake('public');
+
+    AcademicYear::create([
+        'nama' => '2026/2027', 'aktif' => true,
+        'tgl_mulai' => '2026-07-01', 'tgl_selesai' => '2027-06-30',
+    ]);
+
+    $lama = Student::create(['nis' => '9916', 'nama' => 'Siswa Lama', 'jk' => 'L']);
+    $lama->delete();
+
+    Livewire::actingAs($this->admin)->test(StudentForm::class)
+        ->set('nis', '9916')
+        ->set('nama', 'Siswa Gagal Simpan')
+        ->set('jk', 'L')
+        ->set('foto', UploadedFile::fake()->image('foto.jpg', 100, 100))
+        ->call('save')
+        ->assertHasErrors(['nis']);
+
+    expect(Storage::disk('public')->allFiles('siswa-foto'))->toBe([]);
 });

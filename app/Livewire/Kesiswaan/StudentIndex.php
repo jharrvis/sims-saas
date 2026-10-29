@@ -11,6 +11,7 @@ use App\Models\Grade;
 use App\Models\Invoice;
 use App\Models\Rombel;
 use App\Models\Student;
+use App\Tenancy\TenantContext;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
@@ -222,7 +223,10 @@ class StudentIndex extends Component
         $this->authorize('siswa.update');
 
         $this->validate([
-            'bulkRombelId' => ['required', 'integer', 'exists:rombels,id'],
+            // Rombel tujuan harus milik sekolah aktif: id rombel sekolah
+            // lain ditolak sebagai error validasi (QA B-12).
+            'bulkRombelId' => ['required', 'integer', Rule::exists('rombels', 'id')
+                ->where('school_id', app(TenantContext::class)->requireSchoolId())],
         ]);
 
         $tahunAktifId = AcademicYear::where('aktif', true)->value('id');

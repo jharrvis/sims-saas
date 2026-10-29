@@ -9,6 +9,7 @@ use App\Domains\Platform\Services\QuotaService;
 use App\Models\AcademicYear;
 use App\Models\Student;
 use App\Tenancy\TenantContext;
+use Illuminate\Database\QueryException;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Livewire\Component;
@@ -73,22 +74,27 @@ class StudentForm extends Component
         $schoolId = app(TenantContext::class)->requireSchoolId();
 
         return [
+            // Baris di sampah dikecualikan dari cek unik form agar handler
+            // QueryException di save() bisa memberi pesan "pulihkan dari
+            // sampah" yang jelas; indeks unik DB tetap menjaga (QA B-15).
             'nis' => ['required', 'string', 'max:30', Rule::unique('students')->where(
-                fn ($q) => $q->where('school_id', $schoolId)
+                fn ($q) => $q->where('school_id', $schoolId)->whereNull('deleted_at')
             )->ignore($this->student?->id)],
             // NISN selalu 10 digit dan unik per sekolah — divalidasi di
             // sini dan ditegakkan indeks unik database (QA B-07).
             'nisn' => ['nullable', 'string', 'digits:10', Rule::unique('students')->where(
-                fn ($q) => $q->where('school_id', $schoolId)
+                fn ($q) => $q->where('school_id', $schoolId)->whereNull('deleted_at')
             )->ignore($this->student?->id)],
             'angkatan' => ['nullable', 'integer', 'min:1900', 'max:2100'],
             'nama' => ['required', 'string', 'max:150'],
             'jk' => ['required', Rule::in(['L', 'P'])],
             'tempat_lahir' => ['nullable', 'string', 'max:100'],
-            'tgl_lahir' => ['nullable', 'date'],
+            // Tanggal lahir tidak boleh di masa depan (QA B-13).
+            'tgl_lahir' => ['nullable', 'date', 'before_or_equal:today'],
             'agama' => ['nullable', Rule::in(Student::AGAMAS)],
             'alamat' => ['nullable', 'string'],
-            'phone' => ['nullable', 'string', 'max:20'],
+            // Format nomor telepon dasar: angka, +, spasi, tanda hubung (QA B-14).
+            'phone' => ['nullable', 'string', 'max:20', 'regex:/^[+0-9][0-9\s\-]{7,19}$/'],
             // Foto: maks 2 MB file asli; dikompresi ke maks 512×512 JPEG saat simpan.
             'foto' => ['nullable', 'image', 'max:2048', 'mimes:jpeg,png,webp'],
         ];
@@ -152,14 +158,44 @@ class StudentForm extends Component
             $data['foto_path'] = null;
         }
 
-        if ($this->student?->exists) {
-            $this->student->update($data);
-        } else {
-            Student::create($data);
-            // US-112 (webhook keluar siswa_baru) adalah story Fase 2 yang
-            // belum dibangun — tidak ada WebhookService di codebase, dan
-            // pemanggilan sebelumnya membuat setiap tambah siswa fatal.
-            // Panggilan dihapus sampai fitur webhook Fase 2 diimplementasi.
+        try {
+            if ($this->student?->exists) {
+                $this->student->update($data);
+            } else {
+                Student::create($data);
+                // US-112 (webhook keluar siswa_baru) adalah story Fase 2 yang
+                // belum dibangun — tidak ada WebhookService di codebase, dan
+                // pemanggilan sebelumnya membuat setiap tambah siswa fatal.
+                // Panggilan dihapus sampai fitur webhook Fase 2 diimplementasi.
+            }
+        } catch (QueryException $e) {
+            // Simpan gagal: foto baru yang sudah terunggah jangan sampai
+            // menjadi file yatim tanpa pemilik (QA B-17).
+            if ($newFotoPath) {
+                $photoService->delete($newFotoPath);
+            }
+
+            // Tabrakan unik NIS/NISN — paling sering karena data lama ada
+            // di sampah: beri pesan yang bisa ditindaklanjuti (QA B-15).
+            $pesan = $e->getMessage();
+            if (str_contains($pesan, 'students_school_id_nis_unique') || str_contains($pesan, 'students.school_id, students.nis')) {
+                $diSampah = Student::onlyTrashed()->where('nis', $this->nis)->first();
+                $this->addError('nis', $diSampah
+                    ? "NIS ini dipakai data siswa di sampah ({$diSampah->nama}). Pulihkan data itu dari tampilan sampah atau gunakan NIS lain."
+                    : 'NIS ini sudah digunakan siswa lain.');
+
+                return;
+            }
+            if (str_contains($pesan, 'students_school_id_nisn_unique') || str_contains($pesan, 'students.school_id, students.nisn')) {
+                $diSampah = Student::onlyTrashed()->where('nisn', $this->nisn)->first();
+                $this->addError('nisn', $diSampah
+                    ? "NISN ini dipakai data siswa di sampah ({$diSampah->nama}). Pulihkan data itu dari tampilan sampah atau gunakan NISN lain."
+                    : 'NISN ini sudah digunakan siswa lain.');
+
+                return;
+            }
+
+            throw $e;
         }
 
         if ($newFotoPath || ($this->hapusFoto && $this->student?->exists)) {

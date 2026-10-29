@@ -169,6 +169,29 @@ it('route ekspor menolak pengguna tanpa siswa.export (QA B-04)', function (): vo
         ->assertForbidden();
 });
 
+it('pindah rombel massal menolak rombel milik sekolah lain (QA B-12)', function (): void {
+    $sekolahLain = School::create([
+        'nama' => 'Sekolah Lain', 'slug' => 'lain-'.uniqid(), 'jenjang' => 'SMP',
+        'status' => 'aktif', 'status_langganan' => 'active',
+    ]);
+
+    app(TenantContext::class)->set($sekolahLain);
+    $taLain = AcademicYear::create([
+        'nama' => '2026/2027', 'aktif' => true,
+        'tgl_mulai' => '2026-07-01', 'tgl_selesai' => '2027-06-30',
+    ]);
+    $rombelLain = Rombel::create(['nama' => 'VII X', 'academic_year_id' => $taLain->id, 'tingkat' => '7']);
+    app(TenantContext::class)->set($this->school);
+
+    Livewire::actingAs($this->admin)
+        ->test(StudentIndex::class)
+        ->set('selected', [Student::query()->value('id')])
+        ->set('bulkAksi', 'rombel')
+        ->set('bulkRombelId', (string) $rombelLain->id)
+        ->call('bulkTerapkan')
+        ->assertHasErrors(['bulkRombelId']);
+});
+
 it('route ekspor terdaftar dengan middleware permission siswa.export (QA B-04)', function (): void {
     // Jalur "diizinkan" tidak diuji via unduhan nyata di sini: vendor lokal
     // main tidak memuat maatwebsite/excel (paket itu hanya ada di lock

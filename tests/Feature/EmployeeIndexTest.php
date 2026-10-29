@@ -426,6 +426,20 @@ it('form menolak NIK pegawai yang bukan 16 digit (QA B-19)', function (): void {
     expect(Employee::where('nama', 'Pegawai NIK Pendek')->exists())->toBeFalse();
 });
 
+it('form menolak tanggal lahir masa depan dan telepon berhuruf (QA B-13/B-14)', function (): void {
+    Livewire::actingAs($this->admin)
+        ->test(EmployeeForm::class)
+        ->set('nama', 'Pegawai Aneh')
+        ->set('jenis', 'tendik')
+        ->set('status_kepegawaian', 'honorer')
+        ->set('tgl_lahir', now()->addYear()->format('Y-m-d'))
+        ->set('phone', 'telepon-rumah')
+        ->call('save')
+        ->assertHasErrors(['tgl_lahir', 'phone']);
+
+    expect(Employee::where('nama', 'Pegawai Aneh')->exists())->toBeFalse();
+});
+
 it('akun tertaut mengikuti status_aktif yang diubah lewat form (QA B-01)', function (): void {
     $akun = User::create([
         'username' => 'gurusatu-form', 'name' => 'Guru Satu', 'employee_id' => $this->guruSatu->id,
