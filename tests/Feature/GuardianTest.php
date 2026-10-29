@@ -119,6 +119,18 @@ it('detail wali menautkan dan melepas siswa', function (): void {
     ]);
 });
 
+it('wali dengan NIK tersimpan terenkripsi dan kembali terbaca', function (): void {
+    $wali = Guardian::create([
+        'nama' => 'Budi NIK', 'hubungan' => 'ayah', 'no_wa' => '628444444444',
+        'nik' => '3273010101900001',
+    ]);
+
+    // Nilai mentah di database adalah payload terenkripsi, bukan NIK polos,
+    // dan cast membukanya kembali ke nilai asal.
+    $this->assertNotSame('3273010101900001', $wali->getRawOriginal('nik'));
+    $this->assertSame('3273010101900001', $wali->fresh()->nik);
+});
+
 it('pengguna tanpa permission wali-murid.view tidak boleh membuka daftar', function (): void {
     $this->actingAs($this->guruMapel)
         ->get('/wali')
