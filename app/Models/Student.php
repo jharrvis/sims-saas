@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Concerns\BelongsToSchool;
+use Database\Factories\StudentFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -18,7 +20,8 @@ use Illuminate\Support\Facades\Storage;
  */
 class Student extends Model
 {
-    use BelongsToSchool, SoftDeletes;
+    /** @use HasFactory<StudentFactory> */
+    use BelongsToSchool, HasFactory, SoftDeletes;
 
     /** Daftar agama resmi di Indonesia (6 agama yang diakui pemerintah). */
     public const AGAMAS = ['Islam', 'Kristen', 'Katolik', 'Hindu', 'Buddha', 'Konghucu'];

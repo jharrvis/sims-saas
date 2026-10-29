@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Concerns\BelongsToSchool;
+use Database\Factories\EmployeeFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -19,7 +21,16 @@ use Illuminate\Support\Facades\Storage;
  */
 class Employee extends Model
 {
-    use BelongsToSchool, SoftDeletes;
+    /** @use HasFactory<EmployeeFactory> */
+    use BelongsToSchool, HasFactory, SoftDeletes;
+
+    /**
+     * Daftar agama resmi — satu sumber kebenaran bersama siswa agar form
+     * pegawai tidak lagi meminjam konstanta model lain (QA B-19).
+     *
+     * @var array<int,string>
+     */
+    public const AGAMAS = Student::AGAMAS;
 
     /**
      * Pendidikan terakhir (label tampilan).

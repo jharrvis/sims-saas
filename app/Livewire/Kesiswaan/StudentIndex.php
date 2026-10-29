@@ -11,6 +11,7 @@ use App\Models\Grade;
 use App\Models\Invoice;
 use App\Models\Rombel;
 use App\Models\Student;
+use App\Support\AuditLogger;
 use App\Tenancy\TenantContext;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
@@ -120,6 +121,7 @@ class StudentIndex extends Component
     {
         $this->authorize('siswa.delete');
         $student->delete(); // Soft delete — bisa dipulihkan dari sampah.
+        AuditLogger::log('siswa.delete', $student, ['nama' => $student->nama, 'nis' => $student->nis]);
         session()->flash('sukses', 'Data siswa dipindah ke sampah.');
     }
 
@@ -149,6 +151,7 @@ class StudentIndex extends Component
 
         app(StudentPhotoService::class)->delete($student->foto_path);
         $student->forceDelete();
+        AuditLogger::log('siswa.force_delete', $student, ['nama' => $student->nama, 'nis' => $student->nis]);
 
         session()->flash('sukses', "Data {$student->nama} dihapus permanen.");
     }
@@ -340,6 +343,7 @@ class StudentIndex extends Component
 
             $photoService->delete($student->foto_path);
             $student->forceDelete();
+            AuditLogger::log('siswa.force_delete', $student, ['nama' => $student->nama, 'nis' => $student->nis]);
             $terhapus++;
         }
 

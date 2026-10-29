@@ -6,6 +6,7 @@ namespace App\Livewire\Kesiswaan;
 
 use App\Models\Guardian;
 use App\Models\Student;
+use App\Support\AuditLogger;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Livewire\Component;
@@ -64,6 +65,11 @@ class GuardianShow extends Component
             $student->id => ['hubungan' => $this->linkHubungan],
         ]);
 
+        AuditLogger::log('wali.link', $this->guardian, null, [
+            'student_id' => $student->id, 'student_nama' => $student->nama,
+            'hubungan' => $this->linkHubungan,
+        ]);
+
         $this->linkStudentId = '';
 
         $label = match ($this->linkHubungan) {
@@ -83,6 +89,10 @@ class GuardianShow extends Component
         $student = Student::findOrFail($studentId);
 
         $this->guardian->students()->detach($student->id);
+
+        AuditLogger::log('wali.unlink', $this->guardian, [
+            'student_id' => $student->id, 'student_nama' => $student->nama,
+        ]);
 
         session()->flash('sukses', "Tautan {$student->nama} dilepas.");
     }

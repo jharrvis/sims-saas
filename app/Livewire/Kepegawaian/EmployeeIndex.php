@@ -7,6 +7,7 @@ namespace App\Livewire\Kepegawaian;
 use App\Domains\Kepegawaian\Services\EmployeeAccountSync;
 use App\Domains\Kesiswaan\Services\StudentPhotoService;
 use App\Models\Employee;
+use App\Support\AuditLogger;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 use Livewire\Component;
@@ -94,6 +95,8 @@ class EmployeeIndex extends Component
         // Akun login tertaut ikut kehilangan akses selama data di sampah (QA B-01).
         app(EmployeeAccountSync::class)->syncMembershipStatus($employee);
 
+        AuditLogger::log('guru.delete', $employee, ['nama' => $employee->nama, 'nip_nuptk' => $employee->nip_nuptk]);
+
         session()->flash('sukses', 'Data guru/pegawai dipindah ke sampah.');
     }
 
@@ -150,6 +153,8 @@ class EmployeeIndex extends Component
         });
 
         app(StudentPhotoService::class)->delete($fotoPath);
+
+        AuditLogger::log('guru.force_delete', $employee, ['nama' => $employee->nama, 'nip_nuptk' => $employee->nip_nuptk]);
 
         session()->flash('sukses', $punyaAkun
             ? "Data {$employee->nama} dihapus permanen. Akun login tertaut dinonaktifkan dan tautannya dilepas."

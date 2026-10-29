@@ -105,7 +105,7 @@
                     <label for="agama">Agama</label>
                     <select id="agama" wire:model="agama" class="select-field">
                         <option value="">—</option>
-                        @foreach (\App\Models\Student::AGAMAS as $agamaOption)
+                        @foreach (\App\Models\Employee::AGAMAS as $agamaOption)
                             <option value="{{ $agamaOption }}">{{ $agamaOption }}</option>
                         @endforeach
                     </select>

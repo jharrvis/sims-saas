@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Concerns\BelongsToSchool;
+use Database\Factories\GuardianFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -23,7 +25,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Guardian extends Model
 {
-    use BelongsToSchool, SoftDeletes;
+    /** @use HasFactory<GuardianFactory> */
+    use BelongsToSchool, HasFactory, SoftDeletes;
 
     protected $fillable = [
         'school_id',

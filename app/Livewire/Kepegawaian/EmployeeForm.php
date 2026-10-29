@@ -7,7 +7,6 @@ namespace App\Livewire\Kepegawaian;
 use App\Domains\Kepegawaian\Services\EmployeeAccountSync;
 use App\Domains\Kesiswaan\Services\StudentPhotoService;
 use App\Models\Employee;
-use App\Models\Student;
 use App\Tenancy\TenantContext;
 use Illuminate\Database\QueryException;
 use Illuminate\Validation\Rule;
@@ -127,8 +126,10 @@ class EmployeeForm extends Component
             'tempat_lahir' => ['nullable', 'string', 'max:100'],
             // Tanggal lahir tidak boleh di masa depan (QA B-13).
             'tgl_lahir' => ['nullable', 'date', 'before_or_equal:today'],
+            // jk pegawai sengaja boleh kosong (data lama tidak selalu
+            // lengkap), berbeda dari siswa yang wajib — lihat QA B-19.
             'jk' => ['nullable', Rule::in(['L', 'P'])],
-            'agama' => ['nullable', Rule::in(Student::AGAMAS)],
+            'agama' => ['nullable', Rule::in(Employee::AGAMAS)],
             'alamat' => ['nullable', 'string'],
             'email' => ['nullable', 'email', 'max:150', Rule::unique('employees')->where(
                 fn ($q) => $q->where('school_id', $schoolId)

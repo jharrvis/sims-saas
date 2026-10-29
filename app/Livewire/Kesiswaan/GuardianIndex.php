@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Kesiswaan;
 
 use App\Models\Guardian;
+use App\Support\AuditLogger;
 use Illuminate\View\View;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -75,6 +76,8 @@ class GuardianIndex extends Component
         $guardian = Guardian::findOrFail($id);
         $guardian->delete();
 
+        AuditLogger::log('wali.delete', $guardian, ['nama' => $guardian->nama]);
+
         session()->flash('sukses', 'Data wali murid dipindah ke sampah.');
     }
 
@@ -94,6 +97,8 @@ class GuardianIndex extends Component
 
         $guardian = Guardian::onlyTrashed()->findOrFail($id);
         $guardian->forceDelete();
+
+        AuditLogger::log('wali.force_delete', $guardian, ['nama' => $guardian->nama]);
 
         session()->flash('sukses', 'Data wali murid dihapus permanen.');
     }

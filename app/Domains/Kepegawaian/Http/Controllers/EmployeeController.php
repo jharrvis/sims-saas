@@ -6,7 +6,6 @@ namespace App\Domains\Kepegawaian\Http\Controllers;
 
 use App\Domains\Kepegawaian\Services\EmployeeAccountSync;
 use App\Models\Employee;
-use App\Models\Student;
 use App\Tenancy\TenantContext;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -82,7 +81,7 @@ class EmployeeController extends Controller
             'tempat_lahir' => ['nullable', 'string', 'max:100'],
             'tgl_lahir' => ['nullable', 'date', 'before_or_equal:today'],
             'jk' => ['nullable', Rule::in(['L', 'P'])],
-            'agama' => ['nullable', Rule::in(Student::AGAMAS)],
+            'agama' => ['nullable', Rule::in(Employee::AGAMAS)],
             'alamat' => ['nullable', 'string'],
             'email' => ['nullable', 'email', 'max:150', Rule::unique('employees')->where(
                 fn ($q) => $q->where('school_id', $schoolId)
