@@ -10,6 +10,15 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
+ * Wali murid (FR-302).
+ *
+ * Semantik hubungan (QA B-08): kolom `hubungan` di tabel ini adalah
+ * HUBUNGAN UTAMA/bawaan wali — ditampilkan di daftar dan statistik, dan
+ * menjadi nilai awal saat menautkan siswa. Hubungan yang berlaku terhadap
+ * siswa tertentu disimpan di pivot `guardian_student.hubungan` dan itulah
+ * yang ditampilkan di detail siswa serta dipakai untuk hak akses orang
+ * tua; bila keduanya berbeda, pivot yang menang untuk siswa tersebut.
+ *
  * @property int|null $school_id
  */
 class Guardian extends Model

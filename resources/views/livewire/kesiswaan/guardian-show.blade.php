@@ -50,7 +50,7 @@
 
         <dl class="management-definition-list">
             <div><dt>Nama Lengkap</dt><dd>{{ $guardian->nama }}</dd></div>
-            <div><dt>Hubungan</dt><dd>{{ $labelHubungan }}</dd></div>
+            <div><dt>Hubungan Utama</dt><dd>{{ $labelHubungan }}</dd></div>
             <div><dt>NIK</dt><dd>{{ $nikMasked }}</dd></div>
             <div><dt>Pekerjaan</dt><dd>{{ $guardian->pekerjaan ?? '—' }}</dd></div>
             <div><dt>Nomor WA</dt><dd>{{ $guardian->no_wa }}</dd></div>
@@ -113,6 +113,10 @@
             <form wire:submit="linkStudent" class="management-form-stack" style="padding: 16px;">
                 <div class="form-grid management-form-grid">
                     <div class="form-group">
+                        <label for="link-search">Cari Siswa</label>
+                        <input id="link-search" type="search" wire:model.live.debounce.300ms="linkSearch" class="field" placeholder="Ketik nama atau NIS untuk mempersempit daftar...">
+                    </div>
+                    <div class="form-group">
                         <label for="link-student">Siswa</label>
                         <select id="link-student" wire:model="linkStudentId" class="select-field">
                             <option value="">Pilih siswa...</option>
@@ -123,7 +127,7 @@
                         @error('linkStudentId') <p class="management-field-error" role="alert">{{ $message }}</p> @enderror
                     </div>
                     <div class="form-group">
-                        <label for="link-hubungan">Hubungan</label>
+                        <label for="link-hubungan">Hubungan dengan Siswa Ini</label>
                         <select id="link-hubungan" wire:model="linkHubungan" class="select-field">
                             <option value="ayah">Ayah</option>
                             <option value="ibu">Ibu</option>

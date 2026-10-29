@@ -194,3 +194,133 @@ it('form menolak nomor WA yang tidak valid (QA B-06)', function (): void {
 
     expect(Guardian::where('nama', 'Wali Nomor Aneh')->exists())->toBeFalse();
 });
+
+it('form ubah wali memperbarui data dan NIK milik sendiri tidak dianggap duplikat', function (): void {
+    $wali = Guardian::create([
+        'nama' => 'Wali Ubah', 'hubungan' => 'ayah', 'no_wa' => '628888888888',
+        'nik' => '3273010101900003',
+    ]);
+
+    Livewire::actingAs($this->admin)
+        ->test(GuardianForm::class, ['guardian' => $wali])
+        ->set('nama', 'Wali Berubah')
+        ->set('pekerjaan', 'Petani')
+        ->call('save')
+        ->assertRedirect(route('wali.index'));
+
+    $wali->refresh();
+    expect($wali->nama)->toBe('Wali Berubah')
+        ->and($wali->pekerjaan)->toBe('Petani')
+        ->and($wali->nik)->toBe('3273010101900003');
+});
+
+it('form menolak nama kosong', function (): void {
+    Livewire::actingAs($this->admin)
+        ->test(GuardianForm::class)
+        ->set('nama', '')
+        ->set('no_wa', '628999999999')
+        ->call('save')
+        ->assertHasErrors(['nama']);
+});
+
+it('daftar wali: hapus ke sampah, pulihkan, lalu hapus permanen', function (): void {
+    Livewire::actingAs($this->admin)
+        ->test(GuardianIndex::class)
+        ->call('delete', $this->ibu->id);
+
+    expect($this->ibu->fresh()->trashed())->toBeTrue();
+
+    Livewire::actingAs($this->admin)
+        ->test(GuardianIndex::class)
+        ->call('restore', $this->ibu->id);
+
+    expect($this->ibu->fresh()->trashed())->toBeFalse();
+
+    Livewire::actingAs($this->admin)
+        ->test(GuardianIndex::class)
+        ->call('delete', $this->ibu->id)
+        ->call('forceDelete', $this->ibu->id);
+
+    expect(Guardian::withTrashed()->find($this->ibu->id))->toBeNull();
+});
+
+it('wali sekolah lain tidak muncul di daftar sekolah ini', function (): void {
+    $sekolahLain = School::create([
+        'nama' => 'Sekolah Lain', 'slug' => 'lain-'.uniqid(), 'jenjang' => 'SMP',
+        'status' => 'aktif', 'status_langganan' => 'active',
+    ]);
+
+    app(TenantContext::class)->set($sekolahLain);
+    Guardian::create(['nama' => 'Wali Sekolah Lain', 'hubungan' => 'ayah', 'no_wa' => '628000000000']);
+    app(TenantContext::class)->set($this->school);
+
+    Livewire::actingAs($this->admin)
+        ->test(GuardianIndex::class)
+        ->assertSee('Budi Ayah')
+        ->assertDontSee('Wali Sekolah Lain');
+});
+
+it('menautkan siswa sekolah lain ditolak sebagai error validasi (QA B-11)', function (): void {
+    $sekolahLain = School::create([
+        'nama' => 'Sekolah Lain', 'slug' => 'lain-'.uniqid(), 'jenjang' => 'SMP',
+        'status' => 'aktif', 'status_langganan' => 'active',
+    ]);
+
+    app(TenantContext::class)->set($sekolahLain);
+    $siswaLain = Student::create(['nis' => '9001', 'nama' => 'Siswa Lain', 'jk' => 'L']);
+    app(TenantContext::class)->set($this->school);
+
+    Livewire::actingAs($this->admin)
+        ->test(GuardianShow::class, ['guardian' => $this->ayah])
+        ->set('linkStudentId', (string) $siswaLain->id)
+        ->set('linkHubungan', 'ayah')
+        ->call('linkStudent')
+        ->assertHasErrors(['linkStudentId']);
+
+    expect($this->ayah->students()->count())->toBe(0);
+});
+
+it('menautkan siswa non-aktif ditolak (QA B-11)', function (): void {
+    $lulus = Student::create([
+        'nis' => '1002', 'nama' => 'Anak Lulus', 'jk' => 'P', 'status' => 'lulus',
+    ]);
+
+    Livewire::actingAs($this->admin)
+        ->test(GuardianShow::class, ['guardian' => $this->ayah])
+        ->set('linkStudentId', (string) $lulus->id)
+        ->set('linkHubungan', 'ayah')
+        ->call('linkStudent')
+        ->assertHasErrors(['linkStudentId']);
+
+    expect($this->ayah->students()->count())->toBe(0);
+});
+
+it('pengguna tanpa permission link tidak bisa menautkan siswa', function (): void {
+    Livewire::actingAs($this->guruMapel)
+        ->test(GuardianShow::class, ['guardian' => $this->ayah])
+        ->set('linkStudentId', (string) $this->siswa->id)
+        ->set('linkHubungan', 'ayah')
+        ->call('linkStudent')
+        ->assertForbidden();
+
+    expect($this->ayah->students()->count())->toBe(0);
+});
+
+it('kandidat tautan bisa dicari dan dibatasi 50 (QA B-09)', function (): void {
+    foreach (range(1, 55) as $i) {
+        Student::create([
+            'nis' => '2'.str_pad((string) $i, 3, '0', STR_PAD_LEFT),
+            'nama' => 'Kandidat '.str_pad((string) $i, 2, '0', STR_PAD_LEFT),
+            'jk' => 'L',
+        ]);
+    }
+
+    $component = Livewire::actingAs($this->admin)
+        ->test(GuardianShow::class, ['guardian' => $this->ayah])
+        ->assertSee('Kandidat 49')
+        ->assertDontSee('Kandidat 50');
+
+    $component->set('linkSearch', 'Kandidat 55')
+        ->assertSee('Kandidat 55')
+        ->assertDontSee('Kandidat 49');
+});

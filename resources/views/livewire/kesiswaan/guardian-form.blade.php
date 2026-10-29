@@ -29,7 +29,7 @@
                     @error('nama') <p class="management-field-error" role="alert">{{ $message }}</p> @enderror
                 </div>
                 <div class="form-group">
-                    <label for="hubungan">Hubungan <span class="required">*</span></label>
+                    <label for="hubungan">Hubungan Utama <span class="required">*</span></label>
                     <select id="hubungan" wire:model="hubungan" required class="select-field">
                         <option value="ayah">Ayah</option>
                         <option value="ibu">Ibu</option>

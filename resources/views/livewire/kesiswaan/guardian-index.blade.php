@@ -31,19 +31,19 @@
         <article class="card stat-card">
             <div class="stat-top"><span class="mini-icon green"><x-icon name="user" class="h-5 w-5" /></span><span class="badge badge-green">Ayah</span></div>
             <div class="stat-value">{{ number_format($stats['ayah'], 0, ',', '.') }}</div>
-            <div class="stat-caption">Hubungan ayah</div>
-            <div class="stat-footer"><span class="stat-note">Wali dengan hubungan ayah</span></div>
+            <div class="stat-caption">Hubungan utama ayah</div>
+            <div class="stat-footer"><span class="stat-note">Wali dengan hubungan utama ayah</span></div>
         </article>
         <article class="card stat-card">
             <div class="stat-top"><span class="mini-icon purple"><x-icon name="user" class="h-5 w-5" /></span><span class="badge badge-purple">Ibu</span></div>
             <div class="stat-value">{{ number_format($stats['ibu'], 0, ',', '.') }}</div>
-            <div class="stat-caption">Hubungan ibu</div>
-            <div class="stat-footer"><span class="stat-note">Wali dengan hubungan ibu</span></div>
+            <div class="stat-caption">Hubungan utama ibu</div>
+            <div class="stat-footer"><span class="stat-note">Wali dengan hubungan utama ibu</span></div>
         </article>
         <article class="card stat-card">
             <div class="stat-top"><span class="mini-icon cyan"><x-icon name="user" class="h-5 w-5" /></span><span class="badge badge-gray">Wali</span></div>
             <div class="stat-value">{{ number_format($stats['wali'], 0, ',', '.') }}</div>
-            <div class="stat-caption">Hubungan wali</div>
+            <div class="stat-caption">Hubungan utama wali</div>
             <div class="stat-footer"><span class="stat-note">Wali selain ayah dan ibu</span></div>
         </article>
         @can('wali-murid.delete')
@@ -105,7 +105,7 @@
                 <thead>
                     <tr>
                         <th scope="col">Nama Wali</th>
-                        <th scope="col">Hubungan</th>
+                        <th scope="col">Hubungan Utama</th>
                         <th scope="col">Nomor WA</th>
                         <th scope="col">Pekerjaan</th>
                         <th scope="col">Siswa Tertaut</th>

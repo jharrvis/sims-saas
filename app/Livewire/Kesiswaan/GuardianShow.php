@@ -26,9 +26,14 @@ class GuardianShow extends Component
 
     public string $linkHubungan = '';
 
+    /** Kata kunci pencarian kandidat siswa untuk ditautkan (QA B-09). */
+    public string $linkSearch = '';
+
     public function mount(Guardian $guardian): void
     {
         $this->guardian = $guardian;
+        // Nilai awal dari hubungan UTAMA wali; hubungan per siswa yang
+        // tersimpan di pivot tetap yang berlaku (QA B-08).
         $this->linkHubungan = $guardian->hubungan;
     }
 
@@ -37,12 +42,23 @@ class GuardianShow extends Component
         $this->authorize('wali-murid.link');
 
         $this->validate([
-            'linkStudentId' => ['required', 'integer'],
+            // exists dibatasi sekolah wali: id siswa sekolah lain ditolak
+            // sebagai error validasi, bukan 404 (QA B-11).
+            'linkStudentId' => ['required', 'integer', Rule::exists('students', 'id')
+                ->where('school_id', $this->guardian->school_id)],
             'linkHubungan' => ['required', Rule::in(['ayah', 'ibu', 'wali'])],
         ]);
 
         // SchoolScope menjaga siswa tetap satu tenant dengan wali.
         $student = Student::findOrFail((int) $this->linkStudentId);
+
+        // Siswa non-aktif (lulus/pindah/keluar/DO) tidak ditautkan ke wali
+        // baru (QA B-11).
+        if ($student->status !== 'aktif') {
+            $this->addError('linkStudentId', "Siswa ini berstatus {$student->status}; hanya siswa aktif yang dapat ditautkan.");
+
+            return;
+        }
 
         $this->guardian->students()->syncWithoutDetaching([
             $student->id => ['hubungan' => $this->linkHubungan],
@@ -75,9 +91,16 @@ class GuardianShow extends Component
     {
         return view('livewire.kesiswaan.guardian-show', [
             'students' => $this->guardian->students()->orderBy('nama')->get(),
+            // Kandidat tautan dibatasi 50 dan bisa dicari nama/NIS agar
+            // halaman tetap ringan di sekolah besar (QA B-09).
             'unlinkedStudents' => Student::query()
                 ->whereDoesntHave('guardians', fn ($q) => $q->where('guardians.id', $this->guardian->id))
+                ->when($this->linkSearch !== '', fn ($q) => $q->where(function ($w): void {
+                    $w->where('nama', 'like', '%'.$this->linkSearch.'%')
+                        ->orWhere('nis', 'like', '%'.$this->linkSearch.'%');
+                }))
                 ->orderBy('nama')
+                ->limit(50)
                 ->get(['id', 'nama', 'nis']),
         ])->layout('layouts.app', ['title' => 'Detail Wali']);
     }
