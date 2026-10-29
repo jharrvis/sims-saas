@@ -241,7 +241,8 @@ class StudentIndex extends Component
 
     private function bulkExport(): void
     {
-        $this->authorize('siswa.view');
+        // Ekspor massal adalah pengeluaran data: wajib permission khusus (QA B-04).
+        $this->authorize('siswa.export');
 
         $ids = implode('&ids[]=', array_map('intval', $this->selected));
         $this->redirect(route('siswa.ekspor.excel').'?ids[]='.$ids, navigate: false);

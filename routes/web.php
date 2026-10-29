@@ -193,8 +193,8 @@ Route::middleware(['auth', 'mfa'])->group(function (): void {
         if (class_exists(ImportTemplateController::class)) {
             Route::get('/impor/template', [ImportTemplateController::class, 'siswa'])->name('impor.template')->middleware('permission:siswa.import');
         }
-        Route::get('/ekspor/excel', [StudentExportController::class, 'excel'])->name('ekspor.excel')->middleware('permission:siswa.view');
-        Route::get('/ekspor/pdf', [StudentExportController::class, 'pdf'])->name('ekspor.pdf')->middleware('permission:siswa.view');
+        Route::get('/ekspor/excel', [StudentExportController::class, 'excel'])->name('ekspor.excel')->middleware('permission:siswa.export');
+        Route::get('/ekspor/pdf', [StudentExportController::class, 'pdf'])->name('ekspor.pdf')->middleware('permission:siswa.export');
         Route::get('/kartu/rombel', [CetakController::class, 'kartuPelajarRombel'])->name('kartu.rombel')->middleware('permission:siswa.view');
         Route::get('/{student}/kartu', [CetakController::class, 'kartuPelajar'])->name('kartu')->middleware('permission:siswa.view');
         Route::get('/tambah', StudentForm::class)->name('create')->middleware('permission:siswa.create');

@@ -12,6 +12,7 @@ use App\Models\User;
 use App\Tenancy\TenantContext;
 use Database\Seeders\PermissionSeeder;
 use Database\Seeders\RoleSeeder;
+use Illuminate\Support\Facades\Route;
 use Livewire\Livewire;
 use Spatie\Permission\PermissionRegistrar;
 
@@ -74,20 +75,23 @@ afterEach(function (): void {
 });
 
 it('link export + kartu memakai rombel yang dipilih (bukan rombel terakhir di dropdown)', function (): void {
-    Livewire::test(StudentIndex::class)
+    Livewire::actingAs($this->admin)
+        ->test(StudentIndex::class)
         ->set('rombel', (string) $this->rombelA->id)
         ->assertSeeHtml('rombel_id='.$this->rombelA->id)
         ->assertDontSeeHtml('rombel_id='.$this->rombelB->id);
 });
 
 it('tanpa filter kelas, link export tanpa rombel_id dan tombol kartu nonaktif', function (): void {
-    Livewire::test(StudentIndex::class)
+    Livewire::actingAs($this->admin)
+        ->test(StudentIndex::class)
         ->assertDontSeeHtml('rombel_id=')
         ->assertSee('Pilih kelas dulu');
 });
 
 it('dropdown export menampilkan keterangan jumlah + filter yang aktif', function (): void {
-    Livewire::test(StudentIndex::class)
+    Livewire::actingAs($this->admin)
+        ->test(StudentIndex::class)
         ->assertSee('Export 5 siswa')
         ->assertSee('Semua kelas')
         ->set('rombel', (string) $this->rombelA->id)
@@ -141,16 +145,57 @@ it('data terhapus tidak terlihat bagi view-only, terlihat bagi pemegang delete d
         ->assertDontSee('Siswa A2');
 });
 
-it('pengguna view-only hanya melihat aksi massal export', function (): void {
+it('pengguna view-only tidak melihat aksi massal maupun menu export (QA B-04)', function (): void {
     Livewire::actingAs($this->viewer)
         ->test(StudentIndex::class)
         ->set('selected', [Student::query()->value('id')])
-        ->assertSee('Export Excel')
+        ->assertDontSee('Export Excel')
+        ->assertDontSee('Excel (.xlsx)')
         ->assertDontSee('Ubah status')
         ->assertDontSee('Pindah rombel')
         ->assertDontSee('Pindahkan ke sampah')
         ->assertDontSee('Buka Sampah')
         ->assertDontSee('Tambah Siswa');
+});
+
+it('route ekspor menolak pengguna tanpa siswa.export (QA B-04)', function (): void {
+    $this->actingAs($this->viewer)
+        ->get('/siswa/ekspor/excel')
+        ->assertForbidden();
+
+    $this->actingAs($this->viewer)
+        ->get('/siswa/ekspor/pdf')
+        ->assertForbidden();
+});
+
+it('route ekspor terdaftar dengan middleware permission siswa.export (QA B-04)', function (): void {
+    // Jalur "diizinkan" tidak diuji via unduhan nyata di sini: vendor lokal
+    // main tidak memuat maatwebsite/excel (paket itu hanya ada di lock
+    // server). Izin admin dibuktikan lewat uji export massal di bawah.
+    foreach (['siswa.ekspor.excel', 'siswa.ekspor.pdf'] as $namaRoute) {
+        $middleware = Route::getRoutes()->getByName($namaRoute)?->gatherMiddleware() ?? [];
+        expect($middleware)->toContain('permission:siswa.export');
+    }
+});
+
+it('export massal menolak pengguna tanpa siswa.export (QA B-04)', function (): void {
+    Livewire::actingAs($this->viewer)
+        ->test(StudentIndex::class)
+        ->set('selected', [Student::query()->value('id')])
+        ->set('bulkAksi', 'export')
+        ->call('bulkTerapkan')
+        ->assertForbidden();
+});
+
+it('export massal mengarahkan pemegang siswa.export ke unduhan (QA B-04)', function (): void {
+    $studentId = Student::query()->value('id');
+
+    Livewire::actingAs($this->admin)
+        ->test(StudentIndex::class)
+        ->set('selected', [$studentId])
+        ->set('bulkAksi', 'export')
+        ->call('bulkTerapkan')
+        ->assertRedirect(route('siswa.ekspor.excel').'?ids[]='.$studentId);
 });
 
 it('halaman admin tetap tampil ketika fitur impor belum tersedia', function (): void {

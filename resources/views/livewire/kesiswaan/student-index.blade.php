@@ -85,7 +85,9 @@
                             <option value="status">Ubah status</option>
                             <option value="rombel">Pindah rombel</option>
                         @endcan
-                        <option value="export">Export Excel</option>
+                        @can('siswa.export')
+                            <option value="export">Export Excel</option>
+                        @endcan
                         @can('siswa.delete')
                             <option value="hapus">Pindahkan ke sampah</option>
                         @endcan
@@ -152,6 +154,7 @@
             </div>
 
             <div class="toolbar-right management-directory-actions">
+                @can('siswa.export')
                 <details class="management-action-menu">
                     <summary class="btn btn-outline btn-sm"><x-icon name="download" class="h-4 w-4" /> Export <x-icon name="chevron-down" class="h-4 w-4" /></summary>
                     <div class="management-menu-panel">
@@ -173,6 +176,7 @@
                         <a href="{{ route('siswa.ekspor.pdf', array_filter(['search' => $search ?: null, 'status' => $status ?: null, 'rombel_id' => $rombel ?: null])) }}"><x-icon name="file-text" class="h-4 w-4" /> PDF</a>
                     </div>
                 </details>
+                @endcan
                 @if ($rombel !== '')
                     <a href="{{ route('siswa.kartu.rombel', ['rombel_id' => $rombel]) }}" class="btn btn-outline btn-sm"><x-icon name="id-card" class="h-4 w-4" /> Cetak Kartu</a>
                 @else
