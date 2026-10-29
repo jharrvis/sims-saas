@@ -19,6 +19,7 @@ class Guardian extends Model
     protected $fillable = [
         'school_id',
         'nik',
+        'nik_hash',
         'nama',
         'hubungan',
         'pekerjaan',
@@ -32,6 +33,28 @@ class Guardian extends Model
         return [
             'nik' => 'encrypted', // Dok 02 §7: NIK terenkripsi
         ];
+    }
+
+    protected static function booted(): void
+    {
+        // nik_hash selalu diturunkan dari NIK polos agar deteksi duplikat
+        // (QA B-05) konsisten di semua jalur simpan.
+        static::saving(function (Guardian $guardian): void {
+            $guardian->nik_hash = self::hashNik($guardian->nik);
+        });
+    }
+
+    /**
+     * HMAC-SHA256 dari NIK polos dengan kunci aplikasi. Deterministik
+     * (bisa di-query/diindeks) tetapi tidak bisa dibalik ke NIK asal.
+     */
+    public static function hashNik(?string $nik): ?string
+    {
+        if ($nik === null || $nik === '') {
+            return null;
+        }
+
+        return hash_hmac('sha256', $nik, (string) config('app.key'));
     }
 
     /**

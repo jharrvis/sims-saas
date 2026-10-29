@@ -53,13 +53,26 @@ class GuardianForm extends Component
     protected function rules(): array
     {
         return [
-            'nik' => ['nullable', 'string', 'max:25'],
+            // NIK Indonesia selalu 16 digit (QA B-05).
+            'nik' => ['nullable', 'string', 'digits:16'],
             'nama' => ['required', 'string', 'max:150'],
             'hubungan' => ['required', Rule::in(['ayah', 'ibu', 'wali'])],
             'pekerjaan' => ['nullable', 'string', 'max:100'],
-            'no_wa' => ['required', 'string', 'max:20'],
+            // Nomor WA dipakai untuk OTP: wajib format internasional 62xx (QA B-06).
+            'no_wa' => ['required', 'string', 'max:20', 'regex:/^62[0-9]{8,15}$/'],
             'email' => ['nullable', 'email', 'max:150'],
             'alamat' => ['nullable', 'string'],
+        ];
+    }
+
+    /**
+     * @return array<string,string>
+     */
+    protected function messages(): array
+    {
+        return [
+            'no_wa.regex' => 'Nomor WhatsApp tidak valid. Contoh: 0812 3456 7890.',
+            'nik.digits' => 'NIK harus tepat 16 digit angka.',
         ];
     }
 
@@ -69,7 +82,26 @@ class GuardianForm extends Component
         // melindungi GET, bukan aksi Livewire.
         $this->authorize($this->guardian?->exists ? 'wali-murid.update' : 'wali-murid.create');
 
+        // Samakan perilaku dengan EmployeeAccountForm: 08xx diterima dan
+        // dinormalisasi ke 62xx sebelum validasi format (QA B-06).
+        $this->no_wa = $this->normalisasiTelepon($this->no_wa);
+
         $this->validate();
+
+        // Duplikat NIK hanya bisa dideteksi lewat nik_hash karena kolom
+        // nik terenkripsi (QA B-05). SchoolScope membatasi ke sekolah ini.
+        if ($this->nik !== '') {
+            $duplikat = Guardian::query()
+                ->where('nik_hash', Guardian::hashNik($this->nik))
+                ->when($this->guardian?->exists, fn ($q) => $q->whereKeyNot($this->guardian->id))
+                ->exists();
+
+            if ($duplikat) {
+                $this->addError('nik', 'NIK ini sudah terdaftar untuk wali lain di sekolah ini.');
+
+                return;
+            }
+        }
 
         $data = [
             'nik' => $this->nik ?: null,
@@ -94,5 +126,16 @@ class GuardianForm extends Component
     {
         return view('livewire.kesiswaan.guardian-form')
             ->layout('layouts.app', ['title' => $this->guardian?->exists ? 'Ubah Wali' : 'Tambah Wali']);
+    }
+
+    private function normalisasiTelepon(string $phone): string
+    {
+        $digits = preg_replace('/\D/', '', $phone) ?? '';
+
+        if (str_starts_with($digits, '08')) {
+            $digits = '62'.substr($digits, 1);
+        }
+
+        return $digits;
     }
 }

@@ -136,3 +136,61 @@ it('pengguna tanpa permission wali-murid.view tidak boleh membuka daftar', funct
         ->get('/wali')
         ->assertForbidden();
 });
+
+it('form menolak NIK yang bukan 16 digit (QA B-05)', function (): void {
+    Livewire::actingAs($this->admin)
+        ->test(GuardianForm::class)
+        ->set('nama', 'Wali NIK Pendek')
+        ->set('hubungan', 'ayah')
+        ->set('no_wa', '628555555555')
+        ->set('nik', '12345')
+        ->call('save')
+        ->assertHasErrors(['nik']);
+
+    expect(Guardian::where('nama', 'Wali NIK Pendek')->exists())->toBeFalse();
+});
+
+it('form menolak NIK duplikat di sekolah yang sama (QA B-05)', function (): void {
+    Guardian::create([
+        'nama' => 'Wali Pertama', 'hubungan' => 'ayah', 'no_wa' => '628666666666',
+        'nik' => '3273010101900002',
+    ]);
+
+    Livewire::actingAs($this->admin)
+        ->test(GuardianForm::class)
+        ->set('nama', 'Wali Kedua')
+        ->set('hubungan', 'ibu')
+        ->set('no_wa', '628777777777')
+        ->set('nik', '3273010101900002')
+        ->call('save')
+        ->assertHasErrors(['nik']);
+
+    expect(Guardian::where('nama', 'Wali Kedua')->exists())->toBeFalse()
+        ->and(Guardian::where('nik_hash', Guardian::hashNik('3273010101900002'))->count())->toBe(1);
+});
+
+it('nomor WA format 08xx dinormalisasi ke 62xx saat disimpan (QA B-06)', function (): void {
+    Livewire::actingAs($this->admin)
+        ->test(GuardianForm::class)
+        ->set('nama', 'Wali Lokal')
+        ->set('hubungan', 'wali')
+        ->set('no_wa', '0812-3456-7890')
+        ->call('save')
+        ->assertRedirect(route('wali.index'));
+
+    $this->assertDatabaseHas('guardians', [
+        'nama' => 'Wali Lokal', 'no_wa' => '6281234567890',
+    ]);
+});
+
+it('form menolak nomor WA yang tidak valid (QA B-06)', function (): void {
+    Livewire::actingAs($this->admin)
+        ->test(GuardianForm::class)
+        ->set('nama', 'Wali Nomor Aneh')
+        ->set('hubungan', 'ayah')
+        ->set('no_wa', '12345')
+        ->call('save')
+        ->assertHasErrors(['no_wa']);
+
+    expect(Guardian::where('nama', 'Wali Nomor Aneh')->exists())->toBeFalse();
+});
