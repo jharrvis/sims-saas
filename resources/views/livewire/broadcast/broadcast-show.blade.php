@@ -14,7 +14,7 @@
         <div class="page-actions">
             @if ($broadcast->isSiapKirim())
                 @can('broadcast.kirim')
-                    <button wire:click="kirimSekarang" wire:confirm="Kirim broadcast ke semua penerima sekarang?"
+                    <button wire:click="kirimSekarang" data-sims-confirm="Kirim broadcast ke semua penerima sekarang?"
                             class="btn btn-success">
                         Kirim Sekarang
                     </button>

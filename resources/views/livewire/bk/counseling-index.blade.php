@@ -74,7 +74,7 @@
                             @endif
                         @endcan
                         @can('bk.delete')
-                            <button wire:click="destroy({{ $item->id }})" wire:confirm="Hapus sesi ini?" class="text-xs font-semibold text-danger hover:underline">Hapus</button>
+                            <button wire:click="destroy({{ $item->id }})" data-sims-confirm="Hapus sesi ini?" class="text-xs font-semibold text-danger hover:underline">Hapus</button>
                         @endcan
                     </div>
                 </div>

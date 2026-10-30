@@ -21,7 +21,7 @@
                     <input id="invoice-discount" type="number" wire:model="diskon" min="0" class="field" inputmode="numeric">
                     @error('diskon') <span class="platform-field-error" role="alert">{{ $message }}</span> @enderror
                 </div>
-                <button type="submit" wire:confirm="Terbitkan tagihan untuk langganan ini?" wire:loading.attr="disabled" wire:target="issue" class="btn btn-primary">
+                <button type="submit" data-sims-confirm="Terbitkan tagihan untuk langganan ini?" wire:loading.attr="disabled" wire:target="issue" class="btn btn-primary">
                     <x-icon name="send" class="h-4 w-4" /><span wire:loading.remove wire:target="issue">Terbitkan</span><span wire:loading wire:target="issue">Memproses...</span>
                 </button>
             </form>
@@ -52,7 +52,7 @@
                             <td><span class="badge {{ $statusClass }}">{{ $statusLabel }}</span></td>
                             <td>
                                 @if (in_array($invoice->status, ['issued', 'overdue'], true) && auth()->user()?->hasPermissionTo('platform.plan.manage', 'platform'))
-                                    <button type="button" wire:click="markPaid({{ $invoice->id }})" wire:confirm="Tandai tagihan {{ $invoice->nomor }} sebagai lunas?" wire:loading.attr="disabled" wire:target="markPaid({{ $invoice->id }})" class="btn btn-success btn-sm"><x-icon name="check" class="h-4 w-4" /> Tandai Lunas</button>
+                                    <button type="button" wire:click="markPaid({{ $invoice->id }})" data-sims-confirm="Tandai tagihan {{ $invoice->nomor }} sebagai lunas?" wire:loading.attr="disabled" wire:target="markPaid({{ $invoice->id }})" class="btn btn-success btn-sm"><x-icon name="check" class="h-4 w-4" /> Tandai Lunas</button>
                                 @else
                                     <span class="platform-muted-value">—</span>
                                 @endif

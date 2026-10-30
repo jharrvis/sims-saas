@@ -1,6 +1,6 @@
 <div class="page-stack">
     @if (session('sukses'))
-        <div class="management-alert management-alert-success" role="status" aria-live="polite">
+        <div class="management-alert management-alert-success" role="status" aria-live="polite" data-flash-alert>
             <x-icon name="check-circle" class="h-5 w-5" />
             <span>{{ session('sukses') }}</span>
         </div>
@@ -125,7 +125,7 @@
     }" x-init="$watch('selectedCalon', () => syncHeaders()); $watch('selectedAnggota', () => syncHeaders()); if (window.Livewire) { Livewire.hook('morph.updated', () => syncHeaders()); } syncHeaders();">
         <div class="rombel-loading-overlay" wire:loading wire:target="tambahkan,keluarkan,simpan,konfirmasiSimpan,filterAngkatan,sortCalon,sortAnggota,gotoCalonPage,gotoAnggotaPage" role="status" aria-live="polite">
             <span class="rombel-spinner" aria-hidden="true"></span>
-            <span>Memuat...</span>
+            <span>Menyiapkan data...</span>
         </div>
 
         @can('kelas.update')

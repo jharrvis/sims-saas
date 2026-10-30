@@ -135,7 +135,7 @@
                             <td class="text-slate-600 dark:text-slate-300">{{ $item->tanggal?->format('d M Y') ?? '—' }}</td>
                             <td class="text-right">
                                 @can('prestasi.delete')
-                                    <button wire:click="destroy({{ $item->id }})" wire:confirm="Hapus prestasi ini?"
+                                    <button wire:click="destroy({{ $item->id }})" data-sims-confirm="Hapus prestasi ini?"
                                             class="text-xs font-semibold text-danger hover:underline">Hapus</button>
                                 @endcan
                             </td>

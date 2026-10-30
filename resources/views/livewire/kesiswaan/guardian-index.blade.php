@@ -1,6 +1,6 @@
 <div class="page-stack">
     @if (session('sukses'))
-        <div class="management-alert management-alert-success" role="status" aria-live="polite">
+        <div class="management-alert management-alert-success" role="status" aria-live="polite" data-flash-alert>
             <x-icon name="check-circle" class="h-5 w-5" />
             <span>{{ session('sukses') }}</span>
         </div>
@@ -139,12 +139,12 @@
                                     @if ($showTrashed)
                                         @can('wali-murid.delete')
                                             <button type="button" wire:click="restore({{ $wali->id }})" wire:loading.attr="disabled" wire:target="restore({{ $wali->id }})" class="table-action management-action-success" aria-label="Pulihkan {{ $wali->nama }}" title="Pulihkan"><x-icon name="undo-2" class="h-4 w-4" /></button>
-                                            <button type="button" wire:click="forceDelete({{ $wali->id }})" wire:confirm="Hapus permanen {{ $wali->nama }}? Data tidak dapat dikembalikan." wire:loading.attr="disabled" wire:target="forceDelete({{ $wali->id }})" class="table-action danger" aria-label="Hapus permanen {{ $wali->nama }}" title="Hapus permanen"><x-icon name="trash-2" class="h-4 w-4" /></button>
+                                            <button type="button" wire:click="forceDelete({{ $wali->id }})" data-sims-confirm="Hapus permanen {{ $wali->nama }}? Data tidak dapat dikembalikan." wire:loading.attr="disabled" wire:target="forceDelete({{ $wali->id }})" class="table-action danger" aria-label="Hapus permanen {{ $wali->nama }}" title="Hapus permanen"><x-icon name="trash-2" class="h-4 w-4" /></button>
                                         @endcan
                                     @else
                                         @can('wali-murid.view')<a href="{{ route('wali.show', $wali) }}" class="table-action" aria-label="Lihat {{ $wali->nama }}" title="Lihat detail"><x-icon name="eye" class="h-4 w-4" /></a>@endcan
                                         @can('wali-murid.update')<a href="{{ route('wali.edit', $wali) }}" class="table-action" aria-label="Ubah {{ $wali->nama }}" title="Ubah data"><x-icon name="pencil" class="h-4 w-4" /></a>@endcan
-                                        @can('wali-murid.delete')<button type="button" wire:click="delete({{ $wali->id }})" wire:confirm="Pindahkan {{ $wali->nama }} ke sampah?" wire:loading.attr="disabled" wire:target="delete({{ $wali->id }})" class="table-action danger" aria-label="Hapus {{ $wali->nama }}" title="Pindahkan ke sampah"><x-icon name="trash-2" class="h-4 w-4" /></button>@endcan
+                                        @can('wali-murid.delete')<button type="button" wire:click="delete({{ $wali->id }})" data-sims-confirm="Pindahkan {{ $wali->nama }} ke sampah?" wire:loading.attr="disabled" wire:target="delete({{ $wali->id }})" class="table-action danger" aria-label="Hapus {{ $wali->nama }}" title="Pindahkan ke sampah"><x-icon name="trash-2" class="h-4 w-4" /></button>@endcan
                                     @endif
                                 </div>
                             </td>

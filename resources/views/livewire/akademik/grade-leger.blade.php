@@ -47,7 +47,7 @@
             @endif
             @can('nilai.release')
                 @if ($rombelId && $semesterId && ! $released)
-                    <button wire:click="release" wire:confirm="Rilis nilai kelas ini ke PWA siswa/orang tua?"
+                    <button wire:click="release" data-sims-confirm="Rilis nilai kelas ini ke PWA siswa/orang tua?"
                             class="btn btn-success">
                         <x-icon name="send" class="h-4 w-4" /> Rilis Nilai
                     </button>

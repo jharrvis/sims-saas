@@ -72,7 +72,7 @@
                         @endif
                     @endcan
                     @can('pengumuman.delete')
-                        <button wire:click="destroy({{ $item->id }})" wire:confirm="Hapus pengumuman ini?" class="text-xs font-semibold text-danger hover:underline">Hapus</button>
+                        <button wire:click="destroy({{ $item->id }})" data-sims-confirm="Hapus pengumuman ini?" class="text-xs font-semibold text-danger hover:underline">Hapus</button>
                     @endcan
                     <a href="{{ route('bantuan.show', 'pengumuman') }}" class="ml-auto text-xs text-slate-400 hover:text-primary inline-flex items-center gap-1">
                         <x-icon name="circle-help" class="h-4 w-4" /> Bantuan

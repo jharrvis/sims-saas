@@ -82,7 +82,7 @@
                                     @can('peran.delete')
                                         @unless ($sistem)
                                             <button type="button" wire:click="hapus({{ $role->id }})"
-                                                    wire:confirm="Hapus peran {{ \App\Support\RoleCatalog::label($role->name) }}? Tindakan ini tidak dapat dibatalkan."
+                                                    data-sims-confirm="Hapus peran {{ \App\Support\RoleCatalog::label($role->name) }}? Tindakan ini tidak dapat dibatalkan."
                                                     class="p-3.5 rounded-lg text-danger hover:bg-danger/10"
                                                     aria-label="Hapus {{ \App\Support\RoleCatalog::label($role->name) }}">
                                                 <x-icon name="trash-2" class="w-4 h-4" />

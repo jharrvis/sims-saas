@@ -103,14 +103,14 @@
                                     @if (auth()->user()?->hasPermissionTo('platform.tenant.suspend', 'platform'))
                                         @if ($tenant->status_langganan !== 'suspended')
                                             <button type="button" wire:click="suspend({{ $tenant->id }})"
-                                                wire:confirm="Suspend tenant {{ $tenant->nama }}? Akses tulis mereka akan diblokir."
+                                                data-sims-confirm="Suspend tenant {{ $tenant->nama }}? Akses tulis mereka akan diblokir."
                                                 wire:loading.attr="disabled" wire:target="suspend({{ $tenant->id }})"
                                                 class="table-action danger" aria-label="Suspend {{ $tenant->nama }}" title="Suspend tenant">
                                                 <x-icon name="shield-alert" class="h-4 w-4" />
                                             </button>
                                         @else
                                             <button type="button" wire:click="activate({{ $tenant->id }})"
-                                                wire:confirm="Aktifkan kembali {{ $tenant->nama }}?"
+                                                data-sims-confirm="Aktifkan kembali {{ $tenant->nama }}?"
                                                 wire:loading.attr="disabled" wire:target="activate({{ $tenant->id }})"
                                                 class="table-action platform-action-success" aria-label="Aktifkan {{ $tenant->nama }}" title="Aktifkan tenant">
                                                 <x-icon name="check-circle" class="h-4 w-4" />

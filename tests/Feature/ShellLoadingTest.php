@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Models\Membership;
 use App\Models\School;
+use App\Models\Student;
 use App\Models\User;
 use App\Tenancy\TenantContext;
 use Database\Seeders\PermissionSeeder;
@@ -39,6 +40,40 @@ it('menampilkan overlay loading global dan tombol bantuan melayang, bukan kartu 
         ->assertOk()
         ->assertSee('data-sims-loading', false)
         ->assertSee('sims-help-fab', false)
-        ->assertSee('Mohon tunggu sebentar.')
+        ->assertSee('Menyiapkan formulir...')
+        ->assertSee('Menyiapkan data untuk Anda')
         ->assertDontSee('Butuh bantuan?');
+});
+
+it('flash sesi diteruskan ke toast lewat jembatan shell', function (): void {
+    $this->actingAs($this->admin)
+        ->withSession(['sukses' => 'Data guru tersimpan.'])
+        ->get('/guru')
+        ->assertOk()
+        ->assertSee('__simsFlashToasts', false)
+        ->assertSee('Data guru tersimpan.')
+        ->assertSee('data-flash-alert', false);
+});
+
+it('konfirmasi memakai modal modern (data-sims-confirm), bukan dialog browser', function (): void {
+    Student::create(['nis' => 'U1', 'nama' => 'Siswa Uji', 'jk' => 'L', 'status' => 'aktif']);
+
+    $this->actingAs($this->admin)
+        ->get('/siswa')
+        ->assertOk()
+        ->assertSee('data-sims-confirm', false)
+        ->assertDontSee('wire:confirm', false);
+});
+
+it('tidak ada wire:confirm tersisa di seluruh view', function (): void {
+    $files = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator(resource_path('views'), FilesystemIterator::SKIP_DOTS)
+    );
+
+    foreach ($files as $file) {
+        if ($file->isFile() && str_ends_with($file->getFilename(), '.blade.php')) {
+            expect(file_get_contents($file->getPathname()))
+                ->not->toContain('wire:confirm');
+        }
+    }
 });

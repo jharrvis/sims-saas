@@ -101,7 +101,7 @@
                 <div class="settings-row" wire:key="device-token-{{ $token->id }}">
                     <span class="row-icon green"><x-icon name="smartphone" class="h-5 w-5" /></span>
                     <span><strong>{{ $token->name }}</strong><small>Terakhir dipakai {{ $token->last_used_at?->diffForHumans() ?? 'belum pernah' }}</small></span>
-                    <button type="button" class="profile-text-action danger" wire:click="revokeToken({{ $token->id }})" wire:confirm="Cabut akses perangkat {{ $token->name }}?" wire:loading.attr="disabled" wire:target="revokeToken({{ $token->id }})">
+                    <button type="button" class="profile-text-action danger" wire:click="revokeToken({{ $token->id }})" data-sims-confirm="Cabut akses perangkat {{ $token->name }}?" wire:loading.attr="disabled" wire:target="revokeToken({{ $token->id }})">
                         <span wire:loading.remove wire:target="revokeToken({{ $token->id }})">Cabut</span>
                         <span wire:loading wire:target="revokeToken({{ $token->id }})">Memproses</span>
                     </button>
@@ -132,7 +132,7 @@
         </div>
     </section>
 
-    <button type="button" class="logout-button profile-logout" wire:click="logout" wire:confirm="Keluar dari akun SIMS di perangkat ini?" wire:loading.attr="disabled" wire:target="logout">
+    <button type="button" class="logout-button profile-logout" wire:click="logout" data-sims-confirm="Keluar dari akun SIMS di perangkat ini?" wire:loading.attr="disabled" wire:target="logout">
         <x-icon name="log-out" class="h-4 w-4" />
         <span wire:loading.remove wire:target="logout">Keluar dari akun</span>
         <span wire:loading wire:target="logout">Mengakhiri sesi…</span>

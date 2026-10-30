@@ -55,7 +55,7 @@
                                                     <p class="text-[11px] text-slate-400">{{ $entry->ruang }}</p>
                                                 @endif
                                                 @can('jadwal.delete')
-                                                    <button wire:click="deleteEntry({{ $entry->id }})" wire:confirm="Hapus jadwal ini?"
+                                                    <button wire:click="deleteEntry({{ $entry->id }})" data-sims-confirm="Hapus jadwal ini?"
                                                             class="mt-1 inline-flex items-center min-h-11 px-3 text-[11px] font-medium text-danger hover:underline">Hapus</button>
                                                 @endcan
                                             </div>

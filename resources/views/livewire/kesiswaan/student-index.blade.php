@@ -1,13 +1,13 @@
 <div class="page-stack">
     @if (session('sukses'))
-        <div class="management-alert management-alert-success" role="status" aria-live="polite">
+        <div class="management-alert management-alert-success" role="status" aria-live="polite" data-flash-alert>
             <x-icon name="check-circle" class="h-5 w-5" />
             <span>{{ session('sukses') }}</span>
         </div>
     @endif
 
     @if (session('gagal'))
-        <div class="management-alert management-alert-warning" role="alert">
+        <div class="management-alert management-alert-warning" role="alert" data-flash-alert>
             <x-icon name="alert-triangle" class="h-5 w-5" />
             <span>{{ session('gagal') }}</span>
         </div>
@@ -130,7 +130,7 @@
                 @endif
 
                 <button type="button" wire:click="bulkTerapkan" wire:loading.attr="disabled" wire:target="bulkTerapkan"
-                    @if (in_array($bulkAksi, ['hapus', 'hapus_permanen'], true)) wire:confirm="Yakin menjalankan aksi ini untuk siswa yang dipilih?" @endif
+                    @if (in_array($bulkAksi, ['hapus', 'hapus_permanen'], true)) data-sims-confirm="Yakin menjalankan aksi ini untuk siswa yang dipilih?" @endif
                     class="btn btn-primary">
                     <span wire:loading.remove wire:target="bulkTerapkan">Terapkan</span><span wire:loading wire:target="bulkTerapkan">Memproses...</span>
                 </button>
@@ -240,12 +240,12 @@
                                             <button type="button" wire:click="restore({{ $student->id }})" wire:loading.attr="disabled" wire:target="restore({{ $student->id }})" class="table-action management-action-success" aria-label="Pulihkan {{ $student->nama }}" title="Pulihkan"><x-icon name="undo-2" class="h-4 w-4" /></button>
                                         @endcan
                                         @can('siswa.force-delete')
-                                            <button type="button" wire:click="forceDelete({{ $student->id }})" wire:confirm="Hapus permanen {{ $student->nama }}? Data tidak dapat dikembalikan. Siswa yang masih memiliki invoice, nilai, atau absensi akan ditolak oleh sistem." wire:loading.attr="disabled" wire:target="forceDelete({{ $student->id }})" class="table-action danger" aria-label="Hapus permanen {{ $student->nama }}" title="Hapus permanen"><x-icon name="trash-2" class="h-4 w-4" /></button>
+                                            <button type="button" wire:click="forceDelete({{ $student->id }})" data-sims-confirm="Hapus permanen {{ $student->nama }}? Data tidak dapat dikembalikan. Siswa yang masih memiliki invoice, nilai, atau absensi akan ditolak oleh sistem." wire:loading.attr="disabled" wire:target="forceDelete({{ $student->id }})" class="table-action danger" aria-label="Hapus permanen {{ $student->nama }}" title="Hapus permanen"><x-icon name="trash-2" class="h-4 w-4" /></button>
                                         @endcan
                                     @else
                                         @can('siswa.view')<a href="{{ route('siswa.show', $student) }}" class="table-action" aria-label="Lihat {{ $student->nama }}" title="Lihat detail"><x-icon name="eye" class="h-4 w-4" /></a>@endcan
                                         @can('siswa.update')<a href="{{ route('siswa.edit', $student) }}" class="table-action" aria-label="Ubah {{ $student->nama }}" title="Ubah data"><x-icon name="pencil" class="h-4 w-4" /></a>@endcan
-                                        @can('siswa.delete')<button type="button" wire:click="delete({{ $student->id }})" wire:confirm="Pindahkan {{ $student->nama }} ke sampah?" wire:loading.attr="disabled" wire:target="delete({{ $student->id }})" class="table-action danger" aria-label="Hapus {{ $student->nama }}" title="Pindahkan ke sampah"><x-icon name="trash-2" class="h-4 w-4" /></button>@endcan
+                                        @can('siswa.delete')<button type="button" wire:click="delete({{ $student->id }})" data-sims-confirm="Pindahkan {{ $student->nama }} ke sampah?" wire:loading.attr="disabled" wire:target="delete({{ $student->id }})" class="table-action danger" aria-label="Hapus {{ $student->nama }}" title="Pindahkan ke sampah"><x-icon name="trash-2" class="h-4 w-4" /></button>@endcan
                                     @endif
                                 </div>
                             </td>

@@ -100,14 +100,14 @@
                         </div>
                         <button wire:click="saveSelection" class="btn btn-outline">Simpan</button>
                     </div>
-                    <button wire:click="accept" wire:confirm="Terima pendaftar ini?" class="btn btn-success">Terima</button>
-                    <button wire:click="reject" wire:confirm="Tolak pendaftar ini?" class="btn btn-danger">Tolak</button>
+                    <button wire:click="accept" data-sims-confirm="Terima pendaftar ini?" class="btn btn-success">Terima</button>
+                    <button wire:click="reject" data-sims-confirm="Tolak pendaftar ini?" class="btn btn-danger">Tolak</button>
                 @endcan
             @endif
 
             @if ($applicant->status === 'accepted')
                 @can('ppdb.pendaftar.enroll')
-                    <button wire:click="enroll" wire:confirm="Proses daftar ulang? Pendaftar akan menjadi data siswa."
+                    <button wire:click="enroll" data-sims-confirm="Proses daftar ulang? Pendaftar akan menjadi data siswa."
                             class="btn btn-primary">
                         Daftar Ulang → Jadi Siswa
                     </button>

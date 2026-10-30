@@ -132,6 +132,115 @@ const showToast = (detail = {}) => {
 window.addEventListener('sims-toast', (event) => showToast(event.detail));
 window.addEventListener('toast', (event) => showToast(event.detail));
 
+/*
+ * Jembatan flash sesi -> toast: shell (desktop + PWA) menanam
+ * window.__simsFlashToasts berisi pesan sukses/gagal dari redirect.
+ * Tampilkan sebagai toast, lalu hapus blok alert inline bertanda
+ * data-flash-alert di halaman yang sama agar pesan tidak tampil ganda.
+ * Pada render Livewire tanpa muat ulang halaman, jembatan ini tidak
+ * berjalan lagi dan blok inline tetap menjadi salurannya.
+ */
+document.addEventListener('DOMContentLoaded', () => {
+    const flashes = window.__simsFlashToasts;
+    if (!Array.isArray(flashes) || flashes.length === 0) return;
+
+    flashes.forEach((detail) => showToast(detail));
+    document.querySelectorAll('[data-flash-alert]').forEach((el) => el.remove());
+});
+
+/*
+ * Konfirmasi modern pengganti confirm() bawaan browser (dulu wire:confirm).
+ * Elemen pemicu memakai data-sims-confirm="pesan": klik pertama dicegat
+ * sebelum mencapai Livewire/Alpine, modal gaya SIMS ditampilkan, dan klik
+ * diteruskan hanya bila pengguna menekan "Ya, lanjutkan". Nada tombol
+ * persetujuan mengikuti kelas pemicu (danger/btn-danger/text-danger =
+ * merah), selain itu warna utama. Berlaku di desktop dan PWA karena
+ * keduanya memuat app.js; DOM modal dibangun sekali saat dibutuhkan.
+ */
+const simsConfirm = { trigger: null, overlay: null, lastFocus: null };
+
+function simsConfirmKeydown(event) {
+    if (event.key === 'Escape') {
+        event.preventDefault();
+        closeSimsConfirm(false);
+    } else if (event.key === 'Enter') {
+        event.preventDefault();
+        closeSimsConfirm(true);
+    }
+}
+
+function closeSimsConfirm(approved) {
+    const { trigger, overlay, lastFocus } = simsConfirm;
+    simsConfirm.trigger = null;
+    simsConfirm.overlay = null;
+    simsConfirm.lastFocus = null;
+
+    overlay?.remove();
+    document.removeEventListener('keydown', simsConfirmKeydown, true);
+    if (lastFocus instanceof HTMLElement) lastFocus.focus?.();
+
+    if (approved && trigger) {
+        trigger.dataset.simsConfirmed = '1';
+        trigger.click();
+    }
+}
+
+function openSimsConfirm(trigger) {
+    if (simsConfirm.overlay) return;
+
+    const danger = ['danger', 'btn-danger', 'text-danger']
+        .some((name) => trigger.classList?.contains(name));
+
+    const overlay = document.createElement('div');
+    overlay.className = 'sims-confirm-overlay';
+    overlay.innerHTML = `
+        <div class="sims-confirm-card" role="alertdialog" aria-modal="true" aria-label="Konfirmasi tindakan">
+            <span class="sims-confirm-icon" aria-hidden="true">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+            </span>
+            <p class="sims-confirm-message"></p>
+            <div class="sims-confirm-actions">
+                <button type="button" class="sims-confirm-btn cancel">Batal</button>
+                <button type="button" class="sims-confirm-btn ok${danger ? ' danger' : ''}">Ya, lanjutkan</button>
+            </div>
+        </div>`;
+
+    overlay.querySelector('.sims-confirm-message').textContent =
+        trigger.getAttribute('data-sims-confirm') || 'Lanjutkan tindakan ini?';
+    overlay.addEventListener('click', (event) => {
+        if (event.target === overlay) closeSimsConfirm(false);
+    });
+    overlay.querySelector('.sims-confirm-btn.cancel')
+        .addEventListener('click', () => closeSimsConfirm(false));
+    overlay.querySelector('.sims-confirm-btn.ok')
+        .addEventListener('click', () => closeSimsConfirm(true));
+
+    simsConfirm.trigger = trigger;
+    simsConfirm.overlay = overlay;
+    simsConfirm.lastFocus = document.activeElement;
+
+    document.body.appendChild(overlay);
+    document.addEventListener('keydown', simsConfirmKeydown, true);
+    overlay.querySelector('.sims-confirm-btn.ok').focus();
+}
+
+document.addEventListener('click', (event) => {
+    if (!(event.target instanceof Element)) return;
+
+    const trigger = event.target.closest('[data-sims-confirm]');
+    if (!trigger) return;
+
+    if (trigger.dataset.simsConfirmed === '1') {
+        delete trigger.dataset.simsConfirmed;
+        return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+    openSimsConfirm(trigger);
+}, true);
+
 document.addEventListener('alpine:init', () => {
     if (!window.Alpine) return;
 

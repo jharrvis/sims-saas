@@ -117,7 +117,7 @@
             @if (! $locked)
                 <div class="form-actions">
                     @can('absensi.kunci')
-                        <button wire:click="lock" wire:confirm="Kunci absensi tanggal ini? Data yang terkunci tidak bisa diubah."
+                        <button wire:click="lock" data-sims-confirm="Kunci absensi tanggal ini? Data yang terkunci tidak bisa diubah."
                                 class="btn btn-outline">
                             <x-icon name="lock" class="h-4 w-4" /> Kunci
                         </button>

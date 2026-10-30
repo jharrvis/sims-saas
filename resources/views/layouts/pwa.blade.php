@@ -140,6 +140,16 @@
 
 <div class="sims-toast-tray" data-sims-toasts aria-live="polite"></div>
 
+{{-- Jembatan flash sesi -> toast (dibaca app.js saat halaman dimuat). --}}
+@if (session('sukses') || session('gagal'))
+    <script>
+        window.__simsFlashToasts = @js(array_values(array_filter([
+            session('sukses') ? ['type' => 'success', 'message' => session('sukses')] : null,
+            session('gagal') ? ['type' => 'error', 'message' => session('gagal')] : null,
+        ])));
+    </script>
+@endif
+
 @livewireScripts
 </body>
 </html>

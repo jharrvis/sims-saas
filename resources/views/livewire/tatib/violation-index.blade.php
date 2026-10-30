@@ -89,7 +89,7 @@
                                     <a href="{{ route('tatib.edit', $item) }}" class="text-xs font-semibold text-primary hover:underline">Ubah</a>
                                 @endcan
                                 @can('tatib.delete')
-                                    <button wire:click="destroy({{ $item->id }})" wire:confirm="Hapus catatan ini?" class="ml-2 text-xs font-semibold text-danger hover:underline">Hapus</button>
+                                    <button wire:click="destroy({{ $item->id }})" data-sims-confirm="Hapus catatan ini?" class="ml-2 text-xs font-semibold text-danger hover:underline">Hapus</button>
                                 @endcan
                             </td>
                         </tr>

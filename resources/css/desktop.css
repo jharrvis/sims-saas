@@ -1805,8 +1805,8 @@ body {
 .rombel-spinner {
     width: 36px;
     height: 36px;
-    border: 3px solid var(--line);
-    border-top-color: var(--blue);
+    border: 3px solid rgba(20, 174, 118, 0.18);
+    border-top-color: var(--green);
     border-radius: 50%;
     animation: sims-spin 0.7s linear infinite;
 }
@@ -2366,6 +2366,34 @@ body {
    mengalahkan atribut hidden bawaan browser. */
 .app-loading-overlay[hidden] {
     display: none;
+}
+
+/* Penyelarasan overlay loading dengan referensi JHarrvis (2026-10-30):
+   kartu putih besar dan membulat, spinner cincin hijau, judul tegas,
+   subjudul tenang. Menimpa gaya .app-loading-* dari file referensi. */
+.app-loading-card {
+    width: min(100%, 330px);
+    padding: 38px 30px 34px;
+    border-radius: 26px;
+    box-shadow: 0 30px 80px #06122859;
+}
+
+.app-loading-spinner {
+    width: 46px;
+    height: 46px;
+    margin-bottom: 18px;
+    border-width: 4px;
+    border-color: rgba(20, 174, 118, 0.18);
+    border-top-color: var(--green);
+}
+
+.app-loading-card strong {
+    font-size: 17px;
+}
+
+.app-loading-card p {
+    margin-top: 6px;
+    font-size: 13px;
 }
 
 /* Tombol bantuan kecil di pojok kanan bawah, menggantikan kartu besar

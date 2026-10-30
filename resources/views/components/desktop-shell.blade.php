@@ -60,8 +60,8 @@
     <div class="app-loading-overlay" data-sims-loading hidden aria-hidden="true">
         <div class="app-loading-card" role="status">
             <div class="app-loading-spinner" aria-hidden="true"></div>
-            <strong>Memuat {{ $title }}...</strong>
-            <p>Mohon tunggu sebentar.</p>
+            <strong>Menyiapkan formulir...</strong>
+            <p>Menyiapkan data untuk Anda</p>
         </div>
     </div>
 
@@ -302,6 +302,18 @@
 
     <div class="sims-toast-tray" data-sims-toasts aria-live="polite"></div>
 </div>
+
+{{-- Jembatan flash sesi -> toast: dibaca app.js saat halaman dimuat;
+     blok alert inline bertanda data-flash-alert lalu disembunyikan
+     agar pesan yang sama tidak tampil dua kali. --}}
+@if (session('sukses') || session('gagal'))
+    <script>
+        window.__simsFlashToasts = @js(array_values(array_filter([
+            session('sukses') ? ['type' => 'success', 'message' => session('sukses')] : null,
+            session('gagal') ? ['type' => 'error', 'message' => session('gagal')] : null,
+        ])));
+    </script>
+@endif
 
 @livewireScripts
 </body>

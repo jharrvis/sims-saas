@@ -1,13 +1,13 @@
 <div class="page-stack">
     @if (session('sukses'))
-        <div class="management-alert management-alert-success" role="status" aria-live="polite">
+        <div class="management-alert management-alert-success" role="status" aria-live="polite" data-flash-alert>
             <x-icon name="check-circle" class="h-5 w-5" />
             <span>{{ session('sukses') }}</span>
         </div>
     @endif
 
     @if (session('gagal'))
-        <div class="management-alert management-alert-warning" role="alert">
+        <div class="management-alert management-alert-warning" role="alert" data-flash-alert>
             <x-icon name="alert-triangle" class="h-5 w-5" />
             <span>{{ session('gagal') }}</span>
         </div>
@@ -172,12 +172,12 @@
                                             <button type="button" wire:click="restore({{ $guru->id }})" wire:loading.attr="disabled" wire:target="restore({{ $guru->id }})" class="table-action management-action-success" aria-label="Pulihkan {{ $guru->nama }}" title="Pulihkan"><x-icon name="undo-2" class="h-4 w-4" /></button>
                                         @endcan
                                         @can('guru.force-delete')
-                                            <button type="button" wire:click="forceDelete({{ $guru->id }})" wire:confirm="Hapus permanen {{ $guru->nama }}? Data dan foto tidak dapat dikembalikan. Pegawai yang masih memiliki jadwal atau menjadi wali kelas akan ditolak oleh sistem." wire:loading.attr="disabled" wire:target="forceDelete({{ $guru->id }})" class="table-action danger" aria-label="Hapus permanen {{ $guru->nama }}" title="Hapus permanen"><x-icon name="trash-2" class="h-4 w-4" /></button>
+                                            <button type="button" wire:click="forceDelete({{ $guru->id }})" data-sims-confirm="Hapus permanen {{ $guru->nama }}? Data dan foto tidak dapat dikembalikan. Pegawai yang masih memiliki jadwal atau menjadi wali kelas akan ditolak oleh sistem." wire:loading.attr="disabled" wire:target="forceDelete({{ $guru->id }})" class="table-action danger" aria-label="Hapus permanen {{ $guru->nama }}" title="Hapus permanen"><x-icon name="trash-2" class="h-4 w-4" /></button>
                                         @endcan
                                     @else
                                         @can('guru.view')<a href="{{ route('guru.show', $guru) }}" class="table-action" aria-label="Lihat {{ $guru->nama }}" title="Lihat detail"><x-icon name="eye" class="h-4 w-4" /></a>@endcan
                                         @can('guru.update')<a href="{{ route('guru.edit', $guru) }}" class="table-action" aria-label="Ubah {{ $guru->nama }}" title="Ubah data"><x-icon name="pencil" class="h-4 w-4" /></a>@endcan
-                                        @can('guru.delete')<button type="button" wire:click="delete({{ $guru->id }})" wire:confirm="Pindahkan {{ $guru->nama }} ke sampah?" wire:loading.attr="disabled" wire:target="delete({{ $guru->id }})" class="table-action danger" aria-label="Hapus {{ $guru->nama }}" title="Pindahkan ke sampah"><x-icon name="trash-2" class="h-4 w-4" /></button>@endcan
+                                        @can('guru.delete')<button type="button" wire:click="delete({{ $guru->id }})" data-sims-confirm="Pindahkan {{ $guru->nama }} ke sampah?" wire:loading.attr="disabled" wire:target="delete({{ $guru->id }})" class="table-action danger" aria-label="Hapus {{ $guru->nama }}" title="Pindahkan ke sampah"><x-icon name="trash-2" class="h-4 w-4" /></button>@endcan
                                     @endif
                                 </div>
                             </td>

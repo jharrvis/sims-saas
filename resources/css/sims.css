@@ -454,6 +454,123 @@
     }
 }
 
+/* Modal konfirmasi modern pengganti confirm() bawaan browser.
+   Dipicu atribut data-sims-confirm pada elemen pemicu; DOM dibangun
+   oleh app.js saat pertama kali dibutuhkan (berlaku desktop + PWA). */
+.sims-confirm-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 130;
+    display: grid;
+    place-items: center;
+    padding: 20px;
+    background: #09162ab8;
+    backdrop-filter: blur(3px);
+    animation: sims-confirm-fade 0.18s var(--sims-ease) both;
+}
+
+.sims-confirm-card {
+    width: min(100%, 380px);
+    padding: 26px 24px 22px;
+    border-radius: 20px;
+    background: var(--sims-surface);
+    color: var(--sims-ink);
+    box-shadow: var(--sims-shadow-md);
+    text-align: center;
+    animation: sims-confirm-pop 0.22s var(--sims-ease) both;
+}
+
+.sims-confirm-icon {
+    display: grid;
+    place-items: center;
+    width: 52px;
+    height: 52px;
+    margin: 0 auto;
+    border-radius: 50%;
+    color: var(--sims-warning);
+    background: var(--sims-warning-soft);
+}
+
+.sims-confirm-message {
+    margin: 14px 0 0;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.55;
+}
+
+.sims-confirm-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 22px;
+}
+
+.sims-confirm-btn {
+    min-height: 44px;
+    padding: 10px 14px;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: filter 0.2s var(--sims-ease), background-color 0.2s var(--sims-ease);
+}
+
+.sims-confirm-btn.cancel {
+    border-color: var(--sims-line);
+    background: var(--sims-surface);
+    color: var(--sims-ink);
+}
+
+.sims-confirm-btn.cancel:hover {
+    background: var(--sims-primary-soft);
+}
+
+.sims-confirm-btn.ok {
+    background: var(--sims-primary);
+    color: #fff;
+}
+
+.sims-confirm-btn.ok.danger {
+    background: var(--sims-danger);
+}
+
+.sims-confirm-btn.ok:hover {
+    filter: brightness(1.08);
+}
+
+.sims-confirm-btn:focus-visible {
+    outline: 2px solid var(--sims-primary);
+    outline-offset: 2px;
+}
+
+@keyframes sims-confirm-fade {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes sims-confirm-pop {
+    from {
+        opacity: 0;
+        transform: translateY(10px) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .sims-confirm-overlay,
+    .sims-confirm-card {
+        animation: none;
+    }
+}
+
 .sims-scroll {
     scrollbar-width: thin;
     scrollbar-color: #cbd5e1 transparent;

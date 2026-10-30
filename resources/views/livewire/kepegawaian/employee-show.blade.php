@@ -1,6 +1,6 @@
 <div class="page-stack">
     @if (session('sukses'))
-        <div class="management-alert management-alert-success" role="status" aria-live="polite">
+        <div class="management-alert management-alert-success" role="status" aria-live="polite" data-flash-alert>
             <x-icon name="check-circle" class="h-5 w-5" />
             <span>{{ session('sukses') }}</span>
         </div>

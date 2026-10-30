@@ -39,7 +39,7 @@
         @if (auth()->user()?->hasPermissionTo('platform.tenant.impersonate', 'platform'))
             <div class="page-actions">
                 <button type="button" wire:click="impersonate"
-                    wire:confirm="Masuk sebagai admin {{ $school->nama }}? Aksi ini dicatat di audit log."
+                    data-sims-confirm="Masuk sebagai admin {{ $school->nama }}? Aksi ini dicatat di audit log."
                     wire:loading.attr="disabled" wire:target="impersonate" class="btn btn-outline">
                     <x-icon name="user-check" class="h-4 w-4" />
                     <span wire:loading.remove wire:target="impersonate">Masuk sebagai Admin</span>
@@ -119,7 +119,7 @@
                             </select>
                         </div>
                         <label class="platform-check-control"><input type="checkbox" wire:model="trial"><span>Trial 30 hari</span></label>
-                        <button type="button" wire:click="buatLangganan" wire:confirm="Buat langganan baru? Langganan aktif sebelumnya dibatalkan."
+                        <button type="button" wire:click="buatLangganan" data-sims-confirm="Buat langganan baru? Langganan aktif sebelumnya dibatalkan."
                             wire:loading.attr="disabled" wire:target="buatLangganan" class="btn btn-primary">
                             <span wire:loading.remove wire:target="buatLangganan">Simpan</span><span wire:loading wire:target="buatLangganan">Menyimpan...</span>
                         </button>
@@ -149,7 +149,7 @@
                         <div class="platform-record-row" wire:key="tenant-override-{{ $override->id }}">
                             <span><strong>{{ str_replace('_', ' ', $override->metrik) }}</strong><small>{{ $override->batas_custom === null ? 'Tanpa batas' : number_format($override->batas_custom, 0, ',', '.') }}@if (! $override->isBerlaku()) · Kedaluwarsa @endif</small></span>
                             @if (auth()->user()?->hasPermissionTo('platform.tenant.create', 'platform'))
-                                <button type="button" wire:click="hapusOverride({{ $override->id }})" wire:confirm="Hapus override ini?"
+                                <button type="button" wire:click="hapusOverride({{ $override->id }})" data-sims-confirm="Hapus override ini?"
                                     wire:loading.attr="disabled" wire:target="hapusOverride({{ $override->id }})" class="table-action danger"
                                     aria-label="Hapus override {{ $override->metrik }}"><x-icon name="trash-2" class="h-4 w-4" /></button>
                             @endif

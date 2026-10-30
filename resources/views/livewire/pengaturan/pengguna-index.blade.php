@@ -142,7 +142,7 @@
                                         </a>
                                         @if ($pengguna->id !== auth()->id())
                                             <button type="button" wire:click="toggleStatus({{ $pengguna->id }})"
-                                                    wire:confirm="{{ $statusAktif ? 'Nonaktifkan akses '.$pengguna->name.' ke sekolah ini?' : 'Aktifkan kembali akses '.$pengguna->name.'?' }}"
+                                                    data-sims-confirm="{{ $statusAktif ? 'Nonaktifkan akses '.$pengguna->name.' ke sekolah ini?' : 'Aktifkan kembali akses '.$pengguna->name.'?' }}"
                                                     class="p-3.5 rounded-lg {{ $statusAktif ? 'text-danger hover:bg-danger/10' : 'text-success hover:bg-success/10' }}"
                                                     aria-label="{{ $statusAktif ? 'Nonaktifkan' : 'Aktifkan' }} {{ $pengguna->name }}">
                                                 <x-icon name="{{ $statusAktif ? 'user-x' : 'user-check' }}" class="w-4 h-4" />

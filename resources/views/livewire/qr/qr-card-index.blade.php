@@ -22,7 +22,7 @@
         <div class="flex items-center gap-2">
             @can('qr.manage')
                 @if ($rombel_id !== '')
-                    <button wire:click="terbitkanMassal" wire:confirm="Terbitkan kartu QR baru untuk semua siswa rombel ini? Kartu lama dinonaktifkan."
+                    <button wire:click="terbitkanMassal" data-sims-confirm="Terbitkan kartu QR baru untuk semua siswa rombel ini? Kartu lama dinonaktifkan."
                             class="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary/90">
                         <i data-lucide="printer" class="w-4 h-4"></i> Terbitkan & Cetak Rombel
                     </button>
@@ -64,7 +64,7 @@
                                     {{ $card && $card->isValid() ? 'Terbitkan Ulang' : 'Terbitkan' }}
                                 </button>
                                 @if ($card && $card->isValid())
-                                    <button wire:click="cabut({{ $s->id }})" wire:confirm="Cabut kartu QR {{ $s->nama }}?"
+                                    <button wire:click="cabut({{ $s->id }})" data-sims-confirm="Cabut kartu QR {{ $s->nama }}?"
                                             class="ml-2 text-xs font-semibold text-danger hover:underline">Cabut</button>
                                 @endif
                             @endcan

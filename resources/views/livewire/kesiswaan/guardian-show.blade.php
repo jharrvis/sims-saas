@@ -1,6 +1,6 @@
 <div class="page-stack">
     @if (session('sukses'))
-        <div class="management-alert management-alert-success" role="status" aria-live="polite">
+        <div class="management-alert management-alert-success" role="status" aria-live="polite" data-flash-alert>
             <x-icon name="check-circle" class="h-5 w-5" />
             <span>{{ session('sukses') }}</span>
         </div>
@@ -93,7 +93,7 @@
                                 <td>
                                     <div class="row-actions management-row-actions">
                                         @can('wali-murid.view')<a href="{{ route('siswa.show', $siswa) }}" class="table-action" aria-label="Lihat {{ $siswa->nama }}" title="Lihat detail siswa"><x-icon name="eye" class="h-4 w-4" /></a>@endcan
-                                        @can('wali-murid.link')<button type="button" wire:click="unlinkStudent({{ $siswa->id }})" wire:confirm="Lepas tautan {{ $siswa->nama }} dari wali ini?" wire:loading.attr="disabled" wire:target="unlinkStudent({{ $siswa->id }})" class="table-action danger" aria-label="Lepas {{ $siswa->nama }}" title="Lepas tautan"><x-icon name="x" class="h-4 w-4" /></button>@endcan
+                                        @can('wali-murid.link')<button type="button" wire:click="unlinkStudent({{ $siswa->id }})" data-sims-confirm="Lepas tautan {{ $siswa->nama }} dari wali ini?" wire:loading.attr="disabled" wire:target="unlinkStudent({{ $siswa->id }})" class="table-action danger" aria-label="Lepas {{ $siswa->nama }}" title="Lepas tautan"><x-icon name="x" class="h-4 w-4" /></button>@endcan
                                     </div>
                                 </td>
                             </tr>
