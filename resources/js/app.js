@@ -278,3 +278,71 @@ document.addEventListener('livewire:init', () => {
         hideOverlay();
     });
 });
+
+/*
+ * Seleksi siswa (Data Siswa): checkbox baris memakai wire:model tertunda,
+ * jadi mencentang tidak mengirim permintaan apa pun. Modul ini hanya
+ * menjaga tampilan lokal: centang "pilih semua", keadaan indeterminate,
+ * serta visibilitas bar aksi massal + hitungan siswa dipilih. Nilai
+ * checkbox yang tercentang ikut terkirim otomatis oleh Livewire bersama
+ * permintaan berikutnya (klik Terapkan, pindah halaman, filter, dst).
+ */
+const studentRowChecks = () => [...document.querySelectorAll('.student-row-check')];
+
+const syncStudentSelectionUi = () => {
+    const rows = studentRowChecks();
+    const header = document.getElementById('student-select-all');
+    const bar = document.getElementById('student-bulk-bar');
+    if (rows.length === 0 && !header && !bar) return;
+
+    const checked = rows.filter((row) => row.checked).length;
+
+    if (header) {
+        header.checked = rows.length > 0 && checked === rows.length;
+        header.indeterminate = checked > 0 && checked < rows.length;
+    }
+
+    if (bar) {
+        bar.hidden = checked === 0;
+        const label = document.getElementById('student-selected-count');
+        if (label) label.textContent = `${checked} siswa dipilih`;
+    }
+};
+
+document.addEventListener('change', (event) => {
+    const target = event.target;
+    if (!(target instanceof HTMLInputElement) || target.type !== 'checkbox') return;
+
+    if (target.id === 'student-select-all') {
+        studentRowChecks().forEach((row) => {
+            if (row.checked !== target.checked) {
+                row.checked = target.checked;
+                // Event change membuat Livewire mencatat nilai tertunda ini.
+                row.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        });
+        syncStudentSelectionUi();
+    } else if (target.classList.contains('student-row-check')) {
+        syncStudentSelectionUi();
+    }
+});
+
+document.addEventListener('livewire:init', () => {
+    if (!window.Livewire) return;
+
+    // Setelah Livewire menggambar ulang tabel (paginasi/filter/aksi),
+    // samakan kembali keadaan header + bar dengan checkbox yang terender.
+    let queued = false;
+    try {
+        window.Livewire.hook('morph.updated', () => {
+            if (queued) return;
+            queued = true;
+            requestAnimationFrame(() => {
+                queued = false;
+                syncStudentSelectionUi();
+            });
+        });
+    } catch {
+        // Hook tidak tersedia di versi ini; render server sudah benar.
+    }
+});

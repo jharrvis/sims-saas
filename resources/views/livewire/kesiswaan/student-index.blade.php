@@ -78,11 +78,13 @@
         </div>
     @endif
 
-    @if (count($selected) > 0)
-        <section class="management-bulk-bar" aria-label="Aksi massal siswa">
+    {{-- Bar selalu dirender: visibilitas + hitungan dijaga sisi klien
+         (app.js) karena checkbox memakai wire:model tertunda. Server
+         merender keadaan awal yang benar setelah setiap permintaan. --}}
+    <section id="student-bulk-bar" class="management-bulk-bar" aria-label="Aksi massal siswa" @if (count($selected) === 0) hidden @endif>
             <div class="management-selection-count">
                 <span class="mini-icon blue sm"><x-icon name="square-check-big" class="h-4 w-4" /></span>
-                <span><strong>{{ count($selected) }} siswa dipilih</strong><small>Pilihan hanya berlaku pada halaman ini</small></span>
+                <span><strong id="student-selected-count">{{ count($selected) }} siswa dipilih</strong><small>Pilihan hanya berlaku pada halaman ini</small></span>
             </div>
             <div class="management-bulk-controls">
                 <label class="sr-only" for="student-bulk-action">Aksi massal</label>
@@ -128,7 +130,7 @@
                 @endif
 
                 <button type="button" wire:click="bulkTerapkan" wire:loading.attr="disabled" wire:target="bulkTerapkan"
-                    @if (in_array($bulkAksi, ['hapus', 'hapus_permanen'], true)) wire:confirm="Yakin menjalankan aksi ini untuk {{ count($selected) }} siswa?" @endif
+                    @if (in_array($bulkAksi, ['hapus', 'hapus_permanen'], true)) wire:confirm="Yakin menjalankan aksi ini untuk siswa yang dipilih?" @endif
                     class="btn btn-primary">
                     <span wire:loading.remove wire:target="bulkTerapkan">Terapkan</span><span wire:loading wire:target="bulkTerapkan">Memproses...</span>
                 </button>
@@ -136,8 +138,7 @@
             @error('bulkAksi') <p class="management-field-error" role="alert">{{ $message }}</p> @enderror
             @error('bulkStatus') <p class="management-field-error" role="alert">{{ $message }}</p> @enderror
             @error('bulkRombelId') <p class="management-field-error" role="alert">{{ $message }}</p> @enderror
-        </section>
-    @endif
+    </section>
 
     <section class="card management-table-card" aria-labelledby="student-list-title">
         <div class="card-head management-table-heading">
@@ -204,7 +205,7 @@
             <table class="data-table management-data-table student-directory-table">
                 <thead>
                     <tr>
-                        <th scope="col" class="management-check-column"><label class="management-check-target"><input type="checkbox" wire:model.live="selectAll" aria-label="Pilih semua siswa di halaman ini"><span class="sr-only">Pilih semua</span></label></th>
+                        <th scope="col" class="management-check-column"><label class="management-check-target"><input type="checkbox" id="student-select-all" @checked($pageIds !== [] && count(array_intersect($pageIds, array_map('intval', $selected))) === count($pageIds)) aria-label="Pilih semua siswa di halaman ini"><span class="sr-only">Pilih semua</span></label></th>
                         <th scope="col">Nama Siswa</th><th scope="col">Rombel</th><th scope="col">NIS / NISN</th><th scope="col">Jenis Kelamin</th><th scope="col">Status</th><th scope="col" class="management-actions-heading">Aksi</th>
                     </tr>
                 </thead>
@@ -217,7 +218,7 @@
                             $statusLabel = match ($student->status) { 'aktif' => 'Aktif', 'lulus' => 'Lulus', 'pindah' => 'Pindah', 'keluar' => 'Keluar', 'do' => 'DO', default => ucfirst($student->status) };
                         @endphp
                         <tr wire:key="student-directory-{{ $student->id }}">
-                            <td class="management-check-column"><label class="management-check-target"><input type="checkbox" wire:model.live="selected" value="{{ $student->id }}" aria-label="Pilih {{ $student->nama }}"></label></td>
+                            <td class="management-check-column"><label class="management-check-target"><input type="checkbox" class="student-row-check" wire:model="selected" value="{{ $student->id }}" aria-label="Pilih {{ $student->nama }}"></label></td>
                             <td>
                                 <div class="person-cell">
                                     @if ($student->fotoUrl())

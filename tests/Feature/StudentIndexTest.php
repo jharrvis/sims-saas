@@ -296,3 +296,17 @@ it('hapus permanen massal melewati siswa yang masih berdata turunan (QA B-02)', 
     expect(Student::withTrashed()->find($bersih->id))->toBeNull()
         ->and(Student::withTrashed()->find($berdata->id))->not->toBeNull();
 });
+
+it('checkbox siswa memakai wire:model tertunda, bukan live (tanpa request per centang)', function (): void {
+    $component = Livewire::actingAs($this->admin)->test(StudentIndex::class);
+
+    $component->assertSeeHtml('wire:model="selected"')
+        ->assertDontSee('wire:model.live="selected"', false)
+        ->assertSeeHtml('id="student-select-all"')
+        ->assertSeeHtml('id="student-bulk-bar"');
+
+    // Begitu server mengetahui pilihan (terkirim bersama permintaan
+    // berikutnya), bar terender dengan hitungan yang benar.
+    $component->set('selected', [Student::query()->value('id')])
+        ->assertSee('1 siswa dipilih');
+});

@@ -37,12 +37,15 @@ class StudentIndex extends Component
 
     public string $rombel = '';
 
-    /** @var list<int> id siswa terpilih (checkbox) */
+    /**
+     * @var list<int> id siswa terpilih (checkbox). Checkbox memakai
+     *                wire:model tertunda (bukan .live): pilihan cukup dicatat di browser
+     *                dan ikut terkirim bersama permintaan berikutnya (aksi massal,
+     *                pindah halaman, filter), jadi mencentang tidak memicu render ulang.
+     */
     public array $selected = [];
 
-    public bool $selectAll = false;
-
-    /** @var list<int> id siswa di halaman saat ini (untuk select-all) */
+    /** @var list<int> id siswa di halaman saat ini (render memotong ke daftar ini) */
     public array $pageIds = [];
 
     public string $bulkAksi = '';
@@ -85,17 +88,6 @@ class StudentIndex extends Component
             $this->resetSelection();
             $this->bulkAksi = '';
         }
-    }
-
-    public function updatedSelectAll(): void
-    {
-        $this->selected = $this->selectAll ? $this->pageIds : [];
-    }
-
-    public function updatedSelected(): void
-    {
-        $selected = array_map('intval', $this->selected);
-        $this->selectAll = $this->pageIds !== [] && count(array_diff($this->pageIds, $selected)) === 0;
     }
 
     public function toggleTrashed(): void
@@ -361,7 +353,6 @@ class StudentIndex extends Component
     private function resetSelection(): void
     {
         $this->selected = [];
-        $this->selectAll = false;
     }
 
     public function render(): View
